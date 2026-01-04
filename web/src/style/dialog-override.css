@@ -1,0 +1,25 @@
+/* 公告对话框宽度覆盖 */
+.announcement-dialog {
+  width: 1200px !important;
+  max-width: 90vw !important;
+  min-width: 800px !important;
+}
+
+.announcement-dialog .el-dialog__body {
+  padding: 20px !important;
+}
+
+/* 确保在所有屏幕尺寸下都有合适的显示 */
+@media (max-width: 1400px) {
+  .announcement-dialog {
+    width: 90vw !important;
+    min-width: 600px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .announcement-dialog {
+    width: 95vw !important;
+    min-width: 300px !important;
+  }
+}

@@ -1,0 +1,316 @@
+/* 导入主题变量 */
+@use './theme.scss';
+
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background-color: var(--bg-color-primary);
+  color: var(--text-color-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  height: 100%;
+}
+
+/* 滚动条样式 - 使用主题配色 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color-tertiary);
+  border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color-hover);
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-normal);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Element Plus 样式覆盖 - 使用主题配色 */
+.el-menu {
+  border-right: none !important;
+}
+
+.el-menu-item {
+  height: 50px !important;
+  line-height: 50px !important;
+  color: var(--text-color-sidebar-inactive) !important;
+  transition: var(--transition-normal) !important;
+}
+
+.el-menu-item.is-active {
+  background-color: var(--primary-color-bg-hover) !important;
+  color: var(--primary-color) !important;
+  border-right: 3px solid var(--primary-color) !important;
+}
+
+.el-menu-item:hover {
+  background-color: var(--bg-color-hover) !important;
+  color: var(--primary-color) !important;
+}
+
+.el-sub-menu__title {
+  height: 50px !important;
+  line-height: 50px !important;
+  color: var(--text-color-sidebar-inactive) !important;
+  transition: var(--transition-normal) !important;
+}
+
+.el-sub-menu__title:hover {
+  background-color: var(--bg-color-hover) !important;
+  color: var(--primary-color) !important;
+}
+
+.el-sub-menu .el-menu-item {
+  background-color: var(--bg-color-sidebar-light) !important;
+}
+
+.el-sub-menu .el-menu-item:hover {
+  background-color: var(--primary-color-bg) !important;
+}
+
+/* 布局样式 */
+.app-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.main-container {
+  min-height: 100%;
+  transition: margin-left var(--transition-normal);
+  margin-left: var(--sidebar-width);
+  position: relative;
+  background-color: var(--bg-color-primary);
+}
+
+.sidebar-container {
+  transition: width var(--transition-normal);
+  width: var(--sidebar-width) !important;
+  background-color: var(--bg-color-sidebar);
+  height: 100%;
+  position: fixed;
+  font-size: 0px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-fixed);
+  overflow: hidden;
+  box-shadow: var(--box-shadow-light);
+  border-right: 1px solid var(--border-color-light);
+}
+
+/* 侧边栏收缩状态 */
+.sidebar-container.is-collapse {
+  width: var(--sidebar-width-collapsed) !important;
+}
+
+.sidebar-container.is-collapse ~ .main-container {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+.fixed-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  width: calc(100% - var(--sidebar-width));
+  transition: width var(--transition-normal);
+  background-color: var(--bg-color-primary);
+  border-bottom: 1px solid var(--border-color-light);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.sidebar-container.is-collapse ~ .main-container .fixed-header {
+  width: calc(100% - var(--sidebar-width-collapsed));
+}
+
+/* 响应式设计 */
+/* 平板端适配 */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .sidebar-container:not(.mobile) {
+    width: var(--sidebar-width-collapsed) !important;
+  }
+  
+  .sidebar-container.is-collapse ~ .main-container {
+    margin-left: var(--sidebar-width-collapsed);
+  }
+  
+  .fixed-header {
+    width: calc(100% - var(--sidebar-width-collapsed));
+  }
+  
+  /* Element Plus 表格适配 */
+  :deep(.el-table) {
+    font-size: var(--font-size-sm);
+    
+    .el-table__cell {
+      padding: 8px 0;
+    }
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .main-container {
+    margin-left: 0 !important;
+    padding-top: var(--navbar-height) !important;
+  }
+  
+  .fixed-header {
+    width: 100% !important;
+  }
+  
+  .sidebar-container {
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+  }
+  
+  .sidebar-container:not(.hidden) {
+    transform: translateX(0);
+  }
+  
+  /* 移动端卡片间距调整 */
+  .el-card {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  /* 移动端表格适配 */
+  :deep(.el-table) {
+    font-size: var(--font-size-xs);
+    
+    .el-table__cell {
+      padding: 6px 0;
+    }
+    
+    .cell {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+  }
+  
+  /* 移动端按钮组适配 */
+  .table-action-buttons {
+    gap: 2px;
+  }
+  
+  .table-action-link {
+    font-size: 12px;
+    padding: 1px 3px;
+  }
+  
+  /* 移动端表单适配 */
+  :deep(.el-form-item) {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  :deep(.el-form-item__label) {
+    font-size: var(--font-size-sm);
+  }
+  
+  /* 移动端对话框适配 */
+  :deep(.el-dialog) {
+    width: 95% !important;
+    margin-top: 5vh !important;
+  }
+  
+  :deep(.el-drawer) {
+    width: 85% !important;
+  }
+}
+
+/* 小屏移动端适配 */
+@media (max-width: 480px) {
+  .el-row {
+    margin: 0 !important;
+  }
+  
+  .el-col {
+    padding: 0 6px !important;
+  }
+  
+  /* 小屏表格进一步精简 */
+  :deep(.el-table) {
+    .el-table__header-wrapper,
+    .el-table__body-wrapper {
+      overflow-x: auto;
+    }
+  }
+  
+  /* 小屏按钮适配 */
+  .el-button {
+    padding: 8px 12px;
+    font-size: var(--font-size-xs);
+  }
+  
+  .el-button--small {
+    padding: 6px 10px;
+  }
+}
+
+/* 表格操作按钮样式 */
+.table-action-buttons {
+  display: flex;
+  gap: 4px; /* 从8px减小到4px */
+  flex-wrap: wrap;
+}
+
+.table-action-link {
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 2px 4px; /* 从4px 8px减小到2px 4px */
+  transition: all 0.3s;
+  text-decoration: none;
+  font-size: 13px; /* 从14px减小到13px */
+}
+
+.table-action-link:hover {
+  background-color: var(--primary-color-bg);
+  border-radius: 4px;
+}
+
+.table-action-link.danger {
+  color: var(--danger-color);
+}
+
+.table-action-link.danger:hover {
+  background-color: var(--danger-color-bg);
+}
+
+.table-action-link.warning {
+  color: var(--warning-color);
+}
+
+.table-action-link.warning:hover {
+  background-color: var(--warning-color-bg);
+}
+
+.table-action-link.success {
+  color: var(--success-color);
+}
+
+.table-action-link.success:hover {
+  background-color: var(--success-color-bg);
+}

@@ -1,0 +1,22 @@
+export default {
+  dashboard: 'Dashboard',
+  myInstances: 'My Instances',
+  apply: 'Apply',
+  taskList: 'Task List',
+  wallet: 'Wallet',
+  myOrders: 'My Orders',
+  purchase: 'Purchase',
+  personalCenter: 'Personal Center',
+  userManagement: 'User Management',
+  inviteCodeManagement: 'Invite Code Management',
+  providerManagement: 'Provider Management',
+  taskManagement: 'Task Management',
+  instanceManagement: 'Instance Management',
+  orderManagement: 'Order Management',
+  trafficManagement: 'Traffic Management',
+  portManagement: 'Port Management',
+  systemImages: 'System Images',
+  announcementManagement: 'Announcement Management',
+  systemConfiguration: 'System Configuration',
+  performanceMonitoring: 'Performance Monitoring'
+}

@@ -1,0 +1,43 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: deploy/nginx.dockerfile
+    container_name: web
+    ports:
+      - "8888:80"
+    networks:
+      - default
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/server.dockerfile
+    container_name: api
+    volumes:
+      - ./data/app/:/app/storage
+      - ./server/config.yaml:/app/config.yaml:rw
+    networks:
+      - default
+
+  mysql:
+    image: mariadb:10.11
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+        MYSQL_ALLOW_EMPTY_PASSWORD:  "yes"
+        MYSQL_DATABASE: oneclickvirt
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./deploy/my.cnf:/etc/mysql/conf.d/custom.cnf
+    networks:
+      - default
+
+volumes:
+  mysql_data:
+
+networks:
+  default:
+    driver: bridge
