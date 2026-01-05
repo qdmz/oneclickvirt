@@ -166,7 +166,22 @@ const openSSHInNewWindow = (conn) => {
     wsHost = `${window.location.hostname}:${serverPort}`
   }
   
-  const wsUrl = `${protocol}//${wsHost}/api/v1/user/instances/${conn.instanceId}/ssh?token=${encodeURIComponent(token)}`
+  // 根据连接类型选择正确的API端点
+  let apiPath
+  if (conn.isAdmin) {
+    if (conn.isProvider) {
+      // 管理员连接到节点服务器
+      apiPath = `/api/v1/admin/providers/${conn.instanceId}/ssh`
+    } else {
+      // 管理员连接到实例
+      apiPath = `/api/v1/admin/instances/${conn.instanceId}/ssh`
+    }
+  } else {
+    // 普通用户连接到实例
+    apiPath = `/api/v1/user/instances/${conn.instanceId}/ssh`
+  }
+  
+  const wsUrl = `${protocol}//${wsHost}${apiPath}?token=${encodeURIComponent(token)}`
   
   // 创建新窗口HTML内容
   const htmlContent = `<!DOCTYPE html>

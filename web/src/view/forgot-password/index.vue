@@ -4,12 +4,18 @@
     <header class="auth-header">
       <div class="header-content">
         <div class="logo">
+          <a
+          :href="siteConfigs.site_url || '#'"
+          target="_self"
+          class="site-name-link"
+        >
           <img
-            src="@/assets/images/logo.png"
-            alt="OneClickVirt Logo"
+            :src="siteConfigs.site_icon_url || logoUrl"
+            :alt="siteConfigs.site_name || 'OneClickVirt Logo'"
             class="logo-image"
           >
-          <h1>OneClickVirt</h1>
+          <h1>{{ siteConfigs.site_name || 'OneClickVirt' }}</h1>
+        </a>
         </div>
         <nav class="nav-actions">
           <button
@@ -127,6 +133,8 @@ import { forgotPassword } from '@/api/auth'
 import { getCaptcha } from '@/api/auth'
 import { Operation, HomeFilled } from '@element-plus/icons-vue'
 import { useLanguageStore } from '@/pinia/modules/language'
+import { getPublicSiteConfigs } from '@/api/public'
+import logoUrl from '@/assets/images/logo.png'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -136,6 +144,7 @@ const loading = ref(false)
 const emailSent = ref(false)
 const captchaImage = ref('')
 const captchaId = ref('')
+const siteConfigs = ref({})
 
 const forgotForm = reactive({
   email: '',
@@ -203,8 +212,30 @@ const switchLanguage = () => {
   ElMessage.success(t('navbar.languageSwitched'))
 }
 
+// 获取站点配置
+const fetchSiteConfigs = async () => {
+  try {
+    const resp = await getPublicSiteConfigs()
+    if (resp && (resp.code === 0 || resp.code === 200) && resp.data) {
+      const configs = resp.data
+      // 检查数据格式，如果是对象直接使用，如果是数组则遍历
+      if (Array.isArray(configs)) {
+        configs.forEach(config => {
+          siteConfigs.value[config.key] = config.value
+        })
+      } else {
+        // 直接将对象赋值给siteConfigs
+        siteConfigs.value = { ...siteConfigs.value, ...configs }
+      }
+    }
+  } catch (error) {
+    console.error('获取站点配置失败', error)
+  }
+}
+
 onMounted(() => {
   refreshCaptcha()
+  fetchSiteConfigs()
 })
 </script>
 
