@@ -5,11 +5,17 @@
       <div class="header-content">
         <div class="logo">
           <img
-            src="@/assets/images/logo.png"
-            alt="OneClickVirt Logo"
+            :src="siteConfigs.site_icon_url || '@/assets/images/logo.png'"
+            :alt="siteConfigs.site_name || 'OneClickVirt Logo'"
             class="logo-image"
           >
-          <h1>OneClickVirt</h1>
+          <a
+            :href="siteConfigs.site_url || '#'"
+            target="_self"
+            class="site-name-link"
+          >
+            <h1>{{ siteConfigs.site_name || t('home.title') }}</h1>
+          </a>
         </div>
         <nav class="nav-actions">
           <button
