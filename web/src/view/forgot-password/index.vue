@@ -16,6 +16,7 @@
           >
           <h1>{{ siteConfigs.site_name || 'OneClickVirt' }}</h1>
         </a>
+>>>>>>> c7b889400c2219242bef6b11db18df3929268d87
         </div>
         <nav class="nav-actions">
           <button
