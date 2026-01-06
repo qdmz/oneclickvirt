@@ -3,20 +3,19 @@
     <!-- 顶部栏 -->
     <header class="auth-header">
       <div class="header-content">
-        <div class="logo">
-          <a
-          :href="siteConfigs.site_url || '#'"
-          target="_self"
-          class="site-name-link"
-        >
+       <div class="logo">
           <img
-            :src="siteConfigs.site_icon_url || logoUrl"
+            :src="siteConfigs.site_icon_url || '@/assets/images/logo.png'"
             :alt="siteConfigs.site_name || 'OneClickVirt Logo'"
             class="logo-image"
           >
-          <h1>{{ siteConfigs.site_name || 'OneClickVirt' }}</h1>
-        </a>
->>>>>>> c7b889400c2219242bef6b11db18df3929268d87
+          <a
+            :href="siteConfigs.site_url || '#'"
+            target="_self"
+            class="site-name-link"
+          >
+            <h1>{{ siteConfigs.site_name || t('login.title') }}</h1>
+          </a>
         </div>
         <nav class="nav-actions">
           <button
