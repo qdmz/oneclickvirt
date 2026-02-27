@@ -158,4 +158,18 @@ type Payment struct {
 	WechatMchID      string  `mapstructure:"wechat-mch-id" json:"wechat-mch-id" yaml:"wechat-mch-id"`                      // 微信商户号
 	WechatSerialNo   string  `mapstructure:"wechat-serial-no" json:"wechat-serial-no" yaml:"wechat-serial-no"`             // 微信证书序列号
 	WechatType       string  `mapstructure:"wechat-type" json:"wechat-type" yaml:"wechat-type"`                            // 微信支付类型
+	// 易支付配置
+	EpayAPIURL    string `mapstructure:"epay-api-url" json:"epay-api-url" yaml:"epay-api-url"`          // 易支付API地址
+	EpayPID       string `mapstructure:"epay-pid" json:"epay-pid" yaml:"epay-pid"`                      // 易支付商户ID
+	EpayKey       string `mapstructure:"epay-key" json:"epay-key" yaml:"epay-key"`                      // 易支付密钥
+	EpayReturnURL string `mapstructure:"epay-return-url" json:"epay-return-url" yaml:"epay-return-url"` // 易支付返回URL
+	EpayNotifyURL string `mapstructure:"epay-notify-url" json:"epay-notify-url" yaml:"epay-notify-url"` // 易支付回调URL
+	EnableEpay    bool   `mapstructure:"enable-epay" json:"enable-epay" yaml:"enable-epay"`             // 是否启用易支付
+	// 码支付配置
+	MapayAPIURL    string `mapstructure:"mapay-api-url" json:"mapay-api-url" yaml:"mapay-api-url"`          // 码支付API地址
+	MapayID        string `mapstructure:"mapay-id" json:"mapay-id" yaml:"mapay-id"`                         // 码支付商户ID
+	MapayKey       string `mapstructure:"mapay-key" json:"mapay-key" yaml:"mapay-key"`                      // 码支付密钥
+	MapayReturnURL string `mapstructure:"mapay-return-url" json:"mapay-return-url" yaml:"mapay-return-url"` // 码支付返回URL
+	MapayNotifyURL string `mapstructure:"mapay-notify-url" json:"mapay-notify-url" yaml:"mapay-notify-url"` // 码支付回调URL
+	EnableMapay    bool   `mapstructure:"enable-mapay" json:"enable-mapay" yaml:"enable-mapay"`             // 是否启用码支付
 }

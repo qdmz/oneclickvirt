@@ -15,7 +15,7 @@ npm install
 npm run dev
 ```
 
-前端将运行在 `http://localhost:5173`
+前端将运行在 `http://localhost:8080`
 
 #### 后端开发
 ```bash
@@ -24,7 +24,7 @@ go mod download
 go run main.go
 ```
 
-后端将运行在 `http://localhost:8888`
+后端将运行在 `http://localhost:8890`
 
 ### Docker部署
 
@@ -63,8 +63,8 @@ go build -o oneclickvirt main.go
 ## 🔐 登录信息
 
 ```
-前端地址: http://localhost:5173
-后端API:  http://localhost:8888
+前端地址: http://localhost:8080
+后端API:  http://localhost:8890
 
 管理员账号:
   用户名: admin
@@ -98,6 +98,9 @@ go build -o oneclickvirt main.go
 - ✅ 用户管理
 - ✅ 资源监控
 - ✅ 流量统计
+- ✅ **代用户登录** - 管理员可直接以用户身份登录系统
+- ✅ **实例转移归属** - 管理员可将实例从一个用户转移到另一个用户
+- ✅ **第三方支付配置** - 支持易支付和码支付接口配置
 
 ### 用户功能
 - ✅ 虚拟实例管理
@@ -105,6 +108,7 @@ go build -o oneclickvirt main.go
 - ✅ 钱包管理
 - ✅ 订单管理
 - ✅ 流量监控
+- ✅ **多种支付方式** - 支持支付宝、微信支付、余额支付、易支付、码支付
 
 ## 📁 项目结构
 
@@ -142,6 +146,11 @@ go build -o oneclickvirt main.go
 - Element Plus UI框架
 - Vite构建工具
 
+### 新增技术组件
+- **JWT Token认证** - 支持管理员代用户登录的权限降级
+- **MD5签名验证** - 第三方支付回调安全验证
+- **异步支付处理** - 支持多平台支付回调处理
+
 ## 📝 开发规范
 
 ### 后端
@@ -163,6 +172,9 @@ go build -o oneclickvirt main.go
 - 权限控制
 - 防止SQL注入
 - 防止XSS攻击
+- **支付签名验证** - MD5签名确保支付回调安全性
+- **权限降级机制** - 管理员代用户登录时权限安全控制
+- **操作审计日志** - 记录敏感操作便于追踪
 
 ## 🤝 贡献指南
 

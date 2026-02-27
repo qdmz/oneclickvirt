@@ -171,20 +171,29 @@ const connect = () => {
     if (props.isProvider) {
       // 管理员连接到节点服务器
       console.log('Connecting to provider SSH:', props.instanceId)
-      apiPath = `/api/v1/admin/providers/${props.instanceId}/ssh`
+      apiPath = `/v1/admin/providers/${props.instanceId}/ssh`
     } else {
       // 管理员连接到实例
       console.log('Connecting to instance SSH:', props.instanceId)
-      apiPath = `/api/v1/admin/instances/${props.instanceId}/ssh`
+      apiPath = `/v1/admin/instances/${props.instanceId}/ssh`
     }
   } else {
     // 普通用户连接到实例
     console.log('Connecting to user instance SSH:', props.instanceId)
-    apiPath = `/api/v1/user/instances/${props.instanceId}/ssh`
+    apiPath = `/v1/user/instances/${props.instanceId}/ssh`
   }
-  console.log('WebSocket URL:', `${protocol}//${host}${apiPath}`)
   
-  const wsUrl = `${protocol}//${host}${apiPath}?token=${token}`
+  // 构建WebSocket URL，考虑开发环境和生产环境的差异
+  let wsUrl
+  if (import.meta.env.MODE === 'development') {
+    // 开发环境：使用代理地址
+    wsUrl = `${protocol}//${host}/api${apiPath}?token=${token}`
+  } else {
+    // 生产环境：直接连接API服务器
+    wsUrl = `${protocol}//${host}${apiPath}?token=${token}`
+  }
+  
+  console.log('WebSocket URL:', wsUrl)
 
   try {
     websocket = new WebSocket(wsUrl)
