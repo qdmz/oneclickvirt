@@ -155,6 +155,13 @@ type ResetUserPasswordResponse struct {
 	NewPassword string `json:"newPassword"` // 生成的新密码
 }
 
+// ImpersonateResponse 管理员代用户登录响应
+type ImpersonateResponse struct {
+	Token     string      `json:"token"`     // 登录Token
+	ExpiresIn int         `json:"expiresIn"` // 过期时间(秒)
+	UserInfo  interface{} `json:"userInfo"`  // 用户信息
+}
+
 // ResetInstancePasswordResponse 管理员重置实例密码响应
 type ResetInstancePasswordResponse struct {
 	TaskID uint `json:"taskId"` // 异步任务ID

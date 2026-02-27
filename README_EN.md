@@ -256,8 +256,8 @@ go run main.go
 ### Local Development
 
 * Frontend: [http://localhost:8080](http://localhost:8080)
-* Backend API: [http://localhost:8888](http://localhost:8888)
-* API Documentation: [http://localhost:8888/swagger/index.html](http://localhost:8888/swagger/index.html)
+* Backend API: [http://localhost:8890](http://localhost:8890)
+* API Documentation: [http://localhost:8890/swagger/index.html](http://localhost:8890/swagger/index.html)
 
 </details>
 
@@ -268,6 +268,24 @@ After system initialization, the following default accounts will be generated:
 * Administrator account: `admin / Admin123!@#`
 
 > Tip: Please change the default passwords immediately after first login.
+
+## 🚀 New Features
+
+### Administrator Features
+- ✅ **User Impersonation** - Administrators can log in as users directly
+- ✅ **Instance Ownership Transfer** - Transfer instances between users
+- ✅ **Third-party Payment Integration** - Support for Epay and Mapay payment gateways
+- ✅ **Enhanced Payment Configuration** - Comprehensive payment interface management
+
+### User Features  
+- ✅ **Multiple Payment Methods** - Support for Alipay, WeChat Pay, Balance, Epay, and Mapay
+- ✅ **Improved Wallet System** - Enhanced wallet management and recharge options
+- ✅ **Order Management** - Complete order lifecycle management
+
+### Security Enhancements
+- **Payment Signature Verification** - MD5 signature validation for payment callbacks
+- **Permission Downgrade Mechanism** - Secure permission control for user impersonation
+- **Operation Audit Logs** - Comprehensive logging of sensitive operations
 
 ## Configuration File
 

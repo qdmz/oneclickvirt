@@ -387,4 +387,44 @@ func syncPaymentConfig(paymentConfig map[string]interface{}) {
 	if v, ok := paymentConfig["enable-balance"].(bool); ok {
 		global.APP_CONFIG.Payment.EnableBalance = v
 	}
+
+	// 易支付配置
+	if v, ok := paymentConfig["epay-api-url"].(string); ok {
+		global.APP_CONFIG.Payment.EpayAPIURL = v
+	}
+	if v, ok := paymentConfig["epay-pid"].(string); ok {
+		global.APP_CONFIG.Payment.EpayPID = v
+	}
+	if v, ok := paymentConfig["epay-key"].(string); ok {
+		global.APP_CONFIG.Payment.EpayKey = v
+	}
+	if v, ok := paymentConfig["epay-return-url"].(string); ok {
+		global.APP_CONFIG.Payment.EpayReturnURL = v
+	}
+	if v, ok := paymentConfig["epay-notify-url"].(string); ok {
+		global.APP_CONFIG.Payment.EpayNotifyURL = v
+	}
+	if v, ok := paymentConfig["enable-epay"].(bool); ok {
+		global.APP_CONFIG.Payment.EnableEpay = v
+	}
+
+	// 码支付配置
+	if v, ok := paymentConfig["mapay-api-url"].(string); ok {
+		global.APP_CONFIG.Payment.MapayAPIURL = v
+	}
+	if v, ok := paymentConfig["mapay-id"].(string); ok {
+		global.APP_CONFIG.Payment.MapayID = v
+	}
+	if v, ok := paymentConfig["mapay-key"].(string); ok {
+		global.APP_CONFIG.Payment.MapayKey = v
+	}
+	if v, ok := paymentConfig["mapay-return-url"].(string); ok {
+		global.APP_CONFIG.Payment.MapayReturnURL = v
+	}
+	if v, ok := paymentConfig["mapay-notify-url"].(string); ok {
+		global.APP_CONFIG.Payment.MapayNotifyURL = v
+	}
+	if v, ok := paymentConfig["enable-mapay"].(bool); ok {
+		global.APP_CONFIG.Payment.EnableMapay = v
+	}
 }
