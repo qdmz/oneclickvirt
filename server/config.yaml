@@ -106,10 +106,10 @@ redis:
     db: 0
     password: ""
 system:
-    addr: 8888
+    addr: 8890
     db-type: mysql
     env: development
-    frontend-url: "http://localhost:5173"
+    frontend-url: "http://154.12.84.134"
     iplimit-count: 15000
     iplimit-time: 3600
     oauth2-state-token-minutes: 15

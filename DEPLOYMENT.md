@@ -5,12 +5,12 @@
 ### 后端环境
 - Go 1.24+ (从阿里云镜像获取: https://mirrors.aliyun.com/golang/)
 - MySQL 5.7+
-- 8888端口可用
+- 8890端口可用
 
 ### 前端环境
 - Node.js 16+
 - npm 或 yarn
-- 80端口可用
+- 8080端口可用
 
 ---
 
@@ -235,7 +235,8 @@ npm run dev
 错误: bind: address already in use
 解决:
 # Windows查看端口占用
-netstat -ano | findstr :8888
+netstat -ano | findstr :8890
+netstat -ano | findstr :8080
 # 杀死进程
 taskkill /PID <进程ID> /F
 ```
@@ -465,6 +466,11 @@ cd server && go run main.go
 cd web && npm run dev
 ```
 
+默认访问地址：
+- 前端: http://localhost:8080
+- 后端: http://localhost:8890
+- API文档: http://localhost:8890/swagger/index.html
+
 ### 重置数据库
 ```sql
 DROP DATABASE oneclickvirt;
@@ -483,13 +489,73 @@ tail -f logs/server.log
 ### 杀死进程
 ```bash
 # Windows
-tasklist | findstr oneclivkvirt
+tasklist | findstr oneclickvirt
 taskkill /PID <进程ID> /F
 
 # Linux/Mac
-ps aux | grep oneclivkvirt
+ps aux | grep oneclickvirt
 kill -9 <进程ID>
 ```
+
+---
+
+## 新增功能说明
+
+### 1. 管理员代用户登录功能
+**功能描述:**
+管理员可以直接以目标用户的身份登录系统，无需获取用户密码，方便处理用户问题和审核用户操作。
+
+**使用方法:**
+1. 管理员登录后台
+2. 进入"用户管理"页面
+3. 找到目标用户，点击"代登录"按钮
+4. 确认后系统会生成该用户的登录Token
+5. 自动跳转到用户界面，权限已降级为用户权限
+
+**技术实现:**
+- 位于文件: `server/api/v1/admin/impersonate.go`
+- 前端集成: `web/src/view/admin/users/index.vue`
+- 安全措施: JWT Token生成、权限降级、操作日志记录
+
+### 2. 实例转移归属功能
+**功能描述:**
+支持管理员将实例从一个用户转移到另一个用户，实现灵活的资源管理。
+
+**使用方法:**
+1. 管理员登录后台
+2. 进入"实例管理"页面
+3. 选择要转移的实例
+4. 点击"转移归属"按钮
+5. 选择目标用户并确认
+6. 系统会自动更新实例的所有权信息
+
+**技术实现:**
+- 位于文件: `server/api/v1/admin/transfer.go`
+- 前端集成: `web/src/view/admin/instances/index.vue`
+- 安全措施: 数据库事务处理、操作审计记录
+
+### 3. 第三方支付接口集成
+**功能描述:**
+集成了易支付和码支付两个第三方支付平台，支持多种支付方式。
+
+**支持的支付方式:**
+- 易支付 (Epay) - 支持支付宝、微信支付、QQ钱包等
+- 码支付 (Mapay) - 支持多种扫码支付方式
+- 系统内置支付方式 - 支付宝、微信支付、余额支付
+
+**配置方法:**
+1. 管理员登录后台
+2. 进入"系统配置" → "支付接口配置"
+3. 找到易支付或码支付配置区域
+4. 填写商户ID、密钥、API地址等信息
+5. 设置回调URL和返回URL
+6. 保存配置并启用
+
+**技术实现:**
+- 核心处理: `server/api/v1/payment/thirdparty.go`
+- 配置界面: `web/src/view/admin/config/index.vue`
+- 支付配置: `server/config/config.go`
+- 签名验证: MD5加密签名验证确保回调安全
 
 ---
 

@@ -789,7 +789,7 @@ const openSSHTerminal = (instance) => {
   
   // 创建或显示SSH连接（由全局管理器处理）
   if (!sshStore.hasConnection(instance.id)) {
-    sshStore.createConnection(instance.id, instance.name, true) // true表示管理员模式
+    sshStore.createConnection(instance.id, instance.name, true, false) // true表示管理员模式，false表示不是节点服务器
   } else {
     sshStore.showConnection(instance.id)
   }
