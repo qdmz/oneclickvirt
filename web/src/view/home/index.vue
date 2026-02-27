@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="logo">
           <img
-            :src="siteConfigs.site_icon_url || '@/assets/images/logo.png'"
+            :src="siteConfigs.site_icon_url || logoUrl"
             :alt="siteConfigs.site_name || 'OneClickVirt Logo'"
             class="logo-image"
           >
@@ -446,6 +446,7 @@ import { checkSystemInit } from '@/api/init'
 import { ElTag, ElMessage } from 'element-plus'
 import { Operation } from '@element-plus/icons-vue'
 import { useLanguageStore } from '@/pinia/modules/language'
+import logoUrl from '@/assets/images/logo.png'
 
 const router = useRouter()
 const { t, locale } = useI18n()

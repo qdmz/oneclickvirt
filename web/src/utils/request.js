@@ -5,7 +5,7 @@ import { errorHandler } from './errorHandler'
 import router from '@/router'
 
 const service = axios.create({
-  baseURL: import.meta.env.VITE_BASE_API,
+  baseURL: '/api',
   timeout: 6000, // 恢复原来的6秒全局超时
   headers: {
     'Content-Type': 'application/json'

@@ -438,6 +438,104 @@
                 </el-col>
               </el-row>
             </el-card>
+
+            <!-- 易支付配置 -->
+            <el-card
+              class="payment-card"
+              shadow="never"
+            >
+              <template #header>
+                <div class="payment-header">
+                  <span>易支付配置</span>
+                  <el-switch v-model="config.payment.enableEpay" />
+                </div>
+              </template>
+              <el-form-item label="API地址">
+                <el-input
+                  v-model="config.payment.epayAPIURL"
+                  :disabled="!config.payment.enableEpay"
+                  placeholder="请输入易支付API地址"
+                />
+              </el-form-item>
+              <el-form-item label="商户ID">
+                <el-input
+                  v-model="config.payment.epayPID"
+                  :disabled="!config.payment.enableEpay"
+                  placeholder="请输入商户ID"
+                />
+              </el-form-item>
+              <el-form-item label="密钥">
+                <el-input
+                  v-model="config.payment.epayKey"
+                  :disabled="!config.payment.enableEpay"
+                  placeholder="请输入密钥"
+                  type="password"
+                />
+              </el-form-item>
+              <el-form-item label="返回URL">
+                <el-input
+                  v-model="config.payment.epayReturnURL"
+                  :disabled="!config.payment.enableEpay"
+                  placeholder="请输入返回URL"
+                />
+              </el-form-item>
+              <el-form-item label="回调URL">
+                <el-input
+                  v-model="config.payment.epayNotifyURL"
+                  :disabled="!config.payment.enableEpay"
+                  placeholder="请输入回调URL"
+                />
+              </el-form-item>
+            </el-card>
+
+            <!-- 码支付配置 -->
+            <el-card
+              class="payment-card"
+              shadow="never"
+            >
+              <template #header>
+                <div class="payment-header">
+                  <span>码支付配置</span>
+                  <el-switch v-model="config.payment.enableMapay" />
+                </div>
+              </template>
+              <el-form-item label="API地址">
+                <el-input
+                  v-model="config.payment.mapayAPIURL"
+                  :disabled="!config.payment.enableMapay"
+                  placeholder="请输入码支付API地址"
+                />
+              </el-form-item>
+              <el-form-item label="商户ID">
+                <el-input
+                  v-model="config.payment.mapayID"
+                  :disabled="!config.payment.enableMapay"
+                  placeholder="请输入商户ID"
+                />
+              </el-form-item>
+              <el-form-item label="密钥">
+                <el-input
+                  v-model="config.payment.mapayKey"
+                  :disabled="!config.payment.enableMapay"
+                  placeholder="请输入密钥"
+                  type="password"
+                />
+              </el-form-item>
+              <el-form-item label="返回URL">
+                <el-input
+                  v-model="config.payment.mapayReturnURL"
+                  :disabled="!config.payment.enableMapay"
+                  placeholder="请输入返回URL"
+                />
+              </el-form-item>
+              <el-form-item label="回调URL">
+                <el-input
+                  v-model="config.payment.mapayNotifyURL"
+                  :disabled="!config.payment.enableMapay"
+                  placeholder="请输入回调URL"
+                />
+              </el-form-item>
+            </el-card>
           </el-form>
         </el-tab-pane>
 
@@ -955,7 +1053,21 @@ const config = ref({
     wechatType: 'mp',
     enableBalance: true,
     balanceMinAmount: 0,
-    balanceDailyLimit: 10000
+    balanceDailyLimit: 10000,
+    // 易支付配置
+    enableEpay: false,
+    epayAPIURL: '',
+    epayPID: '',
+    epayKey: '',
+    epayReturnURL: '',
+    epayNotifyURL: '',
+    // 码支付配置
+    enableMapay: false,
+    mapayAPIURL: '',
+    mapayID: '',
+    mapayKey: '',
+    mapayReturnURL: '',
+    mapayNotifyURL: ''
   },
   other: {
     maxAvatarSize: 2, // MB

@@ -31,6 +31,7 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.PUT("/users/:id/status", admin.UpdateUserStatus)
 		AdminGroup.PUT("/users/:id/level", admin.UpdateUserLevel)
 		AdminGroup.PUT("/users/:id/reset-password", admin.ResetUserPassword)
+		AdminGroup.POST("/users/:id/impersonate", admin.ImpersonateUser) // 管理员代用户登录
 		AdminGroup.PUT("/users/batch-level", admin.AdminBatchUpdateUserLevel)
 		AdminGroup.PUT("/users/batch-status", admin.AdminBatchUpdateUserStatus)
 		AdminGroup.POST("/users/batch-delete", admin.AdminBatchDeleteUsers)
@@ -41,6 +42,7 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.PUT("/instances/:id", admin.UpdateInstance)
 		AdminGroup.DELETE("/instances/:id", admin.DeleteInstance)
 		AdminGroup.POST("/instances/:id/action", admin.AdminInstanceAction)
+		AdminGroup.POST("/instances/:id/transfer", admin.TransferInstanceOwnership) // 实例转移归属
 		AdminGroup.PUT("/instances/:id/reset-password", admin.ResetInstancePassword)
 		AdminGroup.GET("/instances/:id/password/:taskId", admin.GetInstanceNewPassword)
 		AdminGroup.GET("/instance-type-permissions", admin.GetAdminInstanceTypePermissions)

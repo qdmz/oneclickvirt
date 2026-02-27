@@ -47,6 +47,8 @@ const (
 	PaymentMethodWechat   = "wechat"   // 微信支付
 	PaymentMethodBalance  = "balance"  // 余额支付
 	PaymentMethodExchange = "exchange" // 兑换码
+	PaymentMethodEpay     = "epay"     // 易支付
+	PaymentMethodMapay    = "mapay"    // 码支付
 )
 
 // PaymentRecord 支付记录表

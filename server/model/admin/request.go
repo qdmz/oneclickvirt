@@ -499,3 +499,8 @@ type CheckPortAvailabilityResponse struct {
 	PortRange        string `json:"portRange"`        // 端口范围描述（如 "10000-10009"）
 	Suggestion       string `json:"suggestion"`       // 建议（如果有冲突，提供替代方案）
 }
+
+// TransferInstanceRequest 转移实例归属请求
+type TransferInstanceRequest struct {
+	TargetUserID uint `json:"targetUserId" binding:"required"` // 目标用户ID
+}
