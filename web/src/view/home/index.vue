@@ -358,7 +358,7 @@
             </li>
             <!-- 直接显示联系电话，不使用v-if条件判断，确保始终显示 -->
             <li>
-              {{ siteConfigs.contact_phone || '888-888-8888' }}
+              
             </li>
             <li v-if="siteConfigs.company_address">
               {{ siteConfigs.company_address }}
