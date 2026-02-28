@@ -353,6 +353,7 @@ import {
   getInstanceConfig,
   createInstance
 } from '@/api/user'
+import { checkUserPurchaseStatus } from '@/api/user-payment'
 import { formatMemorySize, formatDiskSize, formatResourceUsage } from '@/utils/unit-formatter'
 import { getFlagEmoji } from '@/utils/countries'
 
@@ -380,6 +381,10 @@ const instanceTypePermissions = ref({
     maxMemory: 0
   }
 })
+
+// 购买状态检查
+const purchaseChecked = ref(false)
+const hasPurchased = ref(false)
 
 // 规格配置数据
 const instanceConfig = ref({
@@ -1140,6 +1145,26 @@ onMounted(async () => {
   // 强制页面刷新监听器
   window.addEventListener('force-page-refresh', handleForceRefresh)
   
+  // 首先检查用户是否购买过产品
+  try {
+    const purchaseRes = await checkUserPurchaseStatus()
+    if (purchaseRes.code === 200 || purchaseRes.code === 0) {
+      hasPurchased.value = purchaseRes.data.hasPurchased
+      purchaseChecked.value = true
+      
+      if (!hasPurchased.value) {
+        ElMessage.warning('您还未购买任何产品，请先购买产品后再申请实例')
+        // 延迟跳转到购买页面
+        setTimeout(() => {
+          router.push('/user/purchase')
+        }, 2000)
+        return
+      }
+    }
+  } catch (error) {
+    console.error('检查购买状态失败:', error)
+  }
+  
   // 优先加载核心数据，避免并发请求导致数据库锁定
   try {
     // 首先加载用户权限信息
@@ -1161,6 +1186,26 @@ onMounted(async () => {
 
 // 使用 onActivated 确保每次页面激活时都重新加载数据
 onActivated(async () => {
+  // 检查用户是否购买过产品
+  try {
+    const purchaseRes = await checkUserPurchaseStatus()
+    if (purchaseRes.code === 200 || purchaseRes.code === 0) {
+      hasPurchased.value = purchaseRes.data.hasPurchased
+      purchaseChecked.value = true
+      
+      if (!hasPurchased.value) {
+        ElMessage.warning('您还未购买任何产品，请先购买产品后再申请实例')
+        // 延迟跳转到购买页面
+        setTimeout(() => {
+          router.push('/user/purchase')
+        }, 2000)
+        return
+      }
+    }
+  } catch (error) {
+    console.error('检查购买状态失败:', error)
+  }
+  
   // 避免并发请求，按优先级顺序加载
   try {
     await loadInstanceTypePermissions()

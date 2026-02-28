@@ -242,8 +242,29 @@
       @close="handleCloseQRDialog"
     >
       <div class="qr-container">
+        <div
+          v-if="qrCodeUrl && (rechargeForm.paymentMethod === 'epay' || rechargeForm.paymentMethod === 'mapay')"
+          class="payment-link-container"
+        >
+          <el-alert
+            type="info"
+            :closable="false"
+            class="mb-20"
+          >
+            <template #title>
+              请点击下方按钮跳转支付页面
+            </template>
+          </el-alert>
+          <el-button
+            type="primary"
+            size="large"
+            @click="openPaymentUrl"
+          >
+            立即支付
+          </el-button>
+        </div>
         <el-image
-          v-if="qrCodeUrl"
+          v-else-if="qrCodeUrl"
           :src="qrCodeUrl"
           fit="contain"
           class="qr-code"
@@ -252,7 +273,7 @@
           支付金额: ¥{{ (currentOrder.amount / 100).toFixed(2) }}
         </p>
         <p class="tip-text">
-          请使用{{ getPaymentMethodName(rechargeForm.paymentMethod) }}扫描二维码
+          请使用{{ getPaymentMethodName(rechargeForm.paymentMethod) }}{{ rechargeForm.paymentMethod === 'epay' || rechargeForm.paymentMethod === 'mapay' ? '完成支付' : '扫描二维码' }}
         </p>
         <el-alert
           title="支付完成后页面将自动跳转"
@@ -484,6 +505,13 @@ const startPollOrderStatus = () => {
       console.error('查询订单状态失败:', error)
     }
   }, 3000)
+}
+
+// 打开支付链接
+const openPaymentUrl = () => {
+  if (qrCodeUrl.value) {
+    window.open(qrCodeUrl.value, '_blank')
+  }
 }
 
 // 关闭二维码对话框

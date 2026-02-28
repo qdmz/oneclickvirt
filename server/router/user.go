@@ -105,5 +105,8 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		// 产品管理
 		UserGroup.GET("/user/products", user.GetUserProducts)
 		UserGroup.POST("/user/products/:id/purchase", user.PurchaseProduct)
+
+		// 购买状态检查
+		UserGroup.GET("/user/purchase-status", user.CheckUserPurchaseStatus)
 	}
 }

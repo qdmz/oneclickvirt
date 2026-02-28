@@ -525,12 +525,21 @@
           <el-form-item label="当前所有者">
             {{ transferInstance.userName }}
           </el-form-item>
-          <el-form-item label="目标用户ID" required>
-            <el-input
+          <el-form-item label="目标用户" required>
+            <el-select
               v-model="transferForm.targetUserId"
-              placeholder="请输入目标用户ID"
-              type="number"
-            />
+              placeholder="请选择目标用户"
+              filterable
+              :loading="userLoading"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="user in userList"
+                :key="user.id"
+                :label="`${user.username} (ID: ${user.id}${user.email ? ', ' + user.email : ''})`"
+                :value="user.id"
+              />
+            </el-select>
           </el-form-item>
         </el-form>
       </div>
@@ -561,7 +570,7 @@ import {
   Lock, 
   Delete 
 } from '@element-plus/icons-vue'
-import { getAllInstances, deleteInstance as deleteInstanceApi, adminInstanceAction, resetInstancePassword, transferInstanceOwnership } from '@/api/admin'
+import { getAllInstances, deleteInstance as deleteInstanceApi, adminInstanceAction, resetInstancePassword, transferInstanceOwnership, getUserList } from '@/api/admin'
 import { useI18n } from 'vue-i18n'
 import { useSSHStore } from '@/pinia/modules/ssh'
 
@@ -586,6 +595,10 @@ const tableRef = ref(null)
 const transferForm = ref({
   targetUserId: 0
 })
+
+// 用户列表（用于转移归属选择）
+const userList = ref([])
+const userLoading = ref(false)
 
 // 筛选条件
 const filters = ref({
@@ -673,25 +686,46 @@ const showActionDialog = (instance) => {
 }
 
 // 显示转移归属对话框
-const showTransferDialog = (instance) => {
+const showTransferDialog = async (instance) => {
   transferInstance.value = instance
-  transferForm.value.targetUserId = ''
+  transferForm.value.targetUserId = 0
   transferDialogVisible.value = true
+  
+  // 加载用户列表
+  await loadUserList()
+}
+
+// 加载用户列表
+const loadUserList = async () => {
+  userLoading.value = true
+  try {
+    const response = await getUserList({ page: 1, pageSize: 1000 })
+    userList.value = (response.data.list || []).filter(user => user.userType !== 'admin')
+  } catch (error) {
+    console.error('Load user list error:', error)
+    ElMessage.error('加载用户列表失败')
+  } finally {
+    userLoading.value = false
+  }
 }
 
 // 处理转移归属操作
 const handleTransfer = async () => {
   if (!transferInstance.value) return
   
-  const targetUserId = transferForm.value.targetUserId
-  if (!targetUserId) {
-    ElMessage.warning('请输入目标用户ID')
+  const targetUserId = Number(transferForm.value.targetUserId)
+  if (!targetUserId || targetUserId <= 0) {
+    ElMessage.warning('请选择目标用户')
     return
   }
   
+  // 查找选中的用户
+  const selectedUser = userList.value.find(u => u.id === targetUserId)
+  const userName = selectedUser ? selectedUser.username : `ID: ${targetUserId}`
+  
   try {
     await ElMessageBox.confirm(
-      `确定要将实例 "${transferInstance.value.name}" 转移给用户ID为 ${targetUserId} 的用户吗？`,
+      `确定要将实例 "${transferInstance.value.name}" 转移给用户 "${userName}" 吗？`,
       '确认转移',
       {
         confirmButtonText: '确定',
@@ -712,7 +746,8 @@ const handleTransfer = async () => {
     await loadInstances()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('实例转移失败')
+      const errorMsg = error.response?.data?.message || error.message || '实例转移失败'
+      ElMessage.error(errorMsg)
       console.error('Transfer error:', error)
     }
   } finally {
