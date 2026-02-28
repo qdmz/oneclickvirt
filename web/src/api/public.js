@@ -66,3 +66,11 @@ export const getPublicProducts = () => {
     method: 'get'
   })
 }
+
+// 获取支付配置（公开接口）
+export const getPaymentConfig = () => {
+  return request({
+    url: '/v1/public/payment-config',
+    method: 'get'
+  })
+}

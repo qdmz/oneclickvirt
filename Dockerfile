@@ -28,7 +28,7 @@ ARG TARGETARCH
 # Install database and other services based on architecture
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        gnupg2 wget lsb-release procps nginx supervisor ca-certificates && \
+        gnupg2 wget lsb-release procps nginx supervisor ca-certificates openssl && \
     if [ "$TARGETARCH" = "amd64" ]; then \
         echo "Installing MySQL for AMD64..." && \
         gpg --keyserver keyserver.ubuntu.com --recv-keys B7B3B788A8D3785C && \
@@ -46,7 +46,12 @@ ENV TZ=Asia/Shanghai
 WORKDIR /app
 RUN mkdir -p /var/lib/mysql /var/log/mysql /var/run/mysqld /var/log/supervisor \
     && mkdir -p /app/storage/{cache,certs,configs,exports,logs,temp,uploads} \
-    && mkdir -p /etc/mysql/conf.d
+    && mkdir -p /etc/mysql/conf.d \
+    && mkdir -p /etc/nginx/ssl
+
+# Copy SSL certificate files if provided (empty files for now)
+RUN touch /etc/nginx/ssl/cert.pem \
+    && touch /etc/nginx/ssl/key.pem
 
 COPY --from=backend-builder /app/server/main ./main
 COPY --from=backend-builder /app/server/config.yaml ./config.yaml.default
@@ -116,6 +121,7 @@ RUN echo 'user www-data;' > /etc/nginx/nginx.conf && \
     echo '        '"''"' close;' >> /etc/nginx/nginx.conf && \
     echo '    }' >> /etc/nginx/nginx.conf && \
     echo '    ' >> /etc/nginx/nginx.conf && \
+    echo '    # HTTP server' >> /etc/nginx/nginx.conf && \
     echo '    server {' >> /etc/nginx/nginx.conf && \
     echo '        listen 80;' >> /etc/nginx/nginx.conf && \
     echo '        server_name localhost;' >> /etc/nginx/nginx.conf && \
@@ -124,40 +130,141 @@ RUN echo 'user www-data;' > /etc/nginx/nginx.conf && \
     echo '        client_max_body_size 10M;' >> /etc/nginx/nginx.conf && \
     echo '        ' >> /etc/nginx/nginx.conf && \
     echo '        location /api/ {' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_pass http://127.0.0.1:8888;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header REMOTE-HOST $remote_addr;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header X-Forwarded-Proto $scheme;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header X-Forwarded-Port $server_port;' >> /etc/nginx/nginx.conf && \
-    echo '            ' >> /etc/nginx/nginx.conf && \
-    echo '            # WebSocket support' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header Connection $connection_upgrade;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_http_version 1.1;' >> /etc/nginx/nginx.conf && \
-    echo '            ' >> /etc/nginx/nginx.conf && \
-    echo '            # SSL settings' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_ssl_server_name off;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_ssl_name $proxy_host;' >> /etc/nginx/nginx.conf && \
-    echo '            ' >> /etc/nginx/nginx.conf && \
-    echo '            # Timeout settings for SSH connections' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_connect_timeout 60s;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_send_timeout 600s;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_read_timeout 600s;' >> /etc/nginx/nginx.conf && \
-    echo '            ' >> /etc/nginx/nginx.conf && \
-    echo '            # Disable buffering for real-time data' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_buffering off;' >> /etc/nginx/nginx.conf && \
-    echo '            add_header X-Cache $upstream_cache_status;' >> /etc/nginx/nginx.conf && \
-    echo '            add_header Cache-Control no-cache;' >> /etc/nginx/nginx.conf && \
-    echo '        }' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_pass http://127.0.0.1:8890;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header REMOTE-HOST $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Proto $scheme;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Port $server_port;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # WebSocket support' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Connection $connection_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_http_version 1.1;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # SSL settings' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_ssl_server_name off;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_ssl_name $proxy_host;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Timeout settings for SSH connections' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_connect_timeout 60s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_send_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_read_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Disable buffering for real-time data' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_buffering off;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header X-Cache $upstream_cache_status;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header Cache-Control no-cache;' >> /etc/nginx/nginx.conf && \
+		echo '        }' >> /etc/nginx/nginx.conf && \
+		echo '        ' >> /etc/nginx/nginx.conf && \
+		echo '        location /swagger/ {' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_pass http://127.0.0.1:8890;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+		echo '        }' >> /etc/nginx/nginx.conf && \
     echo '        ' >> /etc/nginx/nginx.conf && \
-    echo '        location /swagger/ {' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_pass http://127.0.0.1:8888;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
-    echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+    echo '        # WebSocket endpoints for SSH connections' >> /etc/nginx/nginx.conf && \
+    echo '        location /v1/ {' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_pass http://127.0.0.1:8890;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header REMOTE-HOST $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Proto $scheme;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Port $server_port;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # WebSocket support' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Connection $connection_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_http_version 1.1;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Timeout settings for SSH connections' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_connect_timeout 60s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_send_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_read_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Disable buffering for real-time data' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_buffering off;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header X-Cache $upstream_cache_status;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header Cache-Control no-cache;' >> /etc/nginx/nginx.conf && \
+		echo '        }' >> /etc/nginx/nginx.conf && \
+    echo '        ' >> /etc/nginx/nginx.conf && \
+    echo '        location / {' >> /etc/nginx/nginx.conf && \
+    echo '            try_files $uri $uri/ /index.html;' >> /etc/nginx/nginx.conf && \
     echo '        }' >> /etc/nginx/nginx.conf && \
+    echo '    }' >> /etc/nginx/nginx.conf && \
+    echo '    ' >> /etc/nginx/nginx.conf && \
+    echo '    # HTTPS server (SSL)' >> /etc/nginx/nginx.conf && \
+    echo '    server {' >> /etc/nginx/nginx.conf && \
+    echo '        listen 443 ssl;' >> /etc/nginx/nginx.conf && \
+    echo '        server_name localhost;' >> /etc/nginx/nginx.conf && \
+    echo '        ssl_certificate /etc/nginx/ssl/cert.pem;' >> /etc/nginx/nginx.conf && \
+    echo '        ssl_certificate_key /etc/nginx/ssl/key.pem;' >> /etc/nginx/nginx.conf && \
+    echo '        ssl_protocols TLSv1.2 TLSv1.3;' >> /etc/nginx/nginx.conf && \
+    echo '        ssl_ciphers HIGH:!aNULL:!MD5;' >> /etc/nginx/nginx.conf && \
+    echo '        root /var/www/html;' >> /etc/nginx/nginx.conf && \
+    echo '        index index.html;' >> /etc/nginx/nginx.conf && \
+    echo '        client_max_body_size 10M;' >> /etc/nginx/nginx.conf && \
+    echo '        ' >> /etc/nginx/nginx.conf && \
+    echo '        location /api/ {' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_pass http://127.0.0.1:8890;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header REMOTE-HOST $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Proto https;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Port 443;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # WebSocket support' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Connection $connection_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_http_version 1.1;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Timeout settings for SSH connections' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_connect_timeout 60s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_send_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_read_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Disable buffering for real-time data' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_buffering off;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header X-Cache $upstream_cache_status;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header Cache-Control no-cache;' >> /etc/nginx/nginx.conf && \
+		echo '        }' >> /etc/nginx/nginx.conf && \
+		echo '        ' >> /etc/nginx/nginx.conf && \
+		echo '        location /swagger/ {' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_pass http://127.0.0.1:8890;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+		echo '        }' >> /etc/nginx/nginx.conf && \
+    echo '        ' >> /etc/nginx/nginx.conf && \
+    echo '        # WebSocket endpoints for SSH connections' >> /etc/nginx/nginx.conf && \
+    echo '        location /v1/ {' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_pass http://127.0.0.1:8890;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Host $host;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header REMOTE-HOST $remote_addr;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Proto https;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header X-Forwarded-Port 443;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # WebSocket support' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_set_header Connection $connection_upgrade;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_http_version 1.1;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Timeout settings for SSH connections' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_connect_timeout 60s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_send_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_read_timeout 600s;' >> /etc/nginx/nginx.conf && \
+		echo '            ' >> /etc/nginx/nginx.conf && \
+		echo '            # Disable buffering for real-time data' >> /etc/nginx/nginx.conf && \
+		echo '            proxy_buffering off;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header X-Cache $upstream_cache_status;' >> /etc/nginx/nginx.conf && \
+		echo '            add_header Cache-Control no-cache;' >> /etc/nginx/nginx.conf && \
+		echo '        }' >> /etc/nginx/nginx.conf && \
     echo '        ' >> /etc/nginx/nginx.conf && \
     echo '        location / {' >> /etc/nginx/nginx.conf && \
     echo '            try_files $uri $uri/ /index.html;' >> /etc/nginx/nginx.conf && \
@@ -175,16 +282,43 @@ RUN echo '#!/bin/bash' > /start.sh && \
     echo '' >> /start.sh && \
     echo 'export MYSQL_DATABASE=${MYSQL_DATABASE:-oneclickvirt}' >> /start.sh && \
     echo '' >> /start.sh && \
+    echo '# Configure SSL certificates if provided' >> /start.sh && \
+    echo 'if [ ! -z "$SSL_CERT_PATH" ] && [ ! -z "$SSL_KEY_PATH" ]; then' >> /start.sh && \
+    echo '    echo "Configuring SSL certificates..."' >> /start.sh && \
+    echo '    if [ -f "$SSL_CERT_PATH" ] && [ -f "$SSL_KEY_PATH" ]; then' >> /start.sh && \
+    echo '        cp "$SSL_CERT_PATH" /etc/nginx/ssl/cert.pem' >> /start.sh && \
+    echo '        cp "$SSL_KEY_PATH" /etc/nginx/ssl/key.pem' >> /start.sh && \
+    echo '        chmod 644 /etc/nginx/ssl/cert.pem' >> /start.sh && \
+    echo '        chmod 600 /etc/nginx/ssl/key.pem' >> /start.sh && \
+    echo '        echo "SSL certificates configured successfully"' >> /start.sh && \
+    echo '    else' >> /start.sh && \
+    echo '        echo "Warning: SSL certificate files not found, using self-signed certificates"' >> /start.sh && \
+    echo '        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem -out /etc/nginx/ssl/cert.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"' >> /start.sh && \
+    echo '    fi' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo '' >> /start.sh && \
     echo '# Update config.yaml with FRONTEND_URL if provided' >> /start.sh && \
     echo 'if [ ! -z "$FRONTEND_URL" ]; then' >> /start.sh && \
     echo '    echo "Configuring frontend-url: $FRONTEND_URL"' >> /start.sh && \
     echo '    sed -i "s|frontend-url:.*|frontend-url: \"$FRONTEND_URL\"|g" /app/config.yaml' >> /start.sh && \
     echo '    ' >> /start.sh && \
+    echo '    # Extract domain from FRONTEND_URL' >> /start.sh && \
+    echo '    DOMAIN=$(echo "$FRONTEND_URL" | sed -e "s|^[^/]*//||" -e "s|/.*$||")' >> /start.sh && \
+    echo '    echo "Extracted domain: $DOMAIN"' >> /start.sh && \
+    echo '    ' >> /start.sh && \
+    echo '    # Update nginx server_name for both HTTP and HTTPS servers' >> /start.sh && \
+    echo '    sed -i "s/server_name localhost;/server_name $DOMAIN;/g" /etc/nginx/nginx.conf' >> /start.sh && \
+    echo '    ' >> /start.sh && \
     echo '    # Detect if URL is HTTPS and update nginx config accordingly' >> /start.sh && \
     echo '    if echo "$FRONTEND_URL" | grep -q "^https://"; then' >> /start.sh && \
-    echo '        echo "Detected HTTPS frontend, updating nginx proxy headers..."' >> /start.sh && \
-    echo '        sed -i "/proxy_set_header X-Forwarded-For/a\            proxy_set_header X-Forwarded-Proto https;" /etc/nginx/nginx.conf' >> /start.sh && \
-    echo '        sed -i "/proxy_set_header X-Forwarded-For/a\            proxy_set_header X-Forwarded-Ssl on;" /etc/nginx/nginx.conf' >> /start.sh && \
+    echo '        echo "Detected HTTPS frontend, SSL will be enabled"' >> /start.sh && \
+    echo '        # Generate self-signed certificate if not provided or empty' >> /start.sh && \
+    echo '        if [ ! -f "/etc/nginx/ssl/cert.pem" ] || [ ! -f "/etc/nginx/ssl/key.pem" ] || [ ! -s "/etc/nginx/ssl/cert.pem" ] || [ ! -s "/etc/nginx/ssl/key.pem" ]; then' >> /start.sh && \
+    echo '            echo "Generating self-signed SSL certificate for $DOMAIN..."' >> /start.sh && \
+    echo '            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem -out /etc/nginx/ssl/cert.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=$DOMAIN"' >> /start.sh && \
+    echo '            chmod 644 /etc/nginx/ssl/cert.pem' >> /start.sh && \
+    echo '            chmod 600 /etc/nginx/ssl/key.pem' >> /start.sh && \
+    echo '        fi' >> /start.sh && \
     echo '    else' >> /start.sh && \
     echo '        echo "Detected HTTP frontend, using default nginx config"' >> /start.sh && \
     echo '    fi' >> /start.sh && \

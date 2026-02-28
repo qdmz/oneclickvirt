@@ -858,3 +858,20 @@ export const toggleRedemptionCode = (id) => {
   })
 }
 
+// 管理员代登录用户
+export const impersonateUser = (userId) => {
+  return request({
+    url: `/v1/admin/users/${userId}/impersonate`,
+    method: 'post'
+  })
+}
+
+// 转移实例归属
+export const transferInstanceOwnership = (instanceId, targetUserId) => {
+  return request({
+    url: `/v1/admin/instances/${instanceId}/transfer`,
+    method: 'post',
+    data: { targetUserId }
+  })
+}
+

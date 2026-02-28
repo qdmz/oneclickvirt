@@ -89,6 +89,8 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.POST("/user/recharge/create-order", user.CreateRechargeOrder)
 		UserGroup.GET("/user/recharge/alipay-qr/:orderNo", user.GetRechargeAlipayQR)
 		UserGroup.GET("/user/recharge/wechat-qr/:orderNo", user.GetRechargeWechatQR)
+		UserGroup.GET("/user/recharge/epay-qr/:orderNo", user.GetRechargeEpayQR)
+		UserGroup.GET("/user/recharge/mapay-qr/:orderNo", user.GetRechargeMapayQR)
 		UserGroup.GET("/user/recharge/order-status/:orderNo", user.GetRechargeOrderStatus)
 		UserGroup.POST("/user/recharge/exchange-code", user.ExchangeRedemptionCode)
 
@@ -96,6 +98,8 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.GET("/user/orders", user.GetUserOrders)
 		UserGroup.GET("/user/orders/:id", user.GetUserOrder)
 		UserGroup.GET("/user/orders/status/:orderNo", user.GetPurchaseOrderStatus)
+		UserGroup.GET("/user/orders/epay-qr/:orderNo", user.GetPurchaseEpayQR)
+		UserGroup.GET("/user/orders/mapay-qr/:orderNo", user.GetPurchaseMapayQR)
 		UserGroup.POST("/user/orders/:id/cancel", user.CancelOrder)
 
 		// 产品管理

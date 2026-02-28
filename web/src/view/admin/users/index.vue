@@ -217,7 +217,7 @@
         </el-table-column>
         <el-table-column
           :label="$t('common.actions')"
-          width="250"
+          width="320"
           fixed="right"
           align="center"
         >
@@ -271,6 +271,14 @@
                 @click="handleResetPassword(scope.row)"
               >
                 {{ $t('admin.users.resetPassword') }}
+              </el-button>
+              <el-button
+                v-if="scope.row.userType === 'user'"
+                size="small"
+                type="info"
+                @click="handleImpersonateUser(scope.row)"
+              >
+                代登录
               </el-button>
             </div>
           </template>
@@ -583,6 +591,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, ArrowDown } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
+import { useUserStore } from '@/pinia/modules/user'
+import { useRouter } from 'vue-router'
 import { 
   getUserList, 
   createUser, 
@@ -592,10 +602,13 @@ import {
   batchUpdateUserStatus,
   batchUpdateUserLevel,
   updateUserLevel,
-  resetUserPassword
+  resetUserPassword,
+  impersonateUser
 } from '@/api/admin'
 
 const { t } = useI18n()
+const userStore = useUserStore()
+const router = useRouter()
 
 const users = ref([])
 const loading = ref(false)
@@ -1080,6 +1093,20 @@ const copyPassword = async () => {
   } catch (error) {
     console.error('复制失败:', error)
     ElMessage.error(t('user.profile.copyFailed'))
+  }
+}
+
+// 代登录用户
+const handleImpersonateUser = async (user) => {
+  try {
+    const response = await impersonateUser(user.id)
+    userStore.setToken(response.data.token)
+    userStore.setUser(response.data.UserInfo)
+    userStore.switchToUserView()
+    router.push('/user/dashboard')
+    ElMessage.success('代登录成功')
+  } catch (error) {
+    ElMessage.error('代登录失败: ' + (error.response?.data?.message || error.message))
   }
 }
 

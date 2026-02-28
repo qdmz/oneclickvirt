@@ -1,14 +1,18 @@
 package user
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"oneclickvirt/global"
 	orderModel "oneclickvirt/model/order"
 	redemptionModel "oneclickvirt/model/redemption"
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
-
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,7 +56,9 @@ func CreateRechargeOrder(c *gin.Context) {
 	// 验证支付方式
 	if params.PaymentMethod != orderModel.PaymentMethodAlipay &&
 		params.PaymentMethod != orderModel.PaymentMethodWechat &&
-		params.PaymentMethod != orderModel.PaymentMethodBalance {
+		params.PaymentMethod != orderModel.PaymentMethodBalance &&
+		params.PaymentMethod != orderModel.PaymentMethodEpay &&
+		params.PaymentMethod != orderModel.PaymentMethodMapay {
 		c.JSON(400, gin.H{"code": 400, "message": "不支持的支付方式"})
 		return
 	}
@@ -68,7 +74,7 @@ func CreateRechargeOrder(c *gin.Context) {
 		Status:        orderModel.OrderStatusPending,
 		PaymentMethod: params.PaymentMethod,
 		PaidAmount:    0,
-		ProductData:   "{}", // 充值订单设置默认空JSON对象，避免约束失败
+		ProductData:   "{}",                             // 充值订单设置默认空JSON对象，避免约束失败
 		ExpireAt:      time.Now().Add(30 * time.Minute), // 30分钟过期
 	}
 
@@ -80,9 +86,9 @@ func CreateRechargeOrder(c *gin.Context) {
 
 	// 返回订单信息
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "创建订单成功",
-		"data": order,
+		"data":    order,
 	})
 }
 
@@ -127,12 +133,12 @@ func GetRechargeAlipayQR(c *gin.Context) {
 	qrCode := "https://qr.alipay.com/" + orderNo
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
 		"data": gin.H{
-			"qrCode":  qrCode,
-			"orderNo": order.OrderNo,
-			"amount":  order.Amount,
+			"qrCode":   qrCode,
+			"orderNo":  order.OrderNo,
+			"amount":   order.Amount,
 			"expireAt": order.ExpireAt,
 		},
 	})
@@ -179,12 +185,165 @@ func GetRechargeWechatQR(c *gin.Context) {
 	qrCode := "weixin://wxpay/bizpayurl?pr=" + orderNo
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
 		"data": gin.H{
-			"qrCode":  qrCode,
-			"orderNo": order.OrderNo,
-			"amount":  order.Amount,
+			"qrCode":   qrCode,
+			"orderNo":  order.OrderNo,
+			"amount":   order.Amount,
+			"expireAt": order.ExpireAt,
+		},
+	})
+}
+
+// GetRechargeEpayQR 获取易支付二维码
+// @Summary 获取易支付二维码
+// @Description 获取易支付二维码URL
+// @Tags 用户/充值
+// @Accept json
+// @Produce json
+// @Param orderNo path string true "订单号"
+// @Success 200 {object} common.Response
+// @Router /v1/user/recharge/epay-qr/{orderNo} [get]
+func GetRechargeEpayQR(c *gin.Context) {
+	orderNo := c.Param("orderNo")
+	if orderNo == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
+		return
+	}
+
+	var order orderModel.Order
+	if err := global.APP_DB.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
+		c.JSON(404, gin.H{"code": 404, "message": "订单不存在"})
+		return
+	}
+
+	// 验证订单状态
+	if order.Status != orderModel.OrderStatusPending {
+		c.JSON(400, gin.H{"code": 400, "message": "订单状态异常"})
+		return
+	}
+
+	// 检查订单是否过期
+	if time.Now().After(order.ExpireAt) {
+		order.Status = orderModel.OrderStatusExpired
+		global.APP_DB.Save(&order)
+		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
+		return
+	}
+
+	// 检查易支付配置
+	if !global.APP_CONFIG.Payment.EnableEpay {
+		c.JSON(400, gin.H{"code": 400, "message": "易支付未启用"})
+		return
+	}
+
+	if global.APP_CONFIG.Payment.EpayAPIURL == "" || global.APP_CONFIG.Payment.EpayPID == "" || global.APP_CONFIG.Payment.EpayKey == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "易支付配置不完整"})
+		return
+	}
+
+	// 构建易支付参数
+	params := url.Values{}
+	params.Set("pid", global.APP_CONFIG.Payment.EpayPID)
+	params.Set("type", "alipay")
+	params.Set("out_trade_no", orderNo)
+	params.Set("notify_url", global.APP_CONFIG.Payment.EpayNotifyURL)
+	params.Set("return_url", global.APP_CONFIG.Payment.EpayReturnURL)
+	params.Set("name", "充值")
+	params.Set("money", fmt.Sprintf("%.2f", float64(order.Amount)/100))
+
+	// 生成签名
+	sign := generateEpaySign(params, global.APP_CONFIG.Payment.EpayKey)
+	params.Set("sign", sign)
+	params.Set("sign_type", "MD5")
+
+	// 构建支付URL
+	payURL := global.APP_CONFIG.Payment.EpayAPIURL + "?" + params.Encode()
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"qrCode":   payURL,
+			"orderNo":  order.OrderNo,
+			"amount":   order.Amount,
+			"expireAt": order.ExpireAt,
+		},
+	})
+}
+
+// GetRechargeMapayQR 获取码支付二维码
+// @Summary 获取码支付二维码
+// @Description 获取码支付二维码URL
+// @Tags 用户/充值
+// @Accept json
+// @Produce json
+// @Param orderNo path string true "订单号"
+// @Success 200 {object} common.Response
+// @Router /v1/user/recharge/mapay-qr/{orderNo} [get]
+func GetRechargeMapayQR(c *gin.Context) {
+	orderNo := c.Param("orderNo")
+	if orderNo == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
+		return
+	}
+
+	var order orderModel.Order
+	if err := global.APP_DB.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
+		c.JSON(404, gin.H{"code": 404, "message": "订单不存在"})
+		return
+	}
+
+	// 验证订单状态
+	if order.Status != orderModel.OrderStatusPending {
+		c.JSON(400, gin.H{"code": 400, "message": "订单状态异常"})
+		return
+	}
+
+	// 检查订单是否过期
+	if time.Now().After(order.ExpireAt) {
+		order.Status = orderModel.OrderStatusExpired
+		global.APP_DB.Save(&order)
+		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
+		return
+	}
+
+	// 检查码支付配置
+	if !global.APP_CONFIG.Payment.EnableMapay {
+		c.JSON(400, gin.H{"code": 400, "message": "码支付未启用"})
+		return
+	}
+
+	if global.APP_CONFIG.Payment.MapayAPIURL == "" || global.APP_CONFIG.Payment.MapayID == "" || global.APP_CONFIG.Payment.MapayKey == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "码支付配置不完整"})
+		return
+	}
+
+	// 构建码支付参数
+	params := url.Values{}
+	params.Set("id", global.APP_CONFIG.Payment.MapayID)
+	params.Set("type", "1")
+	params.Set("out_trade_no", orderNo)
+	params.Set("notify_url", global.APP_CONFIG.Payment.MapayNotifyURL)
+	params.Set("return_url", global.APP_CONFIG.Payment.MapayReturnURL)
+	params.Set("name", "充值")
+	params.Set("money", fmt.Sprintf("%.2f", float64(order.Amount)/100))
+
+	// 生成签名
+	sign := generateMapaySign(params, global.APP_CONFIG.Payment.MapayKey)
+	params.Set("sign", sign)
+
+	// 构建支付URL
+	payURL := global.APP_CONFIG.Payment.MapayAPIURL + "?" + params.Encode()
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"qrCode":   payURL,
+			"orderNo":  order.OrderNo,
+			"amount":   order.Amount,
 			"expireAt": order.ExpireAt,
 		},
 	})
@@ -227,7 +386,7 @@ func ExchangeRedemptionCode(c *gin.Context) {
 			tx.Rollback()
 		}
 	}()
-	
+
 	// 确保事务在函数结束时正确关闭
 	var committed bool
 	defer func() {
@@ -389,7 +548,7 @@ func ExchangeRedemptionCode(c *gin.Context) {
 	usage := redemptionModel.RedemptionCodeUsage{
 		CodeID: redemptionCode.ID,
 		UserID: userID.(uint),
-		Reward:  marshalReward(reward),
+		Reward: marshalReward(reward),
 	}
 	if err := tx.Create(&usage).Error; err != nil {
 		tx.Rollback()
@@ -406,9 +565,9 @@ func ExchangeRedemptionCode(c *gin.Context) {
 	committed = true
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "兑换成功",
-		"data": reward,
+		"data":    reward,
 	})
 }
 
@@ -441,7 +600,7 @@ func GetRechargeOrderStatus(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
 		"data": gin.H{
 			"orderNo":  order.OrderNo,
@@ -463,4 +622,56 @@ func marshalReward(reward map[string]interface{}) string {
 		return string(data)
 	}
 	return "{}"
+}
+
+// generateEpaySign 生成易支付签名
+func generateEpaySign(params url.Values, key string) string {
+	var keys []string
+	for k := range params {
+		if k != "sign" && k != "sign_type" && params.Get(k) != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	var signStr strings.Builder
+	for i, k := range keys {
+		if i > 0 {
+			signStr.WriteString("&")
+		}
+		signStr.WriteString(k)
+		signStr.WriteString("=")
+		signStr.WriteString(params.Get(k))
+	}
+	signStr.WriteString(key)
+
+	h := md5.New()
+	h.Write([]byte(signStr.String()))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// generateMapaySign 生成码支付签名
+func generateMapaySign(params url.Values, key string) string {
+	var keys []string
+	for k := range params {
+		if k != "sign" && k != "sign_type" && params.Get(k) != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	var signStr strings.Builder
+	for i, k := range keys {
+		if i > 0 {
+			signStr.WriteString("&")
+		}
+		signStr.WriteString(k)
+		signStr.WriteString("=")
+		signStr.WriteString(params.Get(k))
+	}
+	signStr.WriteString(key)
+
+	h := md5.New()
+	h.Write([]byte(signStr.String()))
+	return hex.EncodeToString(h.Sum(nil))
 }

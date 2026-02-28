@@ -40,6 +40,41 @@ docker-compose -f docker-compose.yaml up -d
 docker-compose up -d
 ```
 
+#### 手动构建和运行
+
+1. 构建镜像
+```bash
+docker build -t oneclickvirt .
+```
+
+2. 运行容器
+
+**基本运行（HTTP）**
+```bash
+docker run -d --name oneclickvirt -p 80:80 -e FRONTEND_URL="http://your-domain.com" oneclickvirt
+```
+
+**使用HTTPS（自动生成自签名证书）**
+```bash
+docker run -d --name oneclickvirt -p 80:80 -p 443:443 -e FRONTEND_URL="https://your-domain.com" oneclickvirt
+```
+
+**使用自定义SSL证书**
+```bash
+docker run -d --name oneclickvirt \
+  -p 80:80 -p 443:443 \
+  -e FRONTEND_URL="https://your-domain.com" \
+  -e SSL_CERT_PATH="/certs/cert.pem" \
+  -e SSL_KEY_PATH="/certs/key.pem" \
+  -v /path/to/your/certs:/certs \
+  oneclickvirt
+```
+
+**环境变量说明**
+- `FRONTEND_URL`: 前端访问URL（如 `https://your-domain.com` 或 `http://your-domain.com`）
+- `SSL_CERT_PATH`: SSL证书文件路径（可选）
+- `SSL_KEY_PATH`: SSL私钥文件路径（可选）
+
 #### 手动构建
 
 1. 构建前端
@@ -62,9 +97,20 @@ go build -o oneclickvirt main.go
 
 ## 🔐 登录信息
 
+**本地开发环境:**
 ```
 前端地址: http://localhost:8080
 后端API:  http://localhost:8890
+
+管理员账号:
+  用户名: admin
+  密码:   admin123456
+```
+
+**Docker部署环境:**
+```
+前端地址: http://your-domain.com (或 https://your-domain.com)
+后端API:  自动配置，无需手动访问
 
 管理员账号:
   用户名: admin

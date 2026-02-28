@@ -46,6 +46,38 @@ export const getWechatQR = (orderNo) => {
   })
 }
 
+// 获取易支付二维码
+export const getEpayQR = (orderNo) => {
+  return request({
+    url: `/v1/user/recharge/epay-qr/${orderNo}`,
+    method: 'get'
+  })
+}
+
+// 获取码支付二维码
+export const getMapayQR = (orderNo) => {
+  return request({
+    url: `/v1/user/recharge/mapay-qr/${orderNo}`,
+    method: 'get'
+  })
+}
+
+// 获取产品购买易支付二维码
+export const getPurchaseEpayQR = (orderNo) => {
+  return request({
+    url: `/v1/user/orders/epay-qr/${orderNo}`,
+    method: 'get'
+  })
+}
+
+// 获取产品购买码支付二维码
+export const getPurchaseMapayQR = (orderNo) => {
+  return request({
+    url: `/v1/user/orders/mapay-qr/${orderNo}`,
+    method: 'get'
+  })
+}
+
 // 查询充值订单状态
 export const getRechargeOrderStatus = (orderNo) => {
   return request({

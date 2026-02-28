@@ -15,5 +15,6 @@ func InitPublicRouter(Router *gin.RouterGroup) {
 		PublicRouter.GET("stats", public.GetDashboardStats)
 		PublicRouter.GET("system-images/available", system.GetAvailableSystemImages)
 		PublicRouter.GET("products", public.GetPublicProducts)
+		PublicRouter.GET("payment-config", public.GetPaymentConfig)
 	}
 }

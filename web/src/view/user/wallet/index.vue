@@ -73,17 +73,41 @@
             </el-form-item>
             <el-form-item label="支付方式">
               <el-radio-group v-model="rechargeForm.paymentMethod">
-                <el-radio value="alipay">
+                <el-radio
+                  v-if="paymentConfig.enableAlipay"
+                  value="alipay"
+                >
                   <el-icon color="#1677ff">
                     <Wallet />
                   </el-icon>
                   支付宝
                 </el-radio>
-                <el-radio value="wechat">
+                <el-radio
+                  v-if="paymentConfig.enableWechat"
+                  value="wechat"
+                >
                   <el-icon color="#07c160">
                     <ChatDotRound />
                   </el-icon>
                   微信支付
+                </el-radio>
+                <el-radio
+                  v-if="paymentConfig.enableMapay"
+                  value="mapay"
+                >
+                  <el-icon color="#f7ba2a">
+                    <Wallet />
+                  </el-icon>
+                  码支付
+                </el-radio>
+                <el-radio
+                  v-if="paymentConfig.enableEpay"
+                  value="epay"
+                >
+                  <el-icon color="#409eff">
+                    <Wallet />
+                  </el-icon>
+                  易支付
                 </el-radio>
               </el-radio-group>
             </el-form-item>
@@ -228,7 +252,7 @@
           支付金额: ¥{{ (currentOrder.amount / 100).toFixed(2) }}
         </p>
         <p class="tip-text">
-          请使用{{ rechargeForm.paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码
+          请使用{{ getPaymentMethodName(rechargeForm.paymentMethod) }}扫描二维码
         </p>
         <el-alert
           title="支付完成后页面将自动跳转"
@@ -254,6 +278,7 @@ import {
   exchangeRedemptionCode,
   getRechargeOrderStatus
 } from '@/api/user-payment'
+import { getPaymentConfig } from '@/api/public'
 
 const loading = ref(false)
 const recharging = ref(false)
@@ -268,6 +293,15 @@ const walletInfo = ref({
   frozen: 0,
   totalRecharge: 0,
   totalExpense: 0
+})
+
+// 支付配置
+const paymentConfig = ref({
+  enableAlipay: true,
+  enableWechat: true,
+  enableBalance: true,
+  enableEpay: false,
+  enableMapay: false
 })
 
 const rechargeForm = ref({
@@ -353,6 +387,17 @@ const getTransactionTypeTag = (type) => {
 const formatTime = (time) => {
   if (!time) return ''
   return new Date(time).toLocaleString('zh-CN')
+}
+
+// 获取支付方式名称
+const getPaymentMethodName = (method) => {
+  const map = {
+    alipay: '支付宝',
+    wechat: '微信',
+    mapay: '码支付',
+    epay: '易支付'
+  }
+  return map[method] || method
 }
 
 // 充值
@@ -494,7 +539,30 @@ const handleCurrentChange = (val) => {
   loadTransactions()
 }
 
+// 加载支付配置
+const loadPaymentConfig = async () => {
+  try {
+    const res = await getPaymentConfig()
+    if (res.code === 200 || res.code === 0) {
+      paymentConfig.value = { ...paymentConfig.value, ...res.data }
+      // 设置默认支付方式
+      if (paymentConfig.value.enableAlipay) {
+        rechargeForm.value.paymentMethod = 'alipay'
+      } else if (paymentConfig.value.enableWechat) {
+        rechargeForm.value.paymentMethod = 'wechat'
+      } else if (paymentConfig.value.enableEpay) {
+        rechargeForm.value.paymentMethod = 'epay'
+      } else if (paymentConfig.value.enableMapay) {
+        rechargeForm.value.paymentMethod = 'mapay'
+      }
+    }
+  } catch (error) {
+    console.error('加载支付配置失败:', error)
+  }
+}
+
 onMounted(() => {
+  loadPaymentConfig()
   loadWallet()
   loadTransactions()
 })
