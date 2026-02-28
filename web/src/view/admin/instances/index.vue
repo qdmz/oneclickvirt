@@ -584,7 +584,7 @@ const tableRef = ref(null)
 
 // 转移归属表单
 const transferForm = ref({
-  targetUserId: ''
+  targetUserId: 0
 })
 
 // 筛选条件
