@@ -1,2 +1,0 @@
-put oneclickvirt.tar.gz /tmp/oneclickvirt.tar.gz
-quit
