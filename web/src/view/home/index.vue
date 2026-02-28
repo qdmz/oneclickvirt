@@ -258,27 +258,27 @@
                 <div class="features">
                   <div class="feature-item">
                     <i class="fas fa-microchip" />
-                    <span>{{ product.cpu }} 核</span>
+                    <span>CPU{{ product.cpu }} 核</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-memory" />
-                    <span>{{ product.memory }} MB</span>
+                    <span>内存{{ product.memory }} MB</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-hdd" />
-                    <span>{{ product.disk }} MB</span>
+                    <span>硬盘{{ product.disk }} MB</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-wifi" />
-                    <span>{{ product.bandwidth }} Mbps</span>
+                    <span>带宽{{ product.bandwidth }} Mbps</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-network-wired" />
-                    <span>{{ product.traffic }} MB</span>
+                    <span>流量{{ product.traffic }} MB</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-server" />
-                    <span>{{ product.maxInstances }} 个</span>
+                    <span>最大VPS量{{ product.maxInstances }} 个</span>
                   </div>
                 </div>
                 <router-link
