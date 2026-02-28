@@ -30,5 +30,7 @@ func InitPaymentRouter(Router *gin.RouterGroup) {
 		// 支付回调接口(不需要认证)
 		PaymentGroup.POST("/alipay/notify", payment.AlipayNotify)
 		PaymentGroup.POST("/wechat/notify", payment.WechatNotify)
+		PaymentGroup.POST("/epay/notify", payment.EpayNotify)
+		PaymentGroup.POST("/mapay/notify", payment.MapayNotify)
 	}
 }

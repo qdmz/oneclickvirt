@@ -849,3 +849,53 @@ func generatePurchaseMapaySign(params url.Values, key string) string {
 	h.Write([]byte(signStr.String()))
 	return hex.EncodeToString(h.Sum(nil))
 }
+
+// CheckUserPurchaseStatus 检查用户是否购买过产品
+// @Summary 检查用户是否购买过产品
+// @Description 检查当前登录用户是否有任何产品购买记录
+// @Tags 用户/订单
+// @Accept json
+// @Produce json
+// @Success 200 {object} common.Response{data=object} "检查成功"
+// @Router /v1/user/purchase-status [get]
+func CheckUserPurchaseStatus(c *gin.Context) {
+	// 从上下文获取用户ID
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(401, gin.H{"code": 401, "message": "未授权"})
+		return
+	}
+
+	// 查询用户是否购买过任何产品
+	var purchaseCount int64
+	if err := global.APP_DB.Model(&productModel.ProductPurchase{}).
+		Where("user_id = ?", userID).
+		Count(&purchaseCount).Error; err != nil {
+		global.APP_LOG.Error("查询用户购买记录失败", zap.Error(err))
+		c.JSON(500, gin.H{"code": 500, "message": "查询购买记录失败"})
+		return
+	}
+
+	// 查询已购买的产品列表
+	var purchasedProducts []struct {
+		ProductID   uint   `json:"productId"`
+		ProductName string `json:"productName"`
+	}
+	if purchaseCount > 0 {
+		global.APP_DB.Model(&productModel.ProductPurchase{}).
+			Select("product_purchases.product_id, products.name as product_name").
+			Joins("LEFT JOIN products ON product_purchases.product_id = products.id").
+			Where("product_purchases.user_id = ?", userID).
+			Scan(&purchasedProducts)
+	}
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"hasPurchased":      purchaseCount > 0,
+			"purchaseCount":     purchaseCount,
+			"purchasedProducts": purchasedProducts,
+		},
+	})
+}

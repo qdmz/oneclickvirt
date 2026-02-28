@@ -148,3 +148,11 @@ export const getPurchaseOrderStatus = (orderNo) => {
     method: 'get'
   })
 }
+
+// 检查用户购买状态
+export const checkUserPurchaseStatus = () => {
+  return request({
+    url: '/v1/user/purchase-status',
+    method: 'get'
+  })
+}

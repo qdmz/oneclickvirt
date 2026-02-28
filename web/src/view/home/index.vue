@@ -336,22 +336,22 @@
           <h3>{{ siteConfigs.site_name || 'OneClickVirt' }}</h3>
           <div class="company-info">
             <p v-if="siteConfigs.company_name">
-              公司名称: {{ siteConfigs.company_name }}
+               {{ siteConfigs.company_name }}
             </p>
             <p v-if="siteConfigs.company_address">
-              公司地址: {{ siteConfigs.company_address }}
+               {{ siteConfigs.company_address }}
             </p>
             <p v-if="siteConfigs.contact_email">
-              联系邮箱: <a :href="'mailto:' + siteConfigs.contact_email">{{ siteConfigs.contact_email }}</a>
+               <a :href="'mailto:' + siteConfigs.contact_email">{{ siteConfigs.contact_email }}</a>
             </p>
             <!-- 直接显示联系电话，不使用v-if条件判断，确保始终显示 -->
             <p>
-              联系电话: {{ siteConfigs.contact_phone || '888-888-8888' }}
+              
             </p>
           </div>
         </div>
         <div class="footer-section">
-          <h4>联系我们</h4>
+          <h4></h4>
           <ul>
             <li v-if="siteConfigs.contact_email">
               <a :href="'mailto:' + siteConfigs.contact_email">{{ siteConfigs.contact_email }}</a>
@@ -366,7 +366,7 @@
           </ul>
         </div>
         <div class="footer-section">
-          <h4>法律信息</h4>
+          <h4></h4>
           <ul>
             <li v-if="siteConfigs.icp_number">
               <a
@@ -378,12 +378,12 @@
               </a>
             </li>
             <li v-if="siteConfigs.company_name">
-              公司名称: {{ siteConfigs.company_name }}
+               {{ siteConfigs.company_name }}
             </li>
           </ul>
         </div>
         <div class="footer-section">
-          <h4>关于我们</h4>
+          <h4></h4>
           <ul>
             <li v-if="siteConfigs.site_url">
               <a
