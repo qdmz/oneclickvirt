@@ -34,3 +34,6 @@ test/.DS_Store*
 .back/DS_Store*
 data
 .idea
+# Docker data persistence
+docker-data/
+backup/
