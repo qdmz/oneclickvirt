@@ -3,9 +3,9 @@
     <!-- 顶部栏 -->
     <header class="auth-header">
       <div class="header-content">
-       <div class="logo">
+        <div class="logo">
           <img
-            :src="siteConfigs.site_icon_url || '@/assets/images/logo.png'"
+            :src="siteConfigs.site_icon_url || logoUrl"
             :alt="siteConfigs.site_name || 'OneClickVirt Logo'"
             class="logo-image"
           >

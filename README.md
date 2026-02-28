@@ -70,10 +70,33 @@ docker run -d --name oneclickvirt \
   oneclickvirt
 ```
 
+**数据持久化运行（推荐用于生产环境）**
+```bash
+# 创建数据目录
+mkdir -p docker-data/mysql docker-data/storage docker-data/ssl
+
+# 运行容器（带数据卷挂载）
+docker run -d --name oneclickvirt \
+  -p 80:80 -p 443:443 \
+  -v $(pwd)/docker-data/mysql:/var/lib/mysql \
+  -v $(pwd)/docker-data/storage:/app/storage \
+  -v $(pwd)/docker-data/ssl:/etc/nginx/ssl \
+  -v $(pwd)/docker-data/config.yaml:/app/config.yaml \
+  oneclickvirt
+```
+
 **环境变量说明**
 - `FRONTEND_URL`: 前端访问URL（如 `https://your-domain.com` 或 `http://your-domain.com`）
 - `SSL_CERT_PATH`: SSL证书文件路径（可选）
 - `SSL_KEY_PATH`: SSL私钥文件路径（可选）
+
+**数据持久化说明**
+- `docker-data/mysql`: MySQL数据库文件（用户数据、订单、配置等）
+- `docker-data/storage`: 应用存储（日志、上传文件、缓存等）
+- `docker-data/ssl`: SSL证书文件
+- `docker-data/config.yaml`: 应用配置文件
+
+⚠️ **重要提示**: 使用数据卷挂载后，即使删除容器，数据也会保留在宿主机上。重新创建容器时只需使用相同的 `-v` 参数即可恢复数据。
 
 #### 手动构建
 
@@ -146,7 +169,7 @@ go build -o oneclickvirt main.go
 - ✅ 流量统计
 - ✅ **代用户登录** - 管理员可直接以用户身份登录系统
 - ✅ **实例转移归属** - 管理员可将实例从一个用户转移到另一个用户
-- ✅ **第三方支付配置** - 支持易支付和码支付接口配置
+- ✅ **第三方支付配置** - 支持易支付和码支付接口配置（详见下方配置说明）
 
 ### 用户功能
 - ✅ 虚拟实例管理
@@ -235,6 +258,45 @@ go build -o oneclickvirt main.go
 ## 📄 许可证
 
 MIT License
+
+## 💳 支付配置说明
+
+### 易支付 (Epay) 配置
+
+在后台管理 → 系统设置 → 支付配置中配置以下参数：
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `商户ID (PID)` | 易支付平台分配的商户ID | `1234` |
+| `商户密钥 (Key)` | 易支付平台分配的商户密钥 | `your_secret_key_here` |
+| `API接口地址` | 易支付平台的API地址 | `https://pay.example.com/` |
+| **回调URL** | 支付成功后的异步通知地址 | `https://your-domain.com/api/v1/payment/epay/notify` |
+| **返回URL** | 支付成功后跳转的页面地址 | `https://your-domain.com/user/wallet` |
+
+⚠️ **重要提示**:
+- 回调URL必须是外网可访问的HTTPS地址
+- 回调URL末尾**不要**加空格或其他字符
+- 返回URL通常是用户钱包页面或订单页面
+- 确保易支付平台的回调白名单中已添加您的服务器IP
+
+### 码支付 (Mapay) 配置
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `商户ID` | 码支付平台分配的商户ID | `5678` |
+| `商户密钥` | 码支付平台分配的商户密钥 | `your_mapay_key_here` |
+| `API接口地址` | 码支付平台的API地址 | `https://mapay.example.com/` |
+| **回调URL** | 支付成功后的异步通知地址 | `https://your-domain.com/api/v1/payment/mapay/notify` |
+| **返回URL** | 支付成功后跳转的页面地址 | `https://your-domain.com/user/wallet` |
+
+### 支付配置检查清单
+
+- [ ] 已启用对应的支付方式（易支付/码支付）
+- [ ] 已正确填写商户ID和密钥
+- [ ] API接口地址以 `/` 结尾
+- [ ] 回调URL格式正确且可访问
+- [ ] 返回URL指向正确的页面
+- [ ] 支付平台已配置回调白名单
 
 ## 📞 联系方式
 
