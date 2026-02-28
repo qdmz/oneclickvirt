@@ -58,6 +58,11 @@ COPY --from=backend-builder /app/server/config.yaml ./config.yaml.default
 RUN if [ ! -f /app/config.yaml ]; then mv /app/config.yaml.default /app/config.yaml; else rm /app/config.yaml.default; fi
 COPY --from=frontend-builder /app/web/dist /var/www/html
 
+# Copy initialization scripts
+COPY scripts/init.sql /app/scripts/init.sql
+COPY scripts/init.sh /app/scripts/init.sh
+RUN chmod +x /app/scripts/init.sh
+
 RUN mkdir -p /var/run/mysqld && \
     chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld && \
     chown -R www-data:www-data /var/www/html && \
