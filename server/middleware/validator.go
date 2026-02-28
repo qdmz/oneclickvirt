@@ -9,6 +9,13 @@ import (
 // InputValidator 输入验证中间件
 func InputValidator() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 跳过支付回调路径的验证
+		path := c.Request.URL.Path
+		if isPaymentCallbackPath(path) {
+			c.Next()
+			return
+		}
+
 		// 检查SQL注入
 		if containsSQLInjection(c.Request.URL.RawQuery) {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -31,6 +38,22 @@ func InputValidator() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// isPaymentCallbackPath 检查是否是支付回调路径
+func isPaymentCallbackPath(path string) bool {
+	paymentPaths := []string{
+		"/api/v1/payment/alipay/notify",
+		"/api/v1/payment/wechat/notify",
+		"/api/v1/payment/epay/notify",
+		"/api/v1/payment/mapay/notify",
+	}
+	for _, pp := range paymentPaths {
+		if path == pp {
+			return true
+		}
+	}
+	return false
 }
 
 // containsSQLInjection 检查是否包含SQL注入模式
