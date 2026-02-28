@@ -98,6 +98,49 @@ docker run -d --name oneclickvirt \
 
 ⚠️ **重要提示**: 使用数据卷挂载后，即使删除容器，数据也会保留在宿主机上。重新创建容器时只需使用相同的 `-v` 参数即可恢复数据。
 
+#### 数据初始化
+
+**首次部署（无数据持久化）**
+
+首次部署时，访问网站会自动跳转到初始化页面，按照提示设置管理员账户即可。
+
+**使用数据持久化时的初始化**
+
+如果使用数据卷挂载部署，需要手动初始化数据库：
+
+```bash
+# 方法1: 在容器内执行初始化脚本
+docker exec -it oneclickvirt bash /app/scripts/init.sh --docker-internal
+
+# 方法2: 从宿主机执行
+./scripts/init.sh oneclickvirt
+
+# 方法3: 手动导入SQL
+docker exec -i oneclickvirt mysql -uroot oneclickvirt < scripts/init.sql
+```
+
+初始化完成后，使用以下账户登录：
+- **用户名**: `admin`
+- **密码**: `admin123456`
+
+⚠️ 首次登录后请立即修改密码！
+
+**重置数据**
+
+如需重置所有数据，执行以下命令：
+
+```bash
+# 停止并删除容器
+docker stop oneclickvirt && docker rm oneclickvirt
+
+# 删除数据目录（谨慎操作！）
+rm -rf docker-data/mysql/*
+rm -f docker-data/storage/.system_initialized
+
+# 重新启动容器
+docker run -d --name oneclickvirt ...
+```
+
 #### 手动构建
 
 1. 构建前端
