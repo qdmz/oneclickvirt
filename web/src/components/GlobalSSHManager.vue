@@ -171,14 +171,14 @@ const openSSHInNewWindow = (conn) => {
   if (conn.isAdmin) {
     if (conn.isProvider) {
       // 管理员连接到节点服务器
-      apiPath = `/api/v1/admin/providers/${conn.instanceId}/ssh`
+      apiPath = `/v1/admin/providers/${conn.instanceId}/ssh`
     } else {
       // 管理员连接到实例
-      apiPath = `/api/v1/admin/instances/${conn.instanceId}/ssh`
+      apiPath = `/v1/admin/instances/${conn.instanceId}/ssh`
     }
   } else {
     // 普通用户连接到实例
-    apiPath = `/api/v1/user/instances/${conn.instanceId}/ssh`
+    apiPath = `/v1/user/instances/${conn.instanceId}/ssh`
   }
   
   const wsUrl = `${protocol}//${wsHost}${apiPath}?token=${encodeURIComponent(token)}`

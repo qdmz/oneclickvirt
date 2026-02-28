@@ -2,12 +2,10 @@ package admin
 
 import (
 	"oneclickvirt/global"
-	"oneclickvirt/middleware"
 	"oneclickvirt/model/admin"
 	"oneclickvirt/model/common"
-	userModel "oneclickvirt/model/user"
 	"oneclickvirt/service/admin/user"
-	"oneclickvirt/service/auth"
+	"oneclickvirt/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -71,8 +69,7 @@ func ImpersonateUser(c *gin.Context) {
 		zap.String("target_username", targetUser.Username))
 
 	// 生成用户登录Token
-	jwtService := auth.GetJWTService()
-	token, err := jwtService.GenerateUserToken(targetUser.ID, targetUser.Username, targetUser.UserType)
+	token, err := utils.GenerateToken(targetUser.ID, targetUser.Username, targetUser.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成用户Token失败",
 			zap.Uint("user_id", targetUser.ID),
@@ -84,18 +81,10 @@ func ImpersonateUser(c *gin.Context) {
 	// 返回Token
 	response := admin.ImpersonateResponse{
 		Token:     token,
-		ExpiresIn: int(jwtService.GetTokenExpireDuration().Seconds()),
+		ExpiresIn: 86400, // 默认24小时
 		UserInfo:  targetUser,
 	}
 
 	common.ResponseSuccess(c, response, "代登录成功")
 }
 
-// GetUserByID 通过ID获取用户信息
-func (s *Service) GetUserByID(userID uint) (*userModel.User, error) {
-	var user userModel.User
-	if err := global.APP_DB.First(&user, userID).Error; err != nil {
-		return nil, err
-	}
-	return &user, nil
-}

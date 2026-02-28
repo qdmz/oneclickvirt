@@ -1,8 +1,11 @@
 package user
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"oneclickvirt/global"
 	orderModel "oneclickvirt/model/order"
 	productModel "oneclickvirt/model/product"
@@ -10,7 +13,8 @@ import (
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
 	"oneclickvirt/service/cache"
-
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -639,4 +643,209 @@ func marshalProductData(product productModel.Product) string {
 		return string(dataBytes)
 	}
 	return "{}"
+}
+
+// GetPurchaseEpayQR 获取产品购买易支付二维码
+// @Summary 获取产品购买易支付二维码
+// @Description 获取产品购买易支付二维码URL
+// @Tags 用户/订单
+// @Accept json
+// @Produce json
+// @Param orderNo path string true "订单号"
+// @Success 200 {object} common.Response
+// @Router /v1/user/orders/epay-qr/{orderNo} [get]
+func GetPurchaseEpayQR(c *gin.Context) {
+	orderNo := c.Param("orderNo")
+	if orderNo == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
+		return
+	}
+
+	var order orderModel.Order
+	if err := global.APP_DB.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
+		c.JSON(404, gin.H{"code": 404, "message": "订单不存在"})
+		return
+	}
+
+	// 验证订单状态
+	if order.Status != orderModel.OrderStatusPending {
+		c.JSON(400, gin.H{"code": 400, "message": "订单状态异常"})
+		return
+	}
+
+	// 检查订单是否过期
+	if time.Now().After(order.ExpireAt) {
+		order.Status = orderModel.OrderStatusExpired
+		global.APP_DB.Save(&order)
+		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
+		return
+	}
+
+	// 检查易支付配置
+	if !global.APP_CONFIG.Payment.EnableEpay {
+		c.JSON(400, gin.H{"code": 400, "message": "易支付未启用"})
+		return
+	}
+
+	if global.APP_CONFIG.Payment.EpayAPIURL == "" || global.APP_CONFIG.Payment.EpayPID == "" || global.APP_CONFIG.Payment.EpayKey == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "易支付配置不完整"})
+		return
+	}
+
+	// 构建易支付参数
+	params := url.Values{}
+	params.Set("pid", global.APP_CONFIG.Payment.EpayPID)
+	params.Set("type", "alipay")
+	params.Set("out_trade_no", orderNo)
+	params.Set("notify_url", global.APP_CONFIG.Payment.EpayNotifyURL)
+	params.Set("return_url", global.APP_CONFIG.Payment.EpayReturnURL)
+	params.Set("name", "产品购买")
+	params.Set("money", fmt.Sprintf("%.2f", float64(order.Amount)/100))
+
+	// 生成签名
+	sign := generatePurchaseEpaySign(params, global.APP_CONFIG.Payment.EpayKey)
+	params.Set("sign", sign)
+	params.Set("sign_type", "MD5")
+
+	// 构建支付URL
+	payURL := global.APP_CONFIG.Payment.EpayAPIURL + "?" + params.Encode()
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"qrCode":   payURL,
+			"orderNo":  order.OrderNo,
+			"amount":   order.Amount,
+			"expireAt": order.ExpireAt,
+		},
+	})
+}
+
+// GetPurchaseMapayQR 获取产品购买码支付二维码
+// @Summary 获取产品购买码支付二维码
+// @Description 获取产品购买码支付二维码URL
+// @Tags 用户/订单
+// @Accept json
+// @Produce json
+// @Param orderNo path string true "订单号"
+// @Success 200 {object} common.Response
+// @Router /v1/user/orders/mapay-qr/{orderNo} [get]
+func GetPurchaseMapayQR(c *gin.Context) {
+	orderNo := c.Param("orderNo")
+	if orderNo == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
+		return
+	}
+
+	var order orderModel.Order
+	if err := global.APP_DB.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
+		c.JSON(404, gin.H{"code": 404, "message": "订单不存在"})
+		return
+	}
+
+	// 验证订单状态
+	if order.Status != orderModel.OrderStatusPending {
+		c.JSON(400, gin.H{"code": 400, "message": "订单状态异常"})
+		return
+	}
+
+	// 检查订单是否过期
+	if time.Now().After(order.ExpireAt) {
+		order.Status = orderModel.OrderStatusExpired
+		global.APP_DB.Save(&order)
+		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
+		return
+	}
+
+	// 检查码支付配置
+	if !global.APP_CONFIG.Payment.EnableMapay {
+		c.JSON(400, gin.H{"code": 400, "message": "码支付未启用"})
+		return
+	}
+
+	if global.APP_CONFIG.Payment.MapayAPIURL == "" || global.APP_CONFIG.Payment.MapayID == "" || global.APP_CONFIG.Payment.MapayKey == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "码支付配置不完整"})
+		return
+	}
+
+	// 构建码支付参数
+	params := url.Values{}
+	params.Set("id", global.APP_CONFIG.Payment.MapayID)
+	params.Set("type", "1")
+	params.Set("out_trade_no", orderNo)
+	params.Set("notify_url", global.APP_CONFIG.Payment.MapayNotifyURL)
+	params.Set("return_url", global.APP_CONFIG.Payment.MapayReturnURL)
+	params.Set("name", "产品购买")
+	params.Set("money", fmt.Sprintf("%.2f", float64(order.Amount)/100))
+
+	// 生成签名
+	sign := generatePurchaseMapaySign(params, global.APP_CONFIG.Payment.MapayKey)
+	params.Set("sign", sign)
+
+	// 构建支付URL
+	payURL := global.APP_CONFIG.Payment.MapayAPIURL + "?" + params.Encode()
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"qrCode":   payURL,
+			"orderNo":  order.OrderNo,
+			"amount":   order.Amount,
+			"expireAt": order.ExpireAt,
+		},
+	})
+}
+
+// generatePurchaseEpaySign 生成产品购买易支付签名
+func generatePurchaseEpaySign(params url.Values, key string) string {
+	var keys []string
+	for k := range params {
+		if k != "sign" && k != "sign_type" && params.Get(k) != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	var signStr strings.Builder
+	for i, k := range keys {
+		if i > 0 {
+			signStr.WriteString("&")
+		}
+		signStr.WriteString(k)
+		signStr.WriteString("=")
+		signStr.WriteString(params.Get(k))
+	}
+	signStr.WriteString(key)
+
+	h := md5.New()
+	h.Write([]byte(signStr.String()))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// generatePurchaseMapaySign 生成产品购买码支付签名
+func generatePurchaseMapaySign(params url.Values, key string) string {
+	var keys []string
+	for k := range params {
+		if k != "sign" && k != "sign_type" && params.Get(k) != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	var signStr strings.Builder
+	for i, k := range keys {
+		if i > 0 {
+			signStr.WriteString("&")
+		}
+		signStr.WriteString(k)
+		signStr.WriteString("=")
+		signStr.WriteString(params.Get(k))
+	}
+	signStr.WriteString(key)
+
+	h := md5.New()
+	h.Write([]byte(signStr.String()))
+	return hex.EncodeToString(h.Sum(nil))
 }

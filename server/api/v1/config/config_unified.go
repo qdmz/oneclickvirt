@@ -320,6 +320,20 @@ func getAdminConfig(cm *config.ConfigManager) map[string]interface{} {
 		"wechatMchId":       global.APP_CONFIG.Payment.WechatMchID,
 		"wechatSerialNo":    global.APP_CONFIG.Payment.WechatSerialNo,
 		"wechatType":        global.APP_CONFIG.Payment.WechatType,
+		// 易支付配置
+		"enableEpay":     global.APP_CONFIG.Payment.EnableEpay,
+		"epayAPIURL":     global.APP_CONFIG.Payment.EpayAPIURL,
+		"epayPID":        global.APP_CONFIG.Payment.EpayPID,
+		"epayKey":        global.APP_CONFIG.Payment.EpayKey,
+		"epayReturnURL":  global.APP_CONFIG.Payment.EpayReturnURL,
+		"epayNotifyURL":  global.APP_CONFIG.Payment.EpayNotifyURL,
+		// 码支付配置
+		"enableMapay":    global.APP_CONFIG.Payment.EnableMapay,
+		"mapayAPIURL":    global.APP_CONFIG.Payment.MapayAPIURL,
+		"mapayID":        global.APP_CONFIG.Payment.MapayID,
+		"mapayKey":       global.APP_CONFIG.Payment.MapayKey,
+		"mapayReturnURL": global.APP_CONFIG.Payment.MapayReturnURL,
+		"mapayNotifyURL": global.APP_CONFIG.Payment.MapayNotifyURL,
 	}
 
 	return result

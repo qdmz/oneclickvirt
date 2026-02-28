@@ -107,6 +107,7 @@
         class="payment-methods"
       >
         <el-radio
+          v-if="paymentConfig.enableAlipay"
           value="alipay"
           class="payment-option"
         >
@@ -116,6 +117,7 @@
           <span>支付宝支付</span>
         </el-radio>
         <el-radio
+          v-if="paymentConfig.enableWechat"
           value="wechat"
           class="payment-option"
         >
@@ -125,6 +127,27 @@
           <span>微信支付</span>
         </el-radio>
         <el-radio
+          v-if="paymentConfig.enableMapay"
+          value="mapay"
+          class="payment-option"
+        >
+          <el-icon color="#f7ba2a">
+            <Wallet />
+          </el-icon>
+          <span>码支付</span>
+        </el-radio>
+        <el-radio
+          v-if="paymentConfig.enableEpay"
+          value="epay"
+          class="payment-option"
+        >
+          <el-icon color="#409eff">
+            <Wallet />
+          </el-icon>
+          <span>易支付</span>
+        </el-radio>
+        <el-radio
+          v-if="paymentConfig.enableBalance"
           value="balance"
           class="payment-option"
         >
@@ -166,7 +189,7 @@
           支付金额: ¥{{ (currentOrder?.amount / 100).toFixed(2) }}
         </p>
         <p class="tip-text">
-          请使用{{ paymentMethod === 'alipay' ? '支付宝' : paymentMethod === 'wechat' ? '微信' : '' }}扫描二维码
+          请使用{{ getPaymentMethodName(paymentMethod) }}扫描二维码
         </p>
         <el-alert
           title="支付完成后页面将自动跳转"
@@ -184,8 +207,9 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Wallet, ChatDotRound, Coin } from '@element-plus/icons-vue'
-import { getUserProducts, purchaseProduct, getAlipayQR, getWechatQR, getPurchaseOrderStatus } from '@/api/user-payment'
+import { getUserProducts, purchaseProduct, getAlipayQR, getWechatQR, getPurchaseOrderStatus, getPurchaseEpayQR, getPurchaseMapayQR } from '@/api/user-payment'
 import { getUserProfile } from '@/api/user'
+import { getPaymentConfig } from '@/api/public'
 
 const router = useRouter()
 
@@ -202,10 +226,43 @@ const qrCodeUrl = ref('')
 const currentOrder = ref(null)
 const pollTimer = ref(null)
 
+// 支付配置
+const paymentConfig = ref({
+  enableAlipay: true,
+  enableWechat: true,
+  enableBalance: true,
+  enableEpay: false,
+  enableMapay: false
+})
+
 // 过滤后的产品列表（只显示等于和高于用户等级的产品）
 const filteredProducts = computed(() => {
   return allProducts.value.filter(product => product.level >= userLevel.value)
 })
+
+// 加载支付配置
+const loadPaymentConfig = async () => {
+  try {
+    const res = await getPaymentConfig()
+    if (res.code === 200 || res.code === 0) {
+      paymentConfig.value = { ...paymentConfig.value, ...res.data }
+      // 设置默认支付方式
+      if (paymentConfig.value.enableAlipay) {
+        paymentMethod.value = 'alipay'
+      } else if (paymentConfig.value.enableWechat) {
+        paymentMethod.value = 'wechat'
+      } else if (paymentConfig.value.enableEpay) {
+        paymentMethod.value = 'epay'
+      } else if (paymentConfig.value.enableMapay) {
+        paymentMethod.value = 'mapay'
+      } else if (paymentConfig.value.enableBalance) {
+        paymentMethod.value = 'balance'
+      }
+    }
+  } catch (error) {
+    console.error('加载支付配置失败:', error)
+  }
+}
 
 // 加载用户信息
 const loadUserInfo = async () => {
@@ -320,6 +377,18 @@ const formatTraffic = (traffic) => {
   }
 }
 
+// 获取支付方式名称
+const getPaymentMethodName = (method) => {
+  const map = {
+    alipay: '支付宝',
+    wechat: '微信',
+    mapay: '码支付',
+    epay: '易支付',
+    balance: '余额'
+  }
+  return map[method] || method
+}
+
 // 购买产品
 const handlePurchase = (product) => {
   selectedProduct.value = product
@@ -372,6 +441,10 @@ const getQRCode = async () => {
       res = await getAlipayQR(currentOrder.value.orderNo)
     } else if (paymentMethod.value === 'wechat') {
       res = await getWechatQR(currentOrder.value.orderNo)
+    } else if (paymentMethod.value === 'epay') {
+      res = await getPurchaseEpayQR(currentOrder.value.orderNo)
+    } else if (paymentMethod.value === 'mapay') {
+      res = await getPurchaseMapayQR(currentOrder.value.orderNo)
     }
 
     if (res.code === 200) {
@@ -430,6 +503,7 @@ const handleCloseQRDialog = () => {
 }
 
 onMounted(() => {
+  loadPaymentConfig()
   loadProducts()
 })
 </script>

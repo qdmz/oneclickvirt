@@ -1274,6 +1274,45 @@ const saveConfig = async () => {
       configToSave.quota.levelLimits = convertedLimits
     }
     
+    // 转换支付配置为 kebab-case 格式
+    if (configToSave.payment) {
+      const payment = configToSave.payment
+      configToSave.payment = {
+        // 支付宝
+        'enable-alipay': payment.enableAlipay,
+        'alipay-app-id': payment.alipayAppId,
+        'alipay-private-key': payment.alipayPrivateKey,
+        'alipay-public-key': payment.alipayPublicKey,
+        'alipay-gateway': payment.alipayGateway,
+        // 微信支付
+        'enable-wechat': payment.enableWechat,
+        'wechat-app-id': payment.wechatAppId,
+        'wechat-mch-id': payment.wechatMchId,
+        'wechat-api-key': payment.wechatApiKey,
+        'wechat-api-v3-key': payment.wechatApiV3Key,
+        'wechat-serial-no': payment.wechatSerialNo,
+        'wechat-type': payment.wechatType,
+        // 余额支付
+        'enable-balance': payment.enableBalance,
+        'balance-daily-limit': payment.balanceDailyLimit,
+        'balance-min-amount': payment.balanceMinAmount,
+        // 易支付
+        'enable-epay': payment.enableEpay,
+        'epay-api-url': payment.epayAPIURL,
+        'epay-pid': payment.epayPID,
+        'epay-key': payment.epayKey,
+        'epay-return-url': payment.epayReturnURL,
+        'epay-notify-url': payment.epayNotifyURL,
+        // 码支付
+        'enable-mapay': payment.enableMapay,
+        'mapay-api-url': payment.mapayAPIURL,
+        'mapay-id': payment.mapayID,
+        'mapay-key': payment.mapayKey,
+        'mapay-return-url': payment.mapayReturnURL,
+        'mapay-notify-url': payment.mapayNotifyURL
+      }
+    }
+    
     // 保存基础配置
     const configResult = await updateAdminConfig(configToSave)
     console.log('基础配置保存结果:', configResult)

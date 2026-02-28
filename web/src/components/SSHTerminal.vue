@@ -183,15 +183,8 @@ const connect = () => {
     apiPath = `/v1/user/instances/${props.instanceId}/ssh`
   }
   
-  // 构建WebSocket URL，考虑开发环境和生产环境的差异
-  let wsUrl
-  if (import.meta.env.MODE === 'development') {
-    // 开发环境：使用代理地址
-    wsUrl = `${protocol}//${host}/api${apiPath}?token=${token}`
-  } else {
-    // 生产环境：直接连接API服务器
-    wsUrl = `${protocol}//${host}${apiPath}?token=${token}`
-  }
+  // 构建WebSocket URL
+  const wsUrl = `${protocol}//${host}${apiPath}?token=${token}`
   
   console.log('WebSocket URL:', wsUrl)
 

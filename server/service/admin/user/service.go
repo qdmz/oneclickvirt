@@ -919,3 +919,12 @@ func (s *Service) getCurrentAdminID() uint {
 	// 实际实现中应该从JWT token或session中获取管理员ID
 	return 0
 }
+
+// GetUserByID 通过ID获取用户信息
+func (s *Service) GetUserByID(userID uint) (*userModel.User, error) {
+	var user userModel.User
+	if err := global.APP_DB.First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

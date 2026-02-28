@@ -234,7 +234,7 @@
         </el-table-column>
         <el-table-column
           :label="$t('common.actions')"
-          width="220"
+          width="300"
           fixed="right"
         >
           <template #default="scope">
@@ -255,11 +255,18 @@
               </el-button>
               <el-button
                 size="small"
+                type="warning"
+                @click="showTransferDialog(scope.row)"
+              >
+                转移归属
+              </el-button>
+              <el-button
+                size="small"
                 type="success"
                 :disabled="scope.row.status !== 'running' || !scope.row.password"
                 @click="openSSHTerminal(scope.row)"
               >
-                {{ $t('admin.instances.connect') }}
+                连接
               </el-button>
             </div>
           </template>
@@ -497,6 +504,49 @@
         </el-button>
       </div>
     </el-dialog>
+
+    <!-- 转移归属对话框 -->
+    <el-dialog
+      v-model="transferDialogVisible"
+      title="转移实例归属"
+      width="400px"
+    >
+      <div
+        v-if="transferInstance"
+        class="transfer-dialog-content"
+      >
+        <el-form
+          :model="transferForm"
+          label-width="100px"
+        >
+          <el-form-item label="实例名称">
+            {{ transferInstance.name }}
+          </el-form-item>
+          <el-form-item label="当前所有者">
+            {{ transferInstance.userName }}
+          </el-form-item>
+          <el-form-item label="目标用户ID" required>
+            <el-input
+              v-model="transferForm.targetUserId"
+              placeholder="请输入目标用户ID"
+              type="number"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="transferDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="transferLoading"
+          @click="handleTransfer"
+        >
+          确认转移
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -511,7 +561,7 @@ import {
   Lock, 
   Delete 
 } from '@element-plus/icons-vue'
-import { getAllInstances, deleteInstance as deleteInstanceApi, adminInstanceAction, resetInstancePassword } from '@/api/admin'
+import { getAllInstances, deleteInstance as deleteInstanceApi, adminInstanceAction, resetInstancePassword, transferInstanceOwnership } from '@/api/admin'
 import { useI18n } from 'vue-i18n'
 import { useSSHStore } from '@/pinia/modules/ssh'
 
@@ -522,12 +572,20 @@ const instances = ref([])
 const loading = ref(false)
 const detailDialogVisible = ref(false)
 const actionDialogVisible = ref(false)
+const transferDialogVisible = ref(false)
 const selectedInstance = ref(null)
 const actionInstance = ref(null)
+const transferInstance = ref(null)
 const actionLoading = ref(false)
+const transferLoading = ref(false)
 const showPassword = ref(false)
 const selectedInstances = ref([])
 const tableRef = ref(null)
+
+// 转移归属表单
+const transferForm = ref({
+  targetUserId: ''
+})
 
 // 筛选条件
 const filters = ref({
@@ -612,6 +670,54 @@ const viewInstanceDetail = (instance) => {
 const showActionDialog = (instance) => {
   actionInstance.value = instance
   actionDialogVisible.value = true
+}
+
+// 显示转移归属对话框
+const showTransferDialog = (instance) => {
+  transferInstance.value = instance
+  transferForm.value.targetUserId = ''
+  transferDialogVisible.value = true
+}
+
+// 处理转移归属操作
+const handleTransfer = async () => {
+  if (!transferInstance.value) return
+  
+  const targetUserId = transferForm.value.targetUserId
+  if (!targetUserId) {
+    ElMessage.warning('请输入目标用户ID')
+    return
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      `确定要将实例 "${transferInstance.value.name}" 转移给用户ID为 ${targetUserId} 的用户吗？`,
+      '确认转移',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+    
+    transferLoading.value = true
+    
+    await transferInstanceOwnership(transferInstance.value.id, targetUserId)
+    
+    ElMessage.success('实例转移成功')
+    transferDialogVisible.value = false
+    transferInstance.value = null
+    
+    // 刷新实例列表
+    await loadInstances()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('实例转移失败')
+      console.error('Transfer error:', error)
+    }
+  } finally {
+    transferLoading.value = false
+  }
 }
 
 // 执行操作
