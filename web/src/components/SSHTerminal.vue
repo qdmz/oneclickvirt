@@ -171,16 +171,16 @@ const connect = () => {
     if (props.isProvider) {
       // 管理员连接到节点服务器
       console.log('Connecting to provider SSH:', props.instanceId)
-      apiPath = `/v1/admin/providers/${props.instanceId}/ssh`
+      apiPath = `/api/v1/admin/providers/${props.instanceId}/ssh`
     } else {
       // 管理员连接到实例
       console.log('Connecting to instance SSH:', props.instanceId)
-      apiPath = `/v1/admin/instances/${props.instanceId}/ssh`
+      apiPath = `/api/v1/admin/instances/${props.instanceId}/ssh`
     }
   } else {
     // 普通用户连接到实例
     console.log('Connecting to user instance SSH:', props.instanceId)
-    apiPath = `/v1/user/instances/${props.instanceId}/ssh`
+    apiPath = `/api/v1/user/instances/${props.instanceId}/ssh`
   }
   
   // 构建WebSocket URL
