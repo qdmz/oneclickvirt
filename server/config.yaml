@@ -46,7 +46,7 @@ mysql:
     max-lifetime: "3600"
     max-open-conns: "100"
     password: ""
-    path: 127.0.0.1
+    path: mysql
     port: "3306"
     prefix: ""
     singular: "false"
@@ -109,7 +109,7 @@ system:
     addr: 8890
     db-type: mysql
     env: development
-    frontend-url: "http://154.12.84.134"
+    frontend-url: "https://heyun.ypvps.com"
     iplimit-count: 15000
     iplimit-time: 3600
     oauth2-state-token-minutes: 15
@@ -165,3 +165,24 @@ payment:
     wechat-mch-id: "434343"
     wechat-serial-no: "343434"
     wechat-type: mp
+system_name: 虚拟化管理平台
+system_description: 支持多种虚拟化技术的管理平台
+enable_email_verification: false
+enable_captcha: true
+captcha_expire_time: 10
+max_login_attempts: 5
+login_lockout_duration: 30
+enable_ssl: false
+ssl_cert_path:
+ssl_key_path:
+enable_backup: true
+backup_retention_days: 7
+enable_audit_log: true
+audit_log_retention_days: 30
+enable_notification: true
+notification_email:
+smtp_host:
+smtp_port: 587
+smtp_username:
+smtp_password:
+smtp_secure: true
