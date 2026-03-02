@@ -1,24 +1,29 @@
 services:
   web:
     build:
-      context: .
-      dockerfile: deploy/nginx.dockerfile
+      context: ./web
+      dockerfile: Dockerfile
     container_name: oneclickvirt-web
     ports:
-      - "8099:80"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certs:/etc/nginx/certs
     restart: always
     networks:
       - default
 
   api:
     build:
-      context: .
-      dockerfile: deploy/server.dockerfile
+      context: ./server
+      dockerfile: Dockerfile
     container_name: oneclickvirt-api
     ports:
-      - "8890:8888"
+      - "8890:8890"
     volumes:
       - ./data/app/:/app/storage
+      - ./data/config:/app/config
       - ./server/config.yaml:/app/config.yaml:rw
     restart: always
     networks:
@@ -35,6 +40,7 @@ services:
         MYSQL_DATABASE: oneclickvirt
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
       - ./deploy/my.cnf:/etc/mysql/conf.d/custom.cnf
     networks:
       - default
