@@ -41,8 +41,9 @@ type MapayConfig struct {
 // @Accept json
 // @Produce json
 // @Router /v1/payment/epay/notify [post]
+// @Router /v1/payment/epay/notify [get]
 func EpayNotify(c *gin.Context) {
-	// 解析表单数据
+	// 解析表单数据或查询参数
 	if err := c.Request.ParseForm(); err != nil {
 		global.APP_LOG.Error("解析易支付回调数据失败", zap.Error(err))
 		c.String(http.StatusBadRequest, "fail")

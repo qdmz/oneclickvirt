@@ -82,8 +82,22 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		global.APP_LOG.Debug("用户密码验证失败", zap.String("username", utils.SanitizeUserInput(req.Username)), zap.String("userType", user.UserType))
-		return nil, "", common.NewError(common.CodeInvalidCredentials)
+		// 如果密码验证失败，检查是否是明文密码
+		// 尝试将明文密码哈希化并更新到数据库
+		hashedPassword, hashErr := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if hashErr == nil {
+			// 更新用户密码为哈希值
+			global.APP_DB.Model(&user).Update("password", string(hashedPassword))
+			global.APP_LOG.Info("自动更新用户密码为哈希值", zap.String("username", user.Username))
+			// 重新验证密码
+			if err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(req.Password)); err != nil {
+				global.APP_LOG.Debug("用户密码验证失败", zap.String("username", utils.SanitizeUserInput(req.Username)), zap.String("userType", user.UserType))
+				return nil, "", common.NewError(common.CodeInvalidCredentials)
+			}
+		} else {
+			global.APP_LOG.Debug("用户密码验证失败", zap.String("username", utils.SanitizeUserInput(req.Username)), zap.String("userType", user.UserType))
+			return nil, "", common.NewError(common.CodeInvalidCredentials)
+		}
 	}
 
 	global.APP_LOG.Info("用户登录成功", zap.String("username", user.Username), zap.String("userType", user.UserType), zap.Uint("userID", user.ID))
