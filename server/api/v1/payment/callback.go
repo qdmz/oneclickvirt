@@ -99,8 +99,10 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	var order orderModel.Order
 	if err := tx.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
+			tx.Rollback()
 			return err
 		}
+		tx.Rollback()
 		return err
 	}
 
@@ -123,6 +125,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	order.PaidAmount = order.Amount
 
 	if err := tx.Save(&order).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -143,6 +146,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	}
 
 	if err := tx.Create(&paymentRecord).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -151,6 +155,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		// 产品购买:提升用户等级
 		var user userModel.User
 		if err := tx.First(&user, order.UserID).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 
@@ -195,12 +200,34 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 					global.APP_LOG.Info(fmt.Sprintf("永久产品，设置到期时间为: %v", farFuture))
 				}
 
+				// 更新用户资源配置
+				if cpu, ok := productData["cpu"].(float64); ok {
+					user.MaxCPU = int(cpu)
+				}
+				if memory, ok := productData["memory"].(float64); ok {
+					user.MaxMemory = int(memory)
+				}
+				// 尝试使用disk字段，如果不存在则尝试storage字段
+				if disk, ok := productData["disk"].(float64); ok {
+					user.MaxDisk = int(disk)
+				} else if storage, ok := productData["storage"].(float64); ok {
+					user.MaxDisk = int(storage)
+				}
+				// 尝试使用maxInstances字段，如果不存在则尝试instances字段
+				if maxInstances, ok := productData["maxInstances"].(float64); ok {
+					user.MaxInstances = int(maxInstances)
+				} else if instances, ok := productData["instances"].(float64); ok {
+					user.MaxInstances = int(instances)
+				}
+
 				// 更新用户名下所有实例的到期时间
 				if err := tx.Model(&instanceModel.Instance{}).Where("user_id = ?", order.UserID).Update("expired_at", user.LevelExpireAt).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 
 				if err := tx.Save(&user).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 
@@ -224,9 +251,11 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 					TotalExpense:  0,
 				}
 				if err := tx.Create(&wallet).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 			} else {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -235,6 +264,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		wallet.Balance += order.Amount
 		wallet.TotalRecharge += order.Amount
 		if err := tx.Save(&wallet).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 
@@ -248,6 +278,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 			OrderID:     &order.ID,
 		}
 		if err := tx.Create(&transaction).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 	}

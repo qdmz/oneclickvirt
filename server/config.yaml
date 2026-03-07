@@ -46,7 +46,7 @@ mysql:
     max-lifetime: "3600"
     max-open-conns: "100"
     password: ""
-    path: mysql
+    path: localhost
     port: "3306"
     prefix: ""
     singular: "false"
@@ -165,24 +165,17 @@ payment:
     wechat-mch-id: "434343"
     wechat-serial-no: "343434"
     wechat-type: mp
-system_name: 虚拟化管理平台
-system_description: 支持多种虚拟化技术的管理平台
-enable_email_verification: false
-enable_captcha: true
-captcha_expire_time: 10
-max_login_attempts: 5
-login_lockout_duration: 30
-enable_ssl: false
-ssl_cert_path:
-ssl_key_path:
-enable_backup: true
-backup_retention_days: 7
-enable_audit_log: true
-audit_log_retention_days: 30
-enable_notification: true
-notification_email:
-smtp_host:
-smtp_port: 587
-smtp_username:
-smtp_password:
-smtp_secure: true
+    # 易支付配置
+    epay-api-url: https://pay.example.com/creat_order
+    epay-pid: "2093"
+    epay-key: "your-epay-key"
+    epay-return-url: https://heyun.ypvps.com/user/wallet
+    epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
+    enable-epay: true
+    # 码支付配置
+    mapay-api-url: https://pay.example.com/pay
+    mapay-id: "your-mapid"
+    mapay-key: "your-mapay-key"
+    mapay-return-url: https://heyun.ypvps.com/user/wallet
+    mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
+    enable-mapay: true

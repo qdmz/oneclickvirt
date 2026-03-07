@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OneClickVirt
 
 ## 📖 项目简介
@@ -346,3 +347,7 @@ MIT License
 如有问题或建议，请创建Issue或联系项目维护者。
 
 **祝您使用愉快!** 🎉
+=======
+# oneclickvirt-new
+oneclickvirt 二开修复版 支持产品管理 会员管理 支付接口 产品转移 可直接用于营运
+>>>>>>> 397ad43d837c3bd1607a55d9e550d59e8f19ed6c

@@ -31,6 +31,7 @@ func InitPaymentRouter(Router *gin.RouterGroup) {
 		PaymentGroup.POST("/alipay/notify", payment.AlipayNotify)
 		PaymentGroup.POST("/wechat/notify", payment.WechatNotify)
 		PaymentGroup.POST("/epay/notify", payment.EpayNotify)
+		PaymentGroup.GET("/epay/notify", payment.EpayNotify) // 支持GET请求
 		PaymentGroup.POST("/mapay/notify", payment.MapayNotify)
 	}
 }

@@ -41,8 +41,9 @@ type MapayConfig struct {
 // @Accept json
 // @Produce json
 // @Router /v1/payment/epay/notify [post]
+// @Router /v1/payment/epay/notify [get]
 func EpayNotify(c *gin.Context) {
-	// 解析表单数据
+	// 解析表单数据或查询参数
 	if err := c.Request.ParseForm(); err != nil {
 		global.APP_LOG.Error("解析易支付回调数据失败", zap.Error(err))
 		c.String(http.StatusBadRequest, "fail")
@@ -52,9 +53,20 @@ func EpayNotify(c *gin.Context) {
 	params := c.Request.Form
 	sign := params.Get("sign")
 	
+	// 打印回调参数，便于调试
+	global.APP_LOG.Info("易支付回调参数", zap.Any("params", params))
+	
 	// 验证签名
 	if !verifyEpaySign(params, sign) {
-		global.APP_LOG.Error("易支付签名验证失败")
+		global.APP_LOG.Error("易支付签名验证失败", zap.String("sign", sign))
+		c.String(http.StatusBadRequest, "fail")
+		return
+	}
+
+	// 检查支付状态
+	tradeStatus := params.Get("trade_status")
+	if tradeStatus != "TRADE_SUCCESS" && tradeStatus != "success" {
+		global.APP_LOG.Error("易支付交易状态异常", zap.String("tradeStatus", tradeStatus))
 		c.String(http.StatusBadRequest, "fail")
 		return
 	}
@@ -67,9 +79,17 @@ func EpayNotify(c *gin.Context) {
 		return
 	}
 
+	// 获取支付金额
+	payAmount := params.Get("money")
+	if payAmount == "" {
+		global.APP_LOG.Error("易支付金额为空")
+		c.String(http.StatusBadRequest, "fail")
+		return
+	}
+
 	// 处理支付成功
 	if err := processPaymentSuccess(orderNo, orderModel.PaymentMethodEpay, valuesToMap(params)); err != nil {
-		global.APP_LOG.Error("处理易支付成功失败", zap.Error(err))
+		global.APP_LOG.Error("处理易支付成功失败", zap.Error(err), zap.String("orderNo", orderNo))
 		c.String(http.StatusInternalServerError, "fail")
 		return
 	}
