@@ -46,7 +46,7 @@ mysql:
     max-lifetime: "3600"
     max-open-conns: "100"
     password: ""
-    path: oneclickvirt-mysql
+    path: localhost
     port: "3306"
     prefix: ""
     singular: "false"
