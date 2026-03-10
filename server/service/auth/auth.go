@@ -290,7 +290,7 @@ func (s *AuthService) RegisterWithContext(req auth.RegisterRequest, ip string, u
 		QQ:            req.QQ,
 		UserType:      "user",
 		Level:         global.APP_CONFIG.Quota.DefaultLevel,
-		Status:        1, // 默认状态为正常
+		Status:        1,              // 默认状态为正常
 		LevelExpireAt: &levelExpireAt, // 设置用户等级到期时间为当前时间加一个月
 		// 资源限制将在创建后通过同步服务自动设置
 		// UsedTraffic字段已删除，流量数据从pmacct_traffic_records实时查询
@@ -372,14 +372,19 @@ func (s *AuthService) RegisterAndLogin(req auth.RegisterRequest, ip string, user
 	if err := s.RegisterWithContext(req, ip, userAgent); err != nil {
 		return nil, "", err
 	}
-	// 注册成功后自动登录
-	loginReq := auth.LoginRequest{
-		Username:  req.Username,
-		Password:  req.Password,
-		LoginType: "username",
-		UserType:  "user",
+	// 注册成功后直接生成token，跳过登录验证
+	var user userModel.User
+	if err := global.APP_DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
+		return nil, "", err
 	}
-	return s.Login(loginReq)
+	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
+	if err != nil {
+		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
+		return nil, "", errors.New("登录失败，请稍后重试")
+	}
+	// 更新最后登录时间
+	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	return &user, token, nil
 }
 
 func (s *AuthService) SendVerifyCode(codeType, target string) error {
