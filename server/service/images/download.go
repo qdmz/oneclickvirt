@@ -1,10 +1,10 @@
 package images
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"fmt"
 	"io"
-	"math/rand"
+	mathRand "math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -113,11 +113,10 @@ func (s *ImageDownloadService) CleanupImageForProvider(imageName, imageURL, arch
 	return nil
 }
 
-// generateFileName 生成文件名
+// generateFileName 生成文件名（使用SHA256前16位）
 func (s *ImageDownloadService) generateFileName(imageName, imageURL, architecture string) string {
-	// 包含架构信息在哈希计算中
 	hashInput := fmt.Sprintf("%s_%s", imageURL, architecture)
-	hash := md5.Sum([]byte(hashInput))
+	hash := sha256.Sum256([]byte(hashInput))
 	return fmt.Sprintf("%s_%s_%x.tar", strings.ReplaceAll(imageName, "/", "_"), architecture, hash[:8])
 }
 
@@ -304,8 +303,8 @@ func (s *ImageDownloadService) getCDNURL(originalURL string) string {
 	endpoints := make([]string, len(s.cdnEndpoints))
 	copy(endpoints, s.cdnEndpoints)
 
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(endpoints), func(i, j int) {
+	mathRand.Seed(time.Now().UnixNano())
+	mathRand.Shuffle(len(endpoints), func(i, j int) {
 		endpoints[i], endpoints[j] = endpoints[j], endpoints[i]
 	})
 

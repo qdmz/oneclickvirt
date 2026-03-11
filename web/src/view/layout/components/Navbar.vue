@@ -27,6 +27,9 @@
     </div>
     
     <div class="right-menu">
+      <!-- Theme switch -->
+      <ThemeSwitch />
+
       <!-- 语言切换按钮 -->
       <div class="language-switcher">
         <el-button
@@ -88,6 +91,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { Switch, SwitchButton, User, CaretBottom, Menu, Operation } from '@element-plus/icons-vue'
+import ThemeSwitch from '@/components/ThemeSwitch.vue'
 import { useUserStore } from '@/pinia/modules/user'
 import { useLanguageStore } from '@/pinia/modules/language'
 import { getPublicSiteConfigs } from '@/api/public'
@@ -174,8 +178,10 @@ const logout = async () => {
   height: var(--navbar-height);
   overflow: hidden;
   position: relative;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  background: var(--navbar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--box-shadow-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -210,17 +216,17 @@ const logout = async () => {
   }
 
   .site-logo-image {
-    width: 64px;
-    height: 64px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
   }
 
   .site-logo-text {
-    font-size: 24px;
-    color: #16a34a;
+    font-size: 20px;
+    color: var(--primary-color);
     margin: 0;
     font-weight: 700;
-    background: linear-gradient(135deg, #16a34a, #22c55e);
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -248,15 +254,17 @@ const logout = async () => {
       .el-button {
         color: var(--text-color-primary);
         background: transparent;
-        border: 1px solid var(--border-color-base);
+        border: 1px solid var(--border-color);
         display: flex;
         align-items: center;
         gap: 6px;
         padding: 8px 15px;
+        border-radius: var(--border-radius-sm);
         
         &:hover {
           background: var(--bg-color-hover);
           border-color: var(--el-color-primary);
+          color: var(--el-color-primary);
         }
 
         .language-text {
@@ -271,7 +279,7 @@ const logout = async () => {
       padding: 0 8px;
       height: 100%;
       font-size: 18px;
-      color: #5a5e66;
+      color: var(--text-color-secondary);
       vertical-align: text-bottom;
 
       &.hover-effect {
@@ -279,7 +287,7 @@ const logout = async () => {
         transition: background .3s;
 
         &:hover {
-          background: rgba(0, 0, 0, .025)
+          background: var(--bg-color-hover)
         }
       }
     }
@@ -295,12 +303,14 @@ const logout = async () => {
           margin-left: 10px;
           margin-right: 5px;
           font-size: var(--font-size-sm);
+          color: var(--text-color-regular);
         }
 
         .el-icon-caret-bottom {
           cursor: pointer;
           font-size: 12px;
           margin-left: 4px;
+          color: var(--text-color-secondary);
         }
       }
     }

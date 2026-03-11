@@ -30,6 +30,7 @@ type RegisterRequest struct {
 	Telegram   string `json:"telegram,omitempty"`
 	QQ         string `json:"qq,omitempty"`
 	InviteCode string `json:"inviteCode" example:"INVITE123"`
+	AgentCode  string `json:"agentCode" example:"AG1234567890"` // 代理商推广码
 	Captcha    string `json:"captcha"`
 	CaptchaId  string `json:"captchaId"`
 }
@@ -45,6 +46,11 @@ type ForgotPasswordRequest struct {
 // ResetPasswordRequest 重置密码请求
 type ResetPasswordRequest struct {
 	Token string `json:"token" binding:"required"`
+}
+
+// ResendVerificationRequest 重发激活邮件请求
+type ResendVerificationRequest struct {
+	Email string `json:"email" binding:"required,email" example:"user@example.com"`
 }
 
 // GetCaptchaRequest 获取验证码请求

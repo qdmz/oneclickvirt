@@ -18,8 +18,10 @@ import (
 	"oneclickvirt/model/common"
 	"oneclickvirt/model/system"
 	userModel "oneclickvirt/model/user"
+	"oneclickvirt/service/email"
 	"oneclickvirt/utils"
 
+	"github.com/google/uuid"
 	"github.com/mojocn/base64Captcha"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -84,7 +86,7 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		// 如果密码验证失败，检查是否是明文密码
 		// 尝试将明文密码哈希化并更新到数据库
-		hashedPassword, hashErr := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		hashedPassword, hashErr := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 		if hashErr == nil {
 			// 更新用户密码为哈希值
 			global.APP_DB.Model(&user).Update("password", string(hashedPassword))
@@ -98,6 +100,11 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 			global.APP_LOG.Debug("用户密码验证失败", zap.String("username", utils.SanitizeUserInput(req.Username)), zap.String("userType", user.UserType))
 			return nil, "", common.NewError(common.CodeInvalidCredentials)
 		}
+	}
+
+	// Check email verification
+	if !user.EmailVerified && global.APP_CONFIG.Auth.EnableEmailVerification {
+		return nil, "", common.NewError(4009, "email not verified")
 	}
 
 	global.APP_LOG.Info("用户登录成功", zap.String("username", user.Username), zap.String("userType", user.UserType), zap.Uint("userID", user.ID))
@@ -274,7 +281,7 @@ func (s *AuthService) RegisterWithContext(req auth.RegisterRequest, ip string, u
 		return common.NewError(common.CodeUsernameExists, "用户名已存在")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 	if err != nil {
 		return err
 	}
@@ -542,7 +549,7 @@ func (s *AuthService) ResetPassword(token, newPassword string) error {
 	}
 
 	// 加密新密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return err
 	}
@@ -591,7 +598,7 @@ func (s *AuthService) ResetPasswordWithToken(token string) error {
 	}
 
 	// 加密新密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return err
 	}
@@ -1086,7 +1093,7 @@ func (s *AuthService) ChangePassword(userID uint, oldPassword, newPassword strin
 		return errors.New("原密码错误")
 	}
 	// 加密新密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return err
 	}
@@ -1114,7 +1121,7 @@ func (s *AuthService) InitSystem(adminUsername, adminPassword, adminEmail string
 		return errors.New("系统已初始化")
 	}
 	// 创建管理员用户
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), 12)
 	if err != nil {
 		return err
 	}
@@ -1126,7 +1133,7 @@ func (s *AuthService) InitSystem(adminUsername, adminPassword, adminEmail string
 		Status:   1,
 	}
 	// 创建示例用户（默认禁用，防止未授权访问）
-	userPassword, _ := bcrypt.GenerateFromPassword([]byte("user123"), bcrypt.DefaultCost)
+	userPassword, _ := bcrypt.GenerateFromPassword([]byte("user123"), 12)
 	user := userModel.User{
 		Username: "user",
 		Password: string(userPassword),
@@ -1165,7 +1172,7 @@ func (s *AuthService) InitSystemWithUsers(adminInfo, userInfo UserInfo) error {
 	}
 
 	// 创建管理员用户
-	adminPassword, err := bcrypt.GenerateFromPassword([]byte(adminInfo.Password), bcrypt.DefaultCost)
+	adminPassword, err := bcrypt.GenerateFromPassword([]byte(adminInfo.Password), 12)
 	if err != nil {
 		return err
 	}
@@ -1179,7 +1186,7 @@ func (s *AuthService) InitSystemWithUsers(adminInfo, userInfo UserInfo) error {
 	}
 
 	// 创建普通用户（默认禁用，防止未授权访问）
-	userPassword, err := bcrypt.GenerateFromPassword([]byte(userInfo.Password), bcrypt.DefaultCost)
+	userPassword, err := bcrypt.GenerateFromPassword([]byte(userInfo.Password), 12)
 	if err != nil {
 		return err
 	}
@@ -1267,6 +1274,70 @@ func syncNewUserResourceLimits(level int, userID uint) error {
 		zap.Int("level", level),
 		zap.Any("updateData", updateData))
 
+	return nil
+}
+
+// getEmailService returns email service if configured
+func (s *AuthService) getEmailService() *email.EmailService {
+	if !s.isEmailConfigured() {
+		return nil
+	}
+	return email.NewEmailService()
+}
+
+// VerifyEmail verifies email activation token
+func (s *AuthService) VerifyEmail(token string) error {
+	var resetRecord userModel.PasswordReset
+	if err := global.APP_DB.Where("token = ? AND used = ? AND expires_at > ?", token, false, time.Now()).First(&resetRecord).Error; err != nil {
+		return common.NewError(common.CodeInvalidParam, "activation token invalid or expired")
+	}
+	global.APP_DB.Model(&resetRecord).Update("used", true)
+	if err := global.APP_DB.Model(&userModel.User{}).Where("uuid = ?", resetRecord.UserUUID).Update("email_verified", true).Error; err != nil {
+		return err
+	}
+	var user userModel.User
+	if err := global.APP_DB.Where("uuid = ?", resetRecord.UserUUID).First(&user).Error; err == nil {
+		if emailSvc := s.getEmailService(); emailSvc != nil {
+			_ = emailSvc.SendWelcomeEmail(user.Email, user.Username)
+		}
+	}
+	return nil
+}
+
+// ResendVerification resends activation email
+func (s *AuthService) ResendVerification(emailAddr string) error {
+	var user userModel.User
+	if err := global.APP_DB.Where("email = ?", emailAddr).First(&user).Error; err != nil {
+		return common.NewError(common.CodeUserNotFound, "user not found")
+	}
+	if user.EmailVerified {
+		return common.NewError(common.CodeInvalidParam, "email already verified")
+	}
+	emailSvc := s.getEmailService()
+	if emailSvc == nil {
+		return errors.New("email service not configured")
+	}
+	token := uuid.New().String()
+	expiry := time.Now().Add(time.Duration(global.APP_CONFIG.Auth.EmailActivationExpireHours) * time.Hour)
+	resetRecord := userModel.PasswordReset{
+		UserUUID:  user.UUID,
+		Token:     token,
+		Used:      false,
+		ExpiresAt: expiry,
+	}
+	if err := global.APP_DB.Create(&resetRecord).Error; err != nil {
+		return err
+	}
+	frontendURL := global.APP_CONFIG.System.FrontendURL
+	return emailSvc.SendActivationEmail(user.Email, token, frontendURL)
+}
+
+// VerifyResetToken verifies password reset token validity
+func (s *AuthService) VerifyResetToken(token string) error {
+	var resetRecord userModel.PasswordReset
+	if err := global.APP_DB.Where("token = ? AND used = ? AND expires_at > ?", token, false, time.Now()).First(&resetRecord).Error; err != nil {
+		return common.NewError(common.CodeInvalidParam, "reset token invalid or expired")
+	}
 	return nil
 }
 

@@ -73,7 +73,7 @@ func GetWalletTransactions(c *gin.Context) {
 	page := 1
 	pageSize := 20
 	if p := c.Query("page"); p != "" {
-		if parsed, err := parseUint(p); err == nil && parsed > 0 {
+		if parsed, err := parseUint(p); err == nil && parsed > 0 && parsed <= 10000 {
 			page = int(parsed)
 		}
 	}

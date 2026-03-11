@@ -1,6 +1,6 @@
 <template>
   <div class="forgot-password-container">
-    <!-- 顶部栏 -->
+    <!-- 顶部�?-->
     <header class="auth-header">
       <div class="header-content">
         <div class="logo">
@@ -244,15 +244,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background: var(--auth-page-bg);
 }
 
-/* 顶部栏样式 */
+/* 顶部栏样�?*/
 .auth-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--auth-header-bg);
   backdrop-filter: blur(20px);
-  box-shadow: 0 2px 20px rgba(22, 163, 74, 0.1);
-  border-bottom: 1px solid rgba(22, 163, 74, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--auth-card-border);
 }
 
 .header-content {
@@ -279,10 +279,10 @@ onMounted(() => {
 
 .logo h1 {
   font-size: 28px;
-  color: #16a34a;
+  color: #fff;
   margin: 0;
   font-weight: 700;
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -312,12 +312,12 @@ onMounted(() => {
 
 .nav-link:hover {
   background: rgba(22, 163, 74, 0.1);
-  color: #16a34a;
+  color: #fff;
   transform: translateY(-2px);
 }
 
 .nav-link.home-btn {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
   color: white;
   border: none;
   box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
@@ -335,9 +335,10 @@ onMounted(() => {
   margin-bottom: 60px;
   width: 400px;
   padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: var(--auth-card-bg);
+  backdrop-filter: blur(24px);
+  border-radius: var(--border-radius-xl);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
 }
 
 .forgot-password-form h2 {
@@ -360,7 +361,7 @@ onMounted(() => {
 }
 
 .form-footer a {
-  color: #409eff;
+  color: var(--primary-color-light);
   text-decoration: none;
 }
 

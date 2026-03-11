@@ -9,6 +9,7 @@ import (
 
 	"oneclickvirt/global"
 
+	"github.com/google/uuid"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
@@ -128,5 +129,5 @@ func ValidateToken(tokenString string) (*jwt.MapClaims, error) {
 
 // generateTokenID 生成唯一的token ID
 func generateTokenID() string {
-	return fmt.Sprintf("%d_%d", time.Now().UnixNano(), os.Getpid())
+	return uuid.New().String()
 }

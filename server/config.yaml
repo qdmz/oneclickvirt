@@ -1,16 +1,20 @@
 auth:
-    email-password: clxandlx123456
+    # 安全提示：以下敏感配置请通过环境变量注入，不要在配置文件中硬编码
+    # 示例: export EMAIL_PASSWORD="your_password"
+    email-password: ${EMAIL_PASSWORD}
     email-smtp-host: smtp.gmail.com
     email-smtp-port: 25
     email-username: qdmzhost
     enable-email: true
+    enable-email-verification: true
+    email-activation-expire-hours: 24
     enable-oauth2: true
     enable-public-registration: true
     enable-qq: true
     enable-telegram: true
-    qq-app-id: dsfdsf
-    qq-app-key: dsfdsfdsf
-    telegram-bot-token: dsfdsfdsf
+    qq-app-id: ${QQ_APP_ID}
+    qq-app-key: ${QQ_APP_KEY}
+    telegram-bot-token: ${TELEGRAM_BOT_TOKEN}
 captcha:
     enabled: true
     expire-time: 300
@@ -108,7 +112,7 @@ redis:
 system:
     addr: 8890
     db-type: mysql
-    env: development
+    env: production
     frontend-url: "https://heyun.ypvps.com"
     iplimit-count: 15000
     iplimit-time: 3600
@@ -150,32 +154,32 @@ signing_key_v1:
     version: 1
 active_version: 1
 payment:
-    alipay-app-id: "323232"
+    alipay-app-id: ${ALIPAY_APP_ID}
     alipay-gateway: https://openapi.alipay.com/gateway.do
-    alipay-private-key: 23232323ewdsdsaddsadsd
-    alipay-public-key: "342323232"
+    alipay-private-key: ${ALIPAY_PRIVATE_KEY}
+    alipay-public-key: ${ALIPAY_PUBLIC_KEY}
     balance-daily-limit: 9998
     balance-min-amount: 2
     enable-alipay: true
     enable-balance: true
     enable-wechat: true
-    wechat-api-key: "34343"
-    wechat-api-v3-key: "34343"
-    wechat-app-id: "34343"
-    wechat-mch-id: "434343"
-    wechat-serial-no: "343434"
+    wechat-api-key: ${WECHAT_API_KEY}
+    wechat-api-v3-key: ${WECHAT_API_V3_KEY}
+    wechat-app-id: ${WECHAT_APP_ID}
+    wechat-mch-id: ${WECHAT_MCH_ID}
+    wechat-serial-no: ${WECHAT_SERIAL_NO}
     wechat-type: mp
     # 易支付配置
     epay-api-url: https://pay.example.com/creat_order
     epay-pid: "2093"
-    epay-key: "your-epay-key"
+    epay-key: ${EPAY_KEY}
     epay-return-url: https://heyun.ypvps.com/user/wallet
     epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
     enable-epay: true
     # 码支付配置
     mapay-api-url: https://pay.example.com/pay
     mapay-id: "your-mapid"
-    mapay-key: "your-mapay-key"
+    mapay-key: ${MAPAY_KEY}
     mapay-return-url: https://heyun.ypvps.com/user/wallet
     mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
     enable-mapay: true

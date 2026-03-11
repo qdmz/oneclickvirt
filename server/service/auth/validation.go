@@ -87,6 +87,8 @@ func (s *AuthValidationService) ClassifyLoginError(err error) *common.AppError {
 		return common.NewError(common.CodeCaptchaInvalid, errMsg)
 	case errMsg == "请填写验证码":
 		return common.NewError(common.CodeCaptchaRequired, errMsg)
+	case errMsg == "邮箱未验证，请先验证邮箱":
+		return common.NewError(common.CodeEmailNotVerified, errMsg)
 	default:
 		// 默认返回用户名或密码错误
 		return common.NewError(common.CodeInvalidCredentials, "用户名或密码错误")

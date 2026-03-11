@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -280,6 +281,16 @@ func (s *InitService) UpdateDatabaseConfig(dbConfig config.DatabaseConfig) error
 
 	// 备份原配置文件
 	backupPath := configPath + ".backup"
+	// 路径遍历防护：确保backupPath在当前工作目录内
+	absBackupPath, err := filepath.Abs(backupPath)
+	if err != nil {
+		global.APP_LOG.Warn("解析备份路径失败", zap.Error(err))
+	} else {
+		absConfigDir, _ := filepath.Abs(".")
+		if absConfigDir != "" && !strings.HasPrefix(absBackupPath, absConfigDir+string(filepath.Separator)) && absBackupPath != absConfigDir {
+			return fmt.Errorf("备份路径超出配置目录范围: %s", backupPath)
+		}
+	}
 	if err := os.WriteFile(backupPath, configData, 0644); err != nil {
 		global.APP_LOG.Debug("备份配置文件失败", zap.String("error", utils.FormatError(err)))
 	}

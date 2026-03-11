@@ -30,6 +30,8 @@ type CORS struct {
 
 type Auth struct {
 	EnableEmail              bool   `mapstructure:"enable-email" json:"enable-email" yaml:"enable-email"`
+	EnableEmailVerification  bool   `mapstructure:"enable-email-verification" json:"enable-email-verification" yaml:"enable-email-verification"`
+	EmailActivationExpireHours int  `mapstructure:"email-activation-expire-hours" json:"email-activation-expire-hours" yaml:"email-activation-expire-hours"`
 	EnableTelegram           bool   `mapstructure:"enable-telegram" json:"enable-telegram" yaml:"enable-telegram"`
 	EnableQQ                 bool   `mapstructure:"enable-qq" json:"enable-qq" yaml:"enable-qq"`
 	EnableOAuth2             bool   `mapstructure:"enable-oauth2" json:"enable-oauth2" yaml:"enable-oauth2"`                                        // 是否启用OAuth2登录（全局开关）

@@ -15,7 +15,7 @@ var (
 	defaultHTTPClientOnce sync.Once
 )
 
-// GetDefaultHTTPClient 获取默认的HTTP客户端（带连接池）
+// GetDefaultHTTPClient returns the default HTTP client with connection pooling
 func GetDefaultHTTPClient() *http.Client {
 	defaultHTTPClientOnce.Do(func() {
 		defaultHTTPClient = &http.Client{
@@ -26,9 +26,9 @@ func GetDefaultHTTPClient() *http.Client {
 					Timeout:   30 * time.Second,
 					KeepAlive: 30 * time.Second,
 				}).DialContext,
-				MaxIdleConns:          100,              // 最大空闲连接数
-				MaxIdleConnsPerHost:   10,               // 每个host的最大空闲连接数
-				IdleConnTimeout:       90 * time.Second, // 空闲连接超时
+				MaxIdleConns:          100,
+				MaxIdleConnsPerHost:   10,
+				IdleConnTimeout:       90 * time.Second,
 				TLSHandshakeTimeout:   10 * time.Second,
 				ExpectContinueTimeout: 1 * time.Second,
 				ForceAttemptHTTP2:     true,
@@ -45,7 +45,6 @@ var (
 	insecureTransportOnce sync.Once
 )
 
-// getSharedTransport 获取共享的HTTP Transport（避免频繁创建导致资源泄漏）
 func getSharedTransport() *http.Transport {
 	sharedTransportOnce.Do(func() {
 		sharedTransport = &http.Transport{
@@ -65,7 +64,7 @@ func getSharedTransport() *http.Transport {
 	return sharedTransport
 }
 
-// getInsecureTransport 获取跳过TLS验证的共享Transport
+// getInsecureTransport returns transport with InsecureSkipVerify for internal hypervisors only
 func getInsecureTransport() *http.Transport {
 	insecureTransportOnce.Do(func() {
 		insecureTransport = &http.Transport{
@@ -79,6 +78,8 @@ func getInsecureTransport() *http.Transport {
 			IdleConnTimeout:     90 * time.Second,
 			TLSHandshakeTimeout: 10 * time.Second,
 			TLSClientConfig: &tls.Config{
+				// Security: only for internal hypervisors (LXD/Incus) with self-signed certs.
+				// Use TrustedFingerprint in Provider model for fingerprint verification when possible.
 				InsecureSkipVerify: true,
 			},
 			ExpectContinueTimeout: 1 * time.Second,
@@ -88,7 +89,7 @@ func getInsecureTransport() *http.Transport {
 	return insecureTransport
 }
 
-// GetHTTPClientWithTimeout 创建带自定义超时的HTTP客户端（复用Transport）
+// GetHTTPClientWithTimeout creates HTTP client with custom timeout (reuses transport)
 func GetHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout:   timeout,
@@ -96,7 +97,7 @@ func GetHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 	}
 }
 
-// GetInsecureHTTPClient 获取跳过TLS验证的HTTP客户端（复用Transport）
+// GetInsecureHTTPClient returns HTTP client that skips TLS verification
 func GetInsecureHTTPClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout:   timeout,
@@ -104,14 +105,14 @@ func GetInsecureHTTPClient(timeout time.Duration) *http.Client {
 	}
 }
 
-// CleanupHTTPTransports 清理HTTP Transport的空闲连接（在应用关闭时调用）
+// CleanupHTTPTransports cleans up idle connections (call on app shutdown)
 func CleanupHTTPTransports() {
 	if sharedTransport != nil {
 		sharedTransport.CloseIdleConnections()
-		global.APP_LOG.Info("已清理共享HTTP Transport的空闲连接")
+		global.APP_LOG.Info("Cleaned up shared HTTP transport idle connections")
 	}
 	if insecureTransport != nil {
 		insecureTransport.CloseIdleConnections()
-		global.APP_LOG.Info("已清理不安全HTTP Transport的空闲连接")
+		global.APP_LOG.Info("Cleaned up insecure HTTP transport idle connections")
 	}
 }

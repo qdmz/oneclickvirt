@@ -1,7 +1,7 @@
 package images
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
@@ -162,15 +162,15 @@ func (s *ImageService) CreateDirectory(dirPath string) error {
 	return os.MkdirAll(dirPath, 0755)
 }
 
-// CalculateFileMD5 计算文件MD5
-func (s *ImageService) CalculateFileMD5(filePath string) (string, error) {
+// CalculateFileSHA256 计算文件SHA256
+func (s *ImageService) CalculateFileSHA256(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err
 	}
 	defer file.Close()
 
-	hash := md5.New()
+	hash := sha256.New()
 	if _, err := io.Copy(hash, file); err != nil {
 		return "", err
 	}

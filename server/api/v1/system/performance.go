@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"runtime"
+	"strconv"
 	"sync"
 	"time"
 
@@ -585,7 +586,7 @@ func checkPerformanceAlerts(metrics *PerformanceMetrics) {
 	if metrics.MemoryAlloc > 500 {
 		global.APP_LOG.Warn("内存使用过高",
 			zap.Uint64("alloc_mb", metrics.MemoryAlloc),
-			zap.String("level", getAlertLevel(int(metrics.MemoryAlloc), 500, 1000)))
+			zap.String("level", getAlertLevel(safeUint64ToInt(metrics.MemoryAlloc), 500, 1000)))
 	}
 
 	// 数据库连接池告警
@@ -608,4 +609,12 @@ func getAlertLevel(value, warningThreshold, criticalThreshold int) string {
 		return "warning"
 	}
 	return "normal"
+}
+
+// safeUint64ToInt 安全地将uint64转换为int，溢出时返回最大int值
+func safeUint64ToInt(v uint64) int {
+	if v > uint64(1<<(strconv.IntSize-1)-1) {
+		return 1<<(strconv.IntSize-1) - 1
+	}
+	return int(v)
 }

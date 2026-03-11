@@ -23,6 +23,8 @@ type Product struct {
 	SortOrder    int       `json:"sortOrder" gorm:"column:sort_order;default:0;comment:排序"`
 	Features     string    `json:"features" gorm:"column:features;type:text;comment:特性(JSON数组)"`
 	AllowRepeat  int       `json:"allowRepeat" gorm:"column:allow_repeat;default:1;comment:是否允许重复购买(1:允许, 0:不允许)"`
+	Stock        int       `json:"stock" gorm:"column:stock;default:-1;comment:库存量(-1表示无限)"`
+	SoldCount    int       `json:"soldCount" gorm:"column:sold_count;default:0;comment:已售数量"`
 	CreatedAt    time.Time `json:"createdAt" gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `json:"updatedAt" gorm:"autoUpdateTime"`
 }
@@ -30,6 +32,21 @@ type Product struct {
 // TableName 指定表名
 func (Product) TableName() string {
 	return "products"
+}
+
+// StockStatus 返回库存状态字符串
+// lowThreshold: 低库存阈值，当 stock > 0 && stock <= lowThreshold 时为 "low"
+func (p Product) StockStatus(lowThreshold int) string {
+	if p.Stock == -1 {
+		return "available"
+	}
+	if p.Stock == 0 {
+		return "soldout"
+	}
+	if lowThreshold > 0 && p.Stock <= lowThreshold {
+		return "low"
+	}
+	return "available"
 }
 
 // ProductPurchase 产品购买记录表

@@ -47,6 +47,7 @@ const (
 	CodeTokenGenerateError      = 4006
 	CodeOAuth2Failed            = 4007 // OAuth2认证失败
 	CodeOAuth2RegistrationLimit = 4008 // OAuth2注册已达限制
+	CodeEmailNotVerified        = 4009 // 邮箱未验证
 
 	// 系统相关错误 5000-5999
 	CodeConfigError      = 5001
@@ -87,6 +88,7 @@ var ErrorMessages = map[int]string{
 	CodeTokenGenerateError:      "令牌生成失败",
 	CodeOAuth2Failed:            "OAuth2认证失败",
 	CodeOAuth2RegistrationLimit: "OAuth2注册已达到限制",
+	CodeEmailNotVerified:        "邮箱未验证，请先验证邮箱",
 	CodeConfigError:             "配置错误",
 	CodeDatabaseError:           "数据库错误",
 	CodeCacheError:              "缓存错误",
@@ -176,7 +178,7 @@ func ResponseSuccessWithPagination(c *gin.Context, data interface{}, total int64
 // 根据错误码获取HTTP状态码
 func getHTTPCode(code int) int {
 	switch code {
-	case CodeInvalidParam, CodeValidationError, CodeCaptchaInvalid, CodeCaptchaRequired, CodeInviteCodeInvalid, CodeInviteCodeExpired, CodeInviteCodeUsed:
+	case CodeInvalidParam, CodeValidationError, CodeCaptchaInvalid, CodeCaptchaRequired, CodeInviteCodeInvalid, CodeInviteCodeExpired, CodeInviteCodeUsed, CodeEmailNotVerified:
 		return http.StatusBadRequest
 	case CodeUnauthorized, CodeInvalidCredentials:
 		return http.StatusUnauthorized

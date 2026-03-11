@@ -19,6 +19,9 @@ func InitAuthRouter(Router *gin.RouterGroup) {
 		AuthRouter.POST("send-verify-code", auth.SendVerifyCode) // 发送登录验证码
 		AuthRouter.POST("forgot-password", auth.ForgotPassword)
 		AuthRouter.POST("reset-password", auth.ResetPassword)
+		AuthRouter.POST("resend-verification", auth.ResendVerification)   // 重发激活邮件
+		AuthRouter.GET("verify-email", auth.VerifyEmail)                   // 验证邮箱激活
+		AuthRouter.GET("verify-reset-token", auth.VerifyResetToken)        // 验证密码重置token
 		AuthRouter.POST("logout", middleware.RequireAuth(authModel.AuthLevelUser), auth.Logout)
 	}
 }

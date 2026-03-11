@@ -26,9 +26,9 @@
         :unique-opened="false"
         :collapse-transition="false"
         mode="vertical"
-        background-color="#f0f9f4"
-        text-color="#374151"
-        active-text-color="#16a34a"
+        background-color="transparent"
+        text-color="var(--sidebar-text)"
+        active-text-color="var(--sidebar-active-text)"
         @select="handleMenuSelect"
       >
         <!-- 首页链接 - 仅在未登录时显示 -->
@@ -176,6 +176,14 @@ const userRoutes = computed(() => {
         }
       },
       {
+        path: '/user/domains',
+        name: 'UserDomains',
+        meta: {
+          title: '域名管理',
+          icon: 'Link'
+        }
+      },
+      {
         path: '/user/orders',
         name: 'UserOrders',
         meta: {
@@ -189,6 +197,14 @@ const userRoutes = computed(() => {
         meta: {
           title: t('sidebar.purchase'),
           icon: 'ShoppingCart'
+        }
+      },
+      {
+        path: '/agent/dashboard',
+        name: 'AgentDashboard',
+        meta: {
+          title: '代理商中心',
+          icon: 'OfficeBuilding'
         }
       },
       {
@@ -272,6 +288,22 @@ const userRoutes = computed(() => {
         meta: {
           title: t('sidebar.portManagement'),
           icon: 'Connection'
+        }
+      },
+      {
+        path: '/admin/domains',
+        name: 'AdminDomains',
+        meta: {
+          title: '域名管理',
+          icon: 'Link'
+        }
+      },
+      {
+        path: '/admin/domain-config',
+        name: 'AdminDomainConfig',
+        meta: {
+          title: '域名配置',
+          icon: 'Setting'
         }
       },
       {
@@ -379,12 +411,12 @@ watch(() => userStore.userType, (newType, oldType) => {
 .sidebar-container {
   transition: width 0.28s;
   width: var(--sidebar-width);
-  background-color: #f0f9f4; /* 浅绿色背景 */
+  background-color: var(--sidebar-bg);
 
   .sidebar-logo {
     height: var(--navbar-height);
     line-height: var(--navbar-height);
-    background: #16a34a; /* 绿色背景 */
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
     text-align: center;
     overflow: hidden;
     display: flex;
@@ -394,7 +426,7 @@ watch(() => userStore.userType, (newType, oldType) => {
     position: relative;
 
     h1 {
-      color: #ffffff; /* 白色文字 */
+      color: #ffffff;
       font-weight: var(--font-weight-semibold);
       font-size: var(--font-size-md);
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
@@ -404,7 +436,7 @@ watch(() => userStore.userType, (newType, oldType) => {
     
     span {
       font-size: var(--font-size-xs);
-      color: #dcfce7; /* 浅绿色文字 */
+      color: rgba(255, 255, 255, 0.7);
     }
 
     .collapse-btn {
@@ -412,13 +444,13 @@ watch(() => userStore.userType, (newType, oldType) => {
       top: 50%;
       right: 10px;
       transform: translateY(-50%);
-      color: #dcfce7; /* 浅绿色 */
+      color: rgba(255, 255, 255, 0.7);
       background: transparent;
       border: none;
       transition: all 0.28s;
       
       &:hover {
-        color: #ffffff; /* 悬停时白色 */
+        color: #ffffff;
       }
     }
   }
@@ -457,35 +489,38 @@ watch(() => userStore.userType, (newType, oldType) => {
   .el-menu {
     border: none;
     height: 100%;
-    background-color: #f0f9f4 !important;
+    background-color: var(--sidebar-bg) !important;
   }
 
-  /* 菜单项悬停效果 */
   :deep(.el-menu-item) {
     background-color: transparent !important;
+    border-radius: var(--border-radius-sm);
+    margin: 2px 8px;
+    border-left: 3px solid transparent;
     
     &:hover {
-      background-color: #dcfce7 !important;
-      color: #16a34a !important;
+      background-color: var(--bg-color-hover) !important;
+      color: var(--sidebar-active-text) !important;
     }
     
     &.is-active {
-      background-color: #bbf7d0 !important;
-      color: #16a34a !important;
-      border-right: 3px solid #16a34a;
+      background-color: var(--sidebar-active-bg) !important;
+      color: var(--sidebar-active-text) !important;
+      border-left: 3px solid var(--primary-color);
     }
   }
 
   :deep(.el-sub-menu__title) {
     background-color: transparent !important;
+    border-radius: var(--border-radius-sm);
+    margin: 2px 8px;
     
     &:hover {
-      background-color: #dcfce7 !important;
-      color: #16a34a !important;
+      background-color: var(--bg-color-hover) !important;
+      color: var(--sidebar-active-text) !important;
     }
   }
 
-  // 收缩状态样式
   &.is-collapse {
     width: var(--sidebar-width-collapsed);
     
@@ -497,7 +532,6 @@ watch(() => userStore.userType, (newType, oldType) => {
     }
   }
   
-  // 移动端样式
   &.mobile {
     width: var(--sidebar-width);
     

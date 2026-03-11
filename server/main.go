@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 
-	systemAPI "oneclickvirt/api/v1/system"
 	"oneclickvirt/global"
 	"oneclickvirt/initialize"
 
@@ -70,8 +70,15 @@ func ensureCorrectWorkingDirectory() {
 }
 
 func runServer() {
-	// 启动性能监控
-	systemAPI.StartPerformanceMonitoring()
+	// 仅在开发环境下启动pprof性能监控（绑定到localhost）
+	if global.APP_CONFIG.System.Env == "development" {
+		go func() {
+			fmt.Println("[INFO] 开发环境：启动pprof性能监控端点 http://localhost:6060/debug/pprof/")
+			if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+				fmt.Printf("[WARN] pprof服务启动失败: %v\n", err)
+			}
+		}()
+	}
 
 	router := initialize.Routers()
 	global.APP_LOG.Debug("路由初始化完成")
@@ -79,7 +86,6 @@ func runServer() {
 	s := initialize.InitServer(address, router)
 	fmt.Printf("[SUCCESS] 服务器启动成功，监听端口: %d\n", global.APP_CONFIG.System.Addr)
 	fmt.Printf("[INFO] API文档路径: /swagger/index.html\n")
-	fmt.Printf("[INFO] 性能监控(pprof)端点: /debug/pprof/\n")
 	global.APP_LOG.Info("服务器启动成功", zap.Int("port", global.APP_CONFIG.System.Addr))
 	if err := s.ListenAndServe(); err != nil {
 		global.APP_LOG.Fatal("服务器启动失败", zap.Error(err))

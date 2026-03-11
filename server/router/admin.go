@@ -170,6 +170,7 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.PUT("/products/:id", admin.UpdateProduct)
 		AdminGroup.DELETE("/products/:id", admin.DeleteProduct)
 		AdminGroup.PUT("/products/:id/toggle", admin.ToggleProduct)
+		AdminGroup.PUT("/products/:id/stock", admin.UpdateProductStock)
 
 		// 兑换码管理
 		AdminGroup.GET("/redemption-codes", admin.GetRedemptionCodes)
@@ -179,11 +180,30 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.GET("/redemption-codes/:id/usages", admin.GetRedemptionCodeUsages)
 		AdminGroup.PUT("/redemption-codes/:id/toggle", admin.ToggleRedemptionCode)
 
+		// 域名管理
+		AdminGroup.GET("/domains", admin.AdminGetDomains)
+		AdminGroup.DELETE("/domains/:id", admin.AdminDeleteDomain)
+		AdminGroup.GET("/domain-config", admin.GetDomainConfig)
+		AdminGroup.PUT("/domain-config", admin.UpdateDomainConfig)
+		AdminGroup.POST("/domains/sync-dns", admin.SyncDNS)
+
 		// 订单管理
 		AdminGroup.GET("/orders", admin.GetOrders)
 		AdminGroup.GET("/orders/:id", admin.GetOrder)
 		AdminGroup.DELETE("/orders/:id", admin.DeleteOrder)
 		AdminGroup.POST("/orders/:id/cancel", admin.CancelOrder)
 		AdminGroup.POST("/orders/:id/refund", admin.RefundOrder)
+
+		// 代理商管理
+		AdminGroup.GET("/agents", admin.GetAgentList)
+		AdminGroup.POST("/agents", admin.CreateAgentByAdmin)
+		AdminGroup.PUT("/agents/:id", admin.UpdateAgentByAdmin)
+		AdminGroup.DELETE("/agents/:id", admin.DeleteAgent)
+		AdminGroup.POST("/agents/:id/approve", admin.ApproveAgent)
+		AdminGroup.PUT("/agents/:id/status", admin.UpdateAgentStatus)
+		AdminGroup.PUT("/agents/:id/commission", admin.AdjustCommission)
+		AdminGroup.GET("/agents/:id/detail", admin.GetAgentDetail)
+		AdminGroup.GET("/agents/:id/sub-users", admin.GetAgentSubUsers)
+		AdminGroup.POST("/commissions/:id/settle", admin.SettleCommission)
 	}
 }
