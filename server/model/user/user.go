@@ -51,6 +51,7 @@ type User struct {
 	// 其他信息
 	InviteCode  string     `json:"inviteCode" gorm:"size:32"` // 注册时使用的邀请码
 	LastLoginAt *time.Time `json:"lastLoginAt"`               // 最后登录时间
+	EmailVerified bool     `json:"emailVerified" gorm:"default:false;comment:邮箱是否验证"`
 
 	// OAuth2关联信息
 	OAuth2ProviderID uint   `json:"oauth2ProviderId" gorm:"index"`   // OAuth2提供商ID（关联oauth2_providers表）

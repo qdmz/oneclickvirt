@@ -128,7 +128,9 @@ type Provider struct {
 	CertPath        string     `json:"certPath" gorm:"size:512"`                 // 客户端证书文件路径
 	KeyPath         string     `json:"keyPath" gorm:"size:512"`                  // 客户端私钥文件路径
 	CACertPath      string     `json:"caCertPath" gorm:"size:512"`               // CA证书文件路径
-	CertFingerprint string     `json:"certFingerprint" gorm:"size:128"`          // 证书指纹
+	CertFingerprint string `json:"certFingerprint" gorm:"size:128"`          // 证书指纹
+	// TrustedFingerprint 可信的服务器证书指纹（SHA256，非空时使用指纹验证替代InsecureSkipVerify）
+	TrustedFingerprint string `json:"trustedFingerprint" gorm:"size:128"` // 可信的服务器证书指纹
 	APIStatus       string     `json:"apiStatus" gorm:"default:unknown;size:16"` // API连接状态：online, offline, unknown
 	SSHStatus       string     `json:"sshStatus" gorm:"default:unknown;size:16"` // SSH连接状态：online, offline, unknown
 	LastAPICheck    *time.Time `json:"lastApiCheck"`                             // 最后一次API健康检查时间

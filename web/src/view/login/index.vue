@@ -42,6 +42,27 @@
         <p>{{ t('login.subtitle') }}</p>
       </div>
 
+      <!-- 邮箱未验证提示 -->
+      <el-alert
+        v-if="emailNotVerified"
+        :title="emailNotVerifiedMsg"
+        type="warning"
+        show-icon
+        :closable="false"
+        style="margin-bottom: 20px;"
+      >
+        <template #default>
+          <el-button
+            type="text"
+            size="small"
+            :loading="resendLoading"
+            @click="handleResendVerification"
+          >
+            重新发送激活邮件
+          </el-button>
+        </template>
+      </el-alert>
+
       <el-form
         ref="loginFormRef"
         :model="loginForm"
@@ -169,6 +190,7 @@ import { getCaptcha } from '@/api/auth'
 import { useErrorHandler } from '@/composables/useErrorHandler'
 import { getPublicConfig, getPublicSiteConfigs } from '@/api/public'
 import { getEnabledOAuth2Providers } from '@/api/oauth2'
+import { resendVerification } from '@/api/auth'
 import { Connection, Operation, HomeFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useLanguageStore } from '@/pinia/modules/language'
@@ -188,6 +210,9 @@ const oauth2Enabled = ref(false)
 const oauth2Providers = ref([])
 const oauth2Loading = ref(false) // OAuth2登录防重复点击
 const siteConfigs = ref({}) // 站点配置
+const emailNotVerified = ref(false)
+const emailNotVerifiedMsg = ref('')
+const resendLoading = ref(false)
 
 const loginForm = reactive({
   username: '',
@@ -226,6 +251,7 @@ const handleLogin = async () => {
     
     try {
       const result = await handleSubmit(async () => {
+        emailNotVerified.value = false
         return await userStore.userLogin({
           ...loginForm,
           captchaId: captchaId.value
@@ -238,6 +264,12 @@ const handleLogin = async () => {
       if (result.success) {
         router.push('/user/dashboard')
       } else {
+        // 检查是否是邮箱未验证错误 (code 4009)
+        const errData = result.error?.response?.data
+        if (errData && errData.code === 4009) {
+          emailNotVerified.value = true
+          emailNotVerifiedMsg.value = errData.message || '邮箱未验证，请先验证邮箱'
+        }
         refreshCaptcha() // 登录失败刷新验证码
       }
     } finally {
@@ -316,6 +348,30 @@ const fetchSiteConfigs = async () => {
   }
 }
 
+// 重新发送激活邮件
+const handleResendVerification = async () => {
+  if (!loginForm.username) {
+    ElMessage.warning(t('login.pleaseEnterUsername'))
+    return
+  }
+  // 尝试用用户名查找邮箱，简单处理：提示用户输入邮箱
+  // 这里用一个简单的方式：用用户名作为查询
+  resendLoading.value = true
+  try {
+    const resp = await resendVerification({ email: loginForm.username })
+    if (resp.code === 0 || resp.code === 200) {
+      ElMessage.success('激活邮件已重新发送，请查收')
+      emailNotVerified.value = false
+    } else {
+      ElMessage.error(resp.message || '发送失败')
+    }
+  } catch (error) {
+    ElMessage.error('发送激活邮件失败')
+  } finally {
+    resendLoading.value = false
+  }
+}
+
 onMounted(() => {
   refreshCaptcha()
   checkOAuth2Config()
@@ -328,28 +384,16 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f7fa;
-}
-
-.login-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-  background-size: cover;
-  opacity: 0.1;
-  z-index: -1;
+  background: var(--auth-page-bg);
+  position: relative;
 }
 
 /* 顶部栏样式 */
 .auth-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--auth-header-bg);
   backdrop-filter: blur(20px);
-  box-shadow: 0 2px 20px rgba(22, 163, 74, 0.1);
-  border-bottom: 1px solid rgba(22, 163, 74, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--auth-card-border);
 }
 
 .header-content {
@@ -369,8 +413,8 @@ onMounted(() => {
 }
 
 .logo-image {
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
@@ -379,11 +423,11 @@ onMounted(() => {
 }
 
 .logo h1 {
-  font-size: 28px;
-  color: #16a34a;
+  font-size: 22px;
+  color: #fff;
   margin: 0;
   font-weight: 700;
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -405,45 +449,53 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 24px;
-  border-radius: 25px;
-  border: 1px solid #e5e7eb;
-  background: transparent;
-  color: #374151;
-  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .nav-link:hover {
-  background: rgba(22, 163, 74, 0.1);
-  color: #16a34a;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
   transform: translateY(-2px);
 }
 
 .nav-link.home-btn {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border: none;
-  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .nav-link.home-btn:hover {
-  background: linear-gradient(135deg, #15803d, #16a34a);
+  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
 }
 
 .login-form {
   margin: auto;
   margin-top: 60px;
   margin-bottom: 60px;
-  width: 400px;
+  width: 420px;
   padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: var(--auth-card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--border-radius-xl);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--auth-card-border);
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .login-form :deep(.el-form) {
@@ -467,6 +519,29 @@ onMounted(() => {
 .login-form :deep(.el-input__wrapper) {
   width: 100%;
   box-sizing: border-box;
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset !important;
+}
+
+.login-form :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset !important;
+}
+
+.login-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--primary-color-light) inset, 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+.login-form :deep(.el-input__inner) {
+  color: var(--text-color-primary) !important;
+}
+
+.login-form :deep(.el-input__prefix .el-icon) {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.login-form :deep(.el-checkbox__label) {
+  color: var(--text-color-secondary) !important;
 }
 
 .login-header {
@@ -476,13 +551,14 @@ onMounted(() => {
 
 .login-header h2 {
   font-size: 24px;
-  color: #303133;
+  color: var(--text-color-primary);
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .login-header p {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .form-options {
@@ -494,7 +570,7 @@ onMounted(() => {
 }
 
 .forgot-link {
-  color: #409eff;
+  color: var(--primary-color-light);
   text-decoration: none;
 }
 
@@ -503,9 +579,22 @@ onMounted(() => {
   width: 100%;
 }
 
-.form-actions .el-button {
+.form-actions :deep(.el-button) {
   width: 100% !important;
   height: 45px;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+  border: none !important;
+  border-radius: var(--border-radius-sm) !important;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+.form-actions :deep(.el-button:hover) {
+  background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5) !important;
 }
 
 .form-footer {
@@ -514,25 +603,29 @@ onMounted(() => {
   width: 100%;
 }
 
+.form-footer p {
+  color: var(--text-color-secondary);
+}
+
 .form-footer a {
-  color: #409eff;
+  color: var(--primary-color-light);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .admin-login {
   text-align: center;
   font-size: 14px;
-  color: #909399;
 }
 
 .admin-link {
-  color: #909399;
+  color: var(--text-color-secondary);
   text-decoration: none;
   margin: 0 5px;
 }
 
 .admin-link:hover {
-  color: #409eff;
+  color: var(--primary-color-light);
 }
 
 .captcha-container {
@@ -550,14 +643,15 @@ onMounted(() => {
 .captcha-image {
   width: 120px;
   height: 40px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius-sm);
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .captcha-image img {
@@ -568,7 +662,7 @@ onMounted(() => {
 
 .captcha-loading {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .oauth2-login {
@@ -579,6 +673,11 @@ onMounted(() => {
 
 .oauth2-login :deep(.el-divider) {
   margin: 20px 0;
+}
+
+.oauth2-login :deep(.el-divider__text) {
+  background: transparent !important;
+  color: var(--text-color-secondary) !important;
 }
 
 .oauth2-providers {
@@ -596,17 +695,20 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #dcdfe6;
-  background: white;
-  color: #606266;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-color-primary) !important;
   margin: 0 !important;
   padding: 0 20px !important;
   box-sizing: border-box;
+  border-radius: var(--border-radius-sm) !important;
+  backdrop-filter: blur(10px);
 }
 
 .oauth2-button:hover {
-  border-color: #409eff;
-  color: #409eff;
+  border-color: var(--primary-color-light) !important;
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: var(--primary-color-light) !important;
 }
 
 .oauth2-providers :deep(.el-button) {
@@ -614,10 +716,15 @@ onMounted(() => {
   margin: 0 !important;
 }
 
+/* Alert override for auth pages */
+.login-form :deep(.el-alert) {
+  --el-alert-bg-color: rgba(245, 158, 11, 0.1);
+}
+
 @media (max-width: 768px) {
   .login-form {
     width: 90%;
-    padding: 20px;
+    padding: 24px;
   }
 }
 </style>

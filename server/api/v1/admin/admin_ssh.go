@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"oneclickvirt/utils"
+	"strings"
 	"sync"
 	"time"
 
@@ -25,7 +26,19 @@ var adminUpgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true // 在生产环境中应该进行更严格的检查
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			return false
+		}
+		frontendURL := global.APP_CONFIG.System.FrontendURL
+		if origin == frontendURL {
+			return true
+		}
+		// 开发环境允许 localhost
+		if global.APP_CONFIG.System.Env == "development" && strings.HasPrefix(origin, "http://localhost") {
+			return true
+		}
+		return false
 	},
 }
 

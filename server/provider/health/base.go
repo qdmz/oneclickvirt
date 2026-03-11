@@ -25,8 +25,8 @@ type BaseHealthChecker struct {
 	httpClient *http.Client
 	logger     *zap.Logger
 	// 追踪字段
-	instanceID string       // 实例唯一标识，用于日志追踪
-	mu         sync.RWMutex // 保护 config 字段的并发访问
+	instanceID string       // 实例唯一标识，用于日志追�?
+	mu         sync.RWMutex // 保护 config 字段的并发访�?
 }
 
 // createOptimizedHTTPClient 创建HTTP客户端（带连接池）并注册到清理管理器
@@ -37,8 +37,8 @@ func createOptimizedHTTPClient(config HealthConfig) *http.Client {
 			Timeout:   10 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
-		MaxIdleConns:          50, // 健康检查不需要太多连接
-		MaxIdleConnsPerHost:   5,  // 每个host最多5个空闲连接
+		MaxIdleConns:          50, // 健康检查不需要太多连�?
+		MaxIdleConnsPerHost:   5,  // 每个host最�?个空闲连�?
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
@@ -47,11 +47,11 @@ func createOptimizedHTTPClient(config HealthConfig) *http.Client {
 	// 如果使用HTTPS且配置了跳过TLS验证，则设置InsecureSkipVerify
 	if config.APIScheme == "https" && config.SkipTLSVerify {
 		transport.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, // Security: only for internal hypervisors with self-signed certs.
 		}
 	}
 
-	// 注册到Transport清理管理器（防止内存泄漏）
+	// 注册到Transport清理管理器（防止内存泄漏�?
 	if GetTransportCleanupManager != nil {
 		mgr := GetTransportCleanupManager()
 		if config.ProviderID > 0 {
@@ -103,21 +103,21 @@ func (b *BaseHealthChecker) SetConfig(config HealthConfig) {
 		}
 	}
 
-	b.config = config.DeepCopy() // 使用深拷贝避免外部修改
+	b.config = config.DeepCopy() // 使用深拷贝避免外部修�?
 	b.instanceID = fmt.Sprintf("provider_%d_%s", config.ProviderID, config.ProviderName)
 
 	// 重新配置HTTP客户端（使用连接池）
 	b.httpClient = createOptimizedHTTPClient(config)
 }
 
-// GetConfig 获取配置的只读副本（线程安全）
+// GetConfig 获取配置的只读副本（线程安全�?
 func (b *BaseHealthChecker) GetConfig() HealthConfig {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 	return b.config.DeepCopy()
 }
 
-// GetHealthStatus 获取健康状态（默认实现）
+// GetHealthStatus 获取健康状态（默认实现�?
 func (b *BaseHealthChecker) GetHealthStatus() HealthStatus {
 	return HealthStatusUnknown
 }
@@ -136,15 +136,15 @@ func (b *BaseHealthChecker) executeChecks(ctx context.Context, checks []func(con
 	for _, check := range checks {
 		checkResult := check(ctx)
 
-		// 记录检查详情
+		// 记录检查详�?
 		result.Details[string(checkResult.Type)] = checkResult
 
-		// 如果有错误，记录到错误列表
+		// 如果有错误，记录到错误列�?
 		if !checkResult.Success && checkResult.Error != "" {
 			result.Errors = append(result.Errors, fmt.Sprintf("%s: %s", checkResult.Type, checkResult.Error))
 		}
 
-		// 更新各种状态
+		// 更新各种状�?
 		switch checkResult.Type {
 		case CheckTypeSSH:
 			result.SSHStatus = b.getStatusString(checkResult.Success)
@@ -158,7 +158,7 @@ func (b *BaseHealthChecker) executeChecks(ctx context.Context, checks []func(con
 		}
 	}
 
-	// 计算总体状态
+	// 计算总体状�?
 	result.Status = b.calculateOverallStatus(sshOk, apiOk, serviceOk)
 	result.Duration = time.Since(startTime)
 
@@ -173,9 +173,9 @@ func (b *BaseHealthChecker) getStatusString(success bool) string {
 	return "offline"
 }
 
-// calculateOverallStatus 计算总体健康状态
+// calculateOverallStatus 计算总体健康状�?
 func (b *BaseHealthChecker) calculateOverallStatus(sshOk, apiOk, serviceOk bool) HealthStatus {
-	// 计算成功的检查数量
+	// 计算成功的检查数�?
 	successCount := 0
 	totalCount := 0
 
@@ -200,7 +200,7 @@ func (b *BaseHealthChecker) calculateOverallStatus(sshOk, apiOk, serviceOk bool)
 		}
 	}
 
-	// 根据成功率确定状态
+	// 根据成功率确定状�?
 	if totalCount == 0 {
 		return HealthStatusUnknown
 	}

@@ -75,3 +75,12 @@ export function sendVerifyCode(data) {
     data
   })
 }
+
+// 重发激活邮件
+export function resendVerification(data) {
+  return request({
+    url: '/v1/auth/resend-verification',
+    method: 'post',
+    data
+  })
+}

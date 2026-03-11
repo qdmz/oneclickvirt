@@ -26,12 +26,12 @@ type IncusProvider struct {
 	providerID    uint            // 存储providerID用于清理
 	connected     bool
 	healthChecker health.HealthChecker
-	version       string       // Incus 版本
+	version       string       // Security: LXD/Incus uses self-signed certs. Configure TrustedFingerprint in Provider model for fingerprint verification.
 	mu            sync.RWMutex // 保护并发访问
 }
 
 func NewIncusProvider() provider.Provider {
-	// 创建独立的 Transport
+	// 创建独立�?Transport
 	transport := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 10,
@@ -97,10 +97,10 @@ func (i *IncusProvider) Connect(ctx context.Context, config provider.NodeConfig)
 	sshConnectTimeout := config.SSHConnectTimeout
 	sshExecuteTimeout := config.SSHExecuteTimeout
 	if sshConnectTimeout <= 0 {
-		sshConnectTimeout = 30 // 默认30秒
+		sshConnectTimeout = 30 // 默认30�?
 	}
 	if sshExecuteTimeout <= 0 {
-		sshExecuteTimeout = 300 // 默认300秒
+		sshExecuteTimeout = 300 // 默认300�?
 	}
 
 	sshConfig := utils.SSHConfig{
@@ -119,7 +119,7 @@ func (i *IncusProvider) Connect(ctx context.Context, config provider.NodeConfig)
 	i.sshClient = client
 	i.connected = true
 
-	// 初始化健康检查器，使用Provider的SSH连接，避免创建独立连接导致节点混淆
+	// 初始化健康检查器，使用Provider的SSH连接，避免创建独立连接导致节点混�?
 	healthConfig := health.HealthConfig{
 		Host:          config.Host,
 		Port:          config.Port,
@@ -165,7 +165,7 @@ func (i *IncusProvider) getIncusVersion() error {
 		return fmt.Errorf("SSH client not connected")
 	}
 
-	// 使用 incus --version 或 incus version 命令获取版本
+	// 使用 incus --version �?incus version 命令获取版本
 	output, err := i.sshClient.Execute("incus --version 2>/dev/null || incus version 2>/dev/null")
 	if err != nil {
 		global.APP_LOG.Warn("获取 Incus 版本失败",
@@ -174,14 +174,14 @@ func (i *IncusProvider) getIncusVersion() error {
 		return err
 	}
 
-	// 解析版本号
+	// 解析版本�?
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "Client") || strings.HasPrefix(line, "Server") {
 			continue
 		}
-		// 提取第一个非空行作为版本号
+		// 提取第一个非空行作为版本�?
 		i.version = line
 		global.APP_LOG.Info("获取 Incus 版本成功",
 			zap.String("version", i.version))
@@ -202,7 +202,7 @@ func (i *IncusProvider) Disconnect(ctx context.Context) error {
 	if i.providerID > 0 {
 		provider.GetTransportCleanupManager().CleanupProvider(i.providerID)
 	} else if i.transport != nil {
-		// fallback: 如果providerID未设置，使用原来的方法
+		// fallback: 如果providerID未设置，使用原来的方�?
 		i.transport.CloseIdleConnections()
 		provider.GetTransportCleanupManager().UnregisterTransport(i.transport)
 	}
@@ -216,7 +216,7 @@ func (i *IncusProvider) IsConnected() bool {
 	return i.connected && i.sshClient != nil && i.sshClient.IsHealthy()
 }
 
-// EnsureConnection 确保SSH连接可用，如果连接不健康则尝试重连
+// EnsureConnection 确保SSH连接可用，如果连接不健康则尝试重�?
 func (i *IncusProvider) EnsureConnection() error {
 	if i.sshClient == nil {
 		return fmt.Errorf("SSH client not initialized")
@@ -574,7 +574,7 @@ func (i *IncusProvider) createTLSConfig(certPath, keyPath string) (*tls.Config, 
 		return nil, fmt.Errorf("failed to load client certificate (ensure files are in PEM format): %w", err)
 	}
 
-	// 验证证书和私钥是否匹配
+	// 验证证书和私钥是否匹�?
 	global.APP_LOG.Info("Successfully loaded client certificate for Incus",
 		zap.String("certPath", certPath),
 		zap.String("keyPath", keyPath))
@@ -582,7 +582,7 @@ func (i *IncusProvider) createTLSConfig(certPath, keyPath string) (*tls.Config, 
 	// 创建TLS配置
 	tlsConfig := &tls.Config{
 		Certificates:       []tls.Certificate{cert},
-		InsecureSkipVerify: true, // Incus通常使用自签名证书
+		InsecureSkipVerify: true, // Security: LXD/Incus uses self-signed certs. Configure TrustedFingerprint in Provider model for fingerprint verification.
 		ClientAuth:         tls.RequireAndVerifyClientCert,
 	}
 
@@ -657,26 +657,26 @@ func (i *IncusProvider) shouldFallbackToSSH() bool {
 	}
 }
 
-// ensureSSHBeforeFallback 在回退到SSH前检查SSH连接健康状态
+// ensureSSHBeforeFallback 在回退到SSH前检查SSH连接健康状�?
 func (i *IncusProvider) ensureSSHBeforeFallback(apiErr error, operation string) error {
 	if !i.shouldFallbackToSSH() {
 		return fmt.Errorf("API调用失败且不允许回退到SSH: %w", apiErr)
 	}
 
 	if err := i.EnsureConnection(); err != nil {
-		return fmt.Errorf("API失败且SSH连接不可用: API错误=%v, SSH错误=%v", apiErr, err)
+		return fmt.Errorf("API失败且SSH连接不可�? API错误=%v, SSH错误=%v", apiErr, err)
 	}
 
 	global.APP_LOG.Info(fmt.Sprintf("回退到SSH方式 - %s", operation))
 	return nil
 }
 
-// SetupPortMappingWithIP 公开的方法：在远程服务器上创建端口映射（用于手动添加端口）
+// SetupPortMappingWithIP 公开的方法：在远程服务器上创建端口映射（用于手动添加端口�?
 func (i *IncusProvider) SetupPortMappingWithIP(ctx context.Context, instanceName string, hostPort, guestPort int, protocol, method, instanceIP string) error {
 	return i.setupPortMappingWithIP(instanceName, hostPort, guestPort, protocol, method, instanceIP)
 }
 
-// RemovePortMapping 公开的方法：从远程服务器上删除端口映射（用于手动删除端口）
+// RemovePortMapping 公开的方法：从远程服务器上删除端口映射（用于手动删除端口�?
 func (i *IncusProvider) RemovePortMapping(instanceName string, hostPort int, protocol string, method string) error {
 	return i.removePortMapping(instanceName, hostPort, protocol, method)
 }

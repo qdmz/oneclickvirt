@@ -9,6 +9,34 @@ import (
 	"go.uber.org/zap"
 )
 
+// productResponse 带库存状态的产品响应
+type productResponse struct {
+	productModel.Product
+	StockStatus string `json:"stockStatus"`
+}
+
+// defaultLowStockThreshold 默认低库存阈值
+const defaultLowStockThreshold = 10
+
+// newProductResponses 将产品列表转换为带库存状态的响应
+func newProductResponse(p productModel.Product, lowStockThreshold int) productResponse {
+	if lowStockThreshold <= 0 {
+		lowStockThreshold = defaultLowStockThreshold
+	}
+	return productResponse{
+		Product:     p,
+		StockStatus: p.StockStatus(lowStockThreshold),
+	}
+}
+
+func newProductResponses(products []productModel.Product, lowStockThreshold int) []productResponse {
+	result := make([]productResponse, len(products))
+	for i, p := range products {
+		result[i] = newProductResponse(p, lowStockThreshold)
+	}
+	return result
+}
+
 // GetProducts 获取产品列表
 // @Summary 获取产品列表
 // @Description 管理员获取产品列表
@@ -51,7 +79,7 @@ func GetProducts(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code":    200,
 		"message": "success",
-		"data":    products,
+		"data":    newProductResponses(products, defaultLowStockThreshold),
 	})
 }
 
@@ -89,7 +117,7 @@ func CreateProduct(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code":    200,
 		"message": "创建成功",
-		"data":    product,
+		"data":    newProductResponse(product, defaultLowStockThreshold),
 	})
 }
 
@@ -136,6 +164,8 @@ func UpdateProduct(c *gin.Context) {
 		"sort_order":    product.SortOrder,
 		"features":      product.Features,
 		"allow_repeat":  product.AllowRepeat, // 添加是否允许重复购买字段
+		"stock":         product.Stock,
+		"sold_count":    product.SoldCount,
 	}
 
 	// 更新产品
@@ -227,7 +257,76 @@ func ToggleProduct(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code":    200,
 		"message": "操作成功",
-		"data":    product,
+		"data":    newProductResponse(product, defaultLowStockThreshold),
+	})
+}
+
+// UpdateProductStock 更新产品库存
+// @Summary 更新产品库存
+// @Description 管理员调整产品库存和已售数量
+// @Tags 管理员/产品管理
+// @Accept json
+// @Produce json
+// @Param id path uint true "产品ID"
+// @Param body body object true "库存信息"
+// @Success 200 {object} common.Response
+// @Router /v1/admin/products/{id}/stock [put]
+func UpdateProductStock(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(400, gin.H{"code": 400, "message": "产品ID不能为空"})
+		return
+	}
+
+	var params struct {
+		Stock     *int `json:"stock"`
+		SoldCount *int `json:"soldCount"`
+	}
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	if params.Stock == nil && params.SoldCount == nil {
+		c.JSON(400, gin.H{"code": 400, "message": "至少需要提供stock或soldCount"})
+		return
+	}
+
+	// 检查产品是否存在
+	var product productModel.Product
+	if err := global.APP_DB.First(&product, id).Error; err != nil {
+		global.APP_LOG.Error("产品不存在", zap.Error(err))
+		c.JSON(404, gin.H{"code": 404, "message": "产品不存在"})
+		return
+	}
+
+	updateMap := map[string]interface{}{}
+	if params.Stock != nil {
+		updateMap["stock"] = *params.Stock
+	}
+	if params.SoldCount != nil {
+		updateMap["sold_count"] = *params.SoldCount
+	}
+
+	if err := global.APP_DB.Model(&productModel.Product{}).Where("id = ?", id).Updates(updateMap).Error; err != nil {
+		global.APP_LOG.Error("更新产品库存失败", zap.Error(err))
+		c.JSON(500, gin.H{"code": 500, "message": "更新产品库存失败"})
+		return
+	}
+
+	// 重新获取更新后的产品数据
+	if err := global.APP_DB.First(&product, id).Error; err != nil {
+		c.JSON(200, gin.H{
+			"code":    200,
+			"message": "更新成功",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "更新成功",
+		"data":    newProductResponse(product, defaultLowStockThreshold),
 	})
 }
 

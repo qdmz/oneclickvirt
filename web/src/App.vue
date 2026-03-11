@@ -52,6 +52,7 @@ onMounted(() => {
 html, body {
   height: 100%;
   background-color: var(--bg-color-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
@@ -93,8 +94,9 @@ p {
 
 .el-card {
   border-radius: var(--border-radius-medium);
-  border-color: var(--border-color);
+  border-color: var(--card-border);
   transition: var(--transition-all);
+  background: var(--card-bg);
 }
 
 .el-card:hover {

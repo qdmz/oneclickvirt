@@ -3,8 +3,10 @@ package initialize
 import (
 	"oneclickvirt/global"
 	adminModel "oneclickvirt/model/admin"
+	agentModel "oneclickvirt/model/agent"
 	authModel "oneclickvirt/model/auth"
 	"oneclickvirt/model/config"
+	domainModel "oneclickvirt/model/domain"
 	monitoringModel "oneclickvirt/model/monitoring"
 	oauth2Model "oneclickvirt/model/oauth2"
 	orderModel "oneclickvirt/model/order"
@@ -176,6 +178,15 @@ func RegisterTables(db *gorm.DB) {
 		// 兑换码相关表
 		&redemptionModel.RedemptionCode{},       // 兑换码表
 		&redemptionModel.RedemptionCodeUsage{},  // 兑换码使用记录表
+
+		// 域名绑定表
+		&domainModel.Domain{},       // 域名绑定表
+		&domainModel.DomainConfig{}, // 域名配置表
+
+		// 代理商相关表
+		&agentModel.Agent{},           // 代理商表
+		&agentModel.SubUserRelation{}, // 代理商子用户关系表
+		&agentModel.Commission{},      // 佣金记录表
 	)
 	if err != nil {
 		global.APP_LOG.Error("register table failed", zap.Error(err))

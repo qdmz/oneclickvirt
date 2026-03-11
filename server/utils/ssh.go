@@ -2,10 +2,12 @@ package utils
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -16,6 +18,65 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 )
+
+const sshKnownHostsPath = "data/ssh_known_hosts"
+
+var knownHostsMu sync.Mutex
+
+// ensureDataDir ensures the data directory exists with proper permissions
+func ensureDataDir() error {
+	dir := filepath.Dir(sshKnownHostsPath)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+	return nil
+}
+
+// hostKeyTOFU implements Trust On First Use for SSH host keys
+func hostKeyTOFU() ssh.HostKeyCallback {
+	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+		knownHostsMu.Lock()
+		defer knownHostsMu.Unlock()
+
+		if err := ensureDataDir(); err != nil {
+			return err
+		}
+
+		keyLine := hostname + " " + key.Type() + " " + hex.EncodeToString(key.Marshal())
+
+		// Read existing known hosts
+		var existing []string
+		if data, err := os.ReadFile(sshKnownHostsPath); err == nil {
+			for _, line := range strings.Split(string(data), "\n") {
+				line = strings.TrimSpace(line)
+				if line != "" {
+					existing = append(existing, line)
+				}
+			}
+		}
+
+		// Check for existing entry
+		for _, entry := range existing {
+			if strings.HasPrefix(entry, hostname+" ") {
+				// Host already known, verify key matches
+				if entry == keyLine {
+					return nil // Key matches
+				}
+				// Key mismatch - possible MITM attack
+				return fmt.Errorf("SSH host key mismatch for %s (possible MITM attack). To fix, remove the entry from %s", hostname, sshKnownHostsPath)
+			}
+		}
+
+		// First time seeing this host - trust on first use
+		existing = append(existing, keyLine)
+		if err := os.WriteFile(sshKnownHostsPath, []byte(strings.Join(existing, "\n")), 0600); err != nil {
+			global.APP_LOG.Warn("Failed to save SSH host key", zap.String("host", hostname), zap.Error(err))
+		} else {
+			global.APP_LOG.Info("SSH host key saved (TOFU)", zap.String("host", hostname))
+		}
+		return nil
+	}
+}
 
 type SSHConfig struct {
 	Host           string
@@ -30,11 +91,11 @@ type SSHConfig struct {
 type SSHClient struct {
 	client          *ssh.Client
 	config          SSHConfig
-	lastHealthTime  time.Time          // 上次健康检查时间
-	keepaliveCancel context.CancelFunc // keepalive goroutine控制
-	keepaliveWg     *sync.WaitGroup    // keepalive goroutine同步（指针避免拷贝）
-	mu              sync.RWMutex       // 保护并发访问
-	closed          bool               // 标记是否已关闭
+	lastHealthTime  time.Time          // Last health check time
+	keepaliveCancel context.CancelFunc // keepalive goroutine sync
+	keepaliveWg     *sync.WaitGroup    // keepalive goroutine sync
+	mu              sync.RWMutex       // Protect concurrent access
+	closed          bool               // Mark as closed
 }
 
 func NewSSHClient(config SSHConfig) (*SSHClient, error) {
@@ -42,10 +103,10 @@ func NewSSHClient(config SSHConfig) (*SSHClient, error) {
 		config.ConnectTimeout = 30 * time.Second
 	}
 	if config.ExecuteTimeout == 0 {
-		config.ExecuteTimeout = 300 * time.Second // 执行超时，避免长时间阻塞
+		config.ExecuteTimeout = 300 * time.Second // Execute timeout to avoid long blocking
 	}
 
-	global.APP_LOG.Debug("SSH客户端连接配置",
+	global.APP_LOG.Debug("SSH client connection config",
 		zap.String("host", config.Host),
 		zap.Int("port", config.Port),
 		zap.Duration("connectTimeout", config.ConnectTimeout),
@@ -66,12 +127,12 @@ func NewSSHClient(config SSHConfig) (*SSHClient, error) {
 	}, nil
 }
 
-// dialSSH 建立SSH连接的内部方法
+// dialSSH 建立SSH连接的内部方�?
 func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup, error) {
-	// 构建认证方法：支持密钥和密码，SSH客户端会按顺序尝试
+	// 构建认证方法：支持密钥和密码，SSH客户端会按顺序尝�?
 	var authMethods []ssh.AuthMethod
 
-	// 如果提供了SSH私钥，添加密钥认证
+	// 如果提供了SSH私钥，添加密钥认�?
 	if config.PrivateKey != "" {
 		signer, err := ssh.ParsePrivateKey([]byte(config.PrivateKey))
 		if err != nil {
@@ -85,14 +146,14 @@ func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup
 		}
 	}
 
-	// 如果提供了密码，添加密码认证（无论是否有密钥，都添加作为备用方案）
+	// 如果提供了密码，添加密码认证（无论是否有密钥，都添加作为备用方案�?
 	if config.Password != "" {
 		authMethods = append(authMethods, ssh.Password(config.Password))
 		global.APP_LOG.Debug("已添加SSH密码认证方法",
 			zap.String("host", config.Host))
 	}
 
-	// 如果既没有密钥也没有密码，返回错误
+	// 如果既没有密钥也没有密码，返回错�?
 	if len(authMethods) == 0 {
 		return nil, nil, nil, fmt.Errorf("no authentication method available: neither SSH key nor password provided")
 	}
@@ -100,7 +161,7 @@ func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup
 	sshConfig := &ssh.ClientConfig{
 		User:            config.Username,
 		Auth:            authMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyTOFU(),
 		Timeout:         config.ConnectTimeout,
 	}
 
@@ -110,7 +171,7 @@ func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup
 		// Host已经包含端口（如 "192.168.1.1:22"），直接使用
 		addr = config.Host
 	} else {
-		// Host不包含端口，拼接端口号
+		// Host不包含端口，拼接端口�?
 		addr = fmt.Sprintf("%s:%d", config.Host, config.Port)
 	}
 
@@ -138,24 +199,24 @@ func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup
 		defer ticker.Stop()
 
 		failedCount := 0
-		maxFailures := 3 // 连续失败3次后退出
+		maxFailures := 3 // 连续失败3次后退�?
 
 		for {
 			select {
 			case <-ctx.Done():
-				// Context被取消，立即退出
-				global.APP_LOG.Debug("SSH keepalive goroutine正常退出",
+				// Context被取消，立即退�?
+				global.APP_LOG.Debug("SSH keepalive goroutine started",
 					zap.String("host", config.Host))
 				return
 			case <-ticker.C:
-				// 双重检查client有效性
+				// 双重检查client有效�?
 				if client == nil {
-					global.APP_LOG.Debug("SSH client已关闭，keepalive退出",
+					global.APP_LOG.Debug("SSH client closed, stopping keepalive",
 						zap.String("host", config.Host))
 					return
 				}
 
-				// 检查连接状态
+				// 检查连接状�?
 				if _, _, err := client.Conn.SendRequest("keepalive@openssh.com", true, nil); err != nil {
 					failedCount++
 					global.APP_LOG.Debug("SSH keepalive失败",
@@ -164,7 +225,7 @@ func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup
 						zap.Error(err))
 
 					if failedCount >= maxFailures {
-						global.APP_LOG.Warn("SSH keepalive连续失败，停止发送",
+						global.APP_LOG.Warn("SSH keepalive send failed, stopping",
 							zap.String("host", config.Host),
 							zap.Int("failedCount", failedCount))
 						return
@@ -172,7 +233,7 @@ func dialSSH(config SSHConfig) (*ssh.Client, context.CancelFunc, *sync.WaitGroup
 					continue
 				}
 
-				// 成功，重置失败计数
+				// 成功，重置失败计�?
 				failedCount = 0
 			}
 		}
@@ -187,15 +248,15 @@ func (c *SSHClient) IsHealthy() bool {
 		return false
 	}
 
-	// 如果最近5秒内检查过，认为是健康的（避免频繁检查）
+	// 如果最�?秒内检查过，认为是健康的（避免频繁检查）
 	if time.Since(c.lastHealthTime) < 5*time.Second {
 		return true
 	}
 
-	// 尝试创建一个session来测试连接
+	// 尝试创建一个session来测试连�?
 	session, err := c.client.NewSession()
 	if err != nil {
-		global.APP_LOG.Warn("SSH连接健康检查失败",
+		global.APP_LOG.Warn("SSH client reconnection failed",
 			zap.String("host", c.config.Host),
 			zap.Error(err))
 		return false
@@ -206,13 +267,13 @@ func (c *SSHClient) IsHealthy() bool {
 	return true
 }
 
-// GetUnderlyingClient 获取底层的ssh.Client，供其他组件使用（如health checker）
+// GetUnderlyingClient 获取底层的ssh.Client，供其他组件使用（如health checker�?
 // 调用者不应该关闭返回的client，它由SSHClient管理
 func (c *SSHClient) GetUnderlyingClient() *ssh.Client {
 	return c.client
 }
 
-// Close 关闭SSH连接并等待所有goroutine退出
+// Close 关闭SSH连接并等待所有goroutine退�?
 func (c *SSHClient) Close() error {
 	c.mu.Lock()
 	if c.closed {
@@ -227,7 +288,7 @@ func (c *SSHClient) Close() error {
 		c.keepaliveCancel()
 	}
 
-	// 等待keepalive goroutine退出
+	// 等待keepalive goroutine退�?
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -241,16 +302,16 @@ func (c *SSHClient) Close() error {
 
 	select {
 	case <-done:
-		// goroutine已退出
-		global.APP_LOG.Debug("SSH keepalive goroutine已正常退出",
+		// goroutine已退�?
+		global.APP_LOG.Debug("SSH keepalive goroutine restarted",
 			zap.String("host", c.config.Host))
 	case <-timer.C:
 		global.APP_LOG.Warn("SSH keepalive goroutine退出超时，强制继续",
 			zap.String("host", c.config.Host))
-		// 超时也要继续关闭连接，不能阻塞
+		// 超时也要继续关闭连接，不能阻�?
 	}
 
-	// 关闭SSH客户端
+	// 关闭SSH客户�?
 	if c.client != nil {
 		return c.client.Close()
 	}
@@ -266,7 +327,7 @@ func (c *SSHClient) Reconnect() error {
 	// 关闭旧连接和keepalive goroutine
 	if c.keepaliveCancel != nil {
 		c.keepaliveCancel()
-		// 等待旧的keepalive goroutine退出
+		// 等待旧的keepalive goroutine退�?
 		done := make(chan struct{})
 		go func() {
 			if c.keepaliveWg != nil {
@@ -281,14 +342,14 @@ func (c *SSHClient) Reconnect() error {
 		select {
 		case <-done:
 		case <-timer.C:
-			global.APP_LOG.Warn("等待旧keepalive goroutine退出超时", zap.String("host", c.config.Host))
+			global.APP_LOG.Warn("Waiting for keepalive goroutine to exit", zap.String("host", c.config.Host))
 		}
 	}
 	if c.client != nil {
 		c.client.Close()
 	}
 
-	// 建立新连接
+	// 建立新连�?
 	client, keepaliveCancel, keepaliveWg, err := dialSSH(c.config)
 	if err != nil {
 		return fmt.Errorf("failed to reconnect SSH: %w", err)
@@ -317,7 +378,7 @@ func (c *SSHClient) Execute(command string) (string, error) {
 		}
 	}
 
-	// 尝试执行命令，如果失败则重试一次（可能是连接刚断开）
+	// 尝试执行命令，如果失败则重试一次（可能是连接刚断开�?
 	output, err := c.executeCommand(command)
 	if err != nil && strings.Contains(err.Error(), "failed to create SSH session") {
 		global.APP_LOG.Warn("SSH session创建失败，尝试重连后重试",
@@ -339,7 +400,7 @@ func (c *SSHClient) Execute(command string) (string, error) {
 	return output, err
 }
 
-// executeCommand 执行SSH命令的内部方法
+// executeCommand 执行SSH命令的内部方�?
 func (c *SSHClient) executeCommand(command string) (string, error) {
 	session, err := c.client.NewSession()
 	if err != nil {
@@ -357,7 +418,7 @@ func (c *SSHClient) executeCommand(command string) (string, error) {
 		return "", fmt.Errorf("failed to request PTY: %w", err)
 	}
 
-	// 设置环境变量来确保PATH正确加载，避免使用bash -l -c的转义问题
+	// 设置环境变量来确保PATH正确加载，避免使用bash -l -c的转义问�?
 	// 这种方式更安全，不需要处理复杂的命令转义
 	envCommand := fmt.Sprintf("source /etc/profile 2>/dev/null || true; source ~/.bashrc 2>/dev/null || true; source ~/.bash_profile 2>/dev/null || true; export PATH=$PATH:/usr/local/bin:/snap/bin:/usr/sbin:/sbin; %s", command)
 
@@ -371,14 +432,14 @@ func (c *SSHClient) executeCommand(command string) (string, error) {
 		close(done)
 	}()
 
-	// 等待命令完成或超时
+	// 等待命令完成或超�?
 	timeoutTimer := time.NewTimer(c.config.ExecuteTimeout)
 	defer timeoutTimer.Stop()
 
 	select {
 	case <-done:
 		if execErr != nil {
-			// 记录执行失败的详细信息，包括原始命令和转换后的命令
+			// 记录执行失败的详细信息，包括原始命令和转换后的命�?
 			if global.APP_LOG != nil {
 				global.APP_LOG.Debug("SSH命令执行失败",
 					zap.String("original_command", command),
@@ -396,10 +457,10 @@ func (c *SSHClient) executeCommand(command string) (string, error) {
 }
 
 // TestSSHConnectionLatency 测试SSH连接延迟，执行指定次数测试并返回结果
-// 复用 NewSSHClient 和 Execute 方法，确保测试环境与实际生产环境完全一致
+// 复用 NewSSHClient �?Execute 方法，确保测试环境与实际生产环境完全一�?
 func TestSSHConnectionLatency(config SSHConfig, testCount int) (minLatency, maxLatency, avgLatency time.Duration, err error) {
 	if testCount <= 0 {
-		testCount = 3 // 默认测试3次
+		testCount = 3 // 默认测试3�?
 	}
 
 	latencies := make([]time.Duration, 0, testCount)
@@ -415,25 +476,25 @@ func TestSSHConnectionLatency(config SSHConfig, testCount int) (minLatency, maxL
 	for i := 0; i < testCount; i++ {
 		startTime := time.Now()
 
-		// 使用真实的 NewSSHClient 创建连接，确保测试环境与生产环境一致
+		// 使用真实�?NewSSHClient 创建连接，确保测试环境与生产环境一�?
 		client, connErr := NewSSHClient(config)
 		if connErr != nil {
 			global.APP_LOG.Error("SSH连接测试失败",
 				zap.Int("attempt", i+1),
 				zap.Error(connErr))
-			lastError = fmt.Errorf("连接失败(第%d次): %w", i+1, connErr)
+			lastError = fmt.Errorf("connection failed (attempt %d): %w", i+1, connErr)
 			// 不立即返回，继续尝试其他次数
-			time.Sleep(1 * time.Second) // 失败后等待1秒再试
+			time.Sleep(1 * time.Second) // 失败后等�?秒再�?
 			continue
 		}
 
-		// 使用真实的 Execute 方法执行命令，测试完整的执行流程（包括PTY、环境变量等）
+		// 使用真实�?Execute 方法执行命令，测试完整的执行流程（包括PTY、环境变量等�?
 		_, cmdErr := client.Execute("echo test")
 
-		// 重要：立即关闭客户端，释放连接
+		// 重要：立即关闭客户端，释放连�?
 		closeErr := client.Close()
 		if closeErr != nil {
-			global.APP_LOG.Warn("关闭SSH连接时出错",
+			global.APP_LOG.Warn("Error closing SSH client",
 				zap.Int("attempt", i+1),
 				zap.Error(closeErr))
 		}
@@ -442,9 +503,9 @@ func TestSSHConnectionLatency(config SSHConfig, testCount int) (minLatency, maxL
 			global.APP_LOG.Error("SSH命令执行失败",
 				zap.Int("attempt", i+1),
 				zap.Error(cmdErr))
-			lastError = fmt.Errorf("命令执行失败(第%d次): %w", i+1, cmdErr)
+			lastError = fmt.Errorf("command execution failed (attempt %d): %w", i+1, cmdErr)
 			// 不立即返回，继续尝试其他次数
-			time.Sleep(1 * time.Second) // 失败后等待1秒再试
+			time.Sleep(1 * time.Second) // 失败后等�?秒再�?
 			continue
 		}
 
@@ -457,21 +518,21 @@ func TestSSHConnectionLatency(config SSHConfig, testCount int) (minLatency, maxL
 			zap.Int("attempt", i+1),
 			zap.Duration("latency", latency))
 
-		// 两次测试之间稍作延迟，避免连接过快
+		// 两次测试之间稍作延迟，避免连接过�?
 		if i < testCount-1 {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
 
-	// 检查是否至少有一次成功
+	// 检查是否至少有一次成�?
 	if successCount == 0 {
 		if lastError != nil {
-			return 0, 0, 0, fmt.Errorf("所有 %d 次连接测试均失败，最后错误: %w", testCount, lastError)
+			return 0, 0, 0, fmt.Errorf("所�?%d 次连接测试均失败，最后错�? %w", testCount, lastError)
 		}
-		return 0, 0, 0, fmt.Errorf("所有 %d 次连接测试均失败", testCount)
+		return 0, 0, 0, fmt.Errorf("所�?%d 次连接测试均失败", testCount)
 	}
 
-	// 如果部分成功，记录警告
+	// 如果部分成功，记录警�?
 	if successCount < testCount {
 		global.APP_LOG.Warn("部分SSH连接测试失败",
 			zap.Int("successCount", successCount),
@@ -515,7 +576,7 @@ func (c *SSHClient) ExecuteWithLogging(command string, logPrefix string) (string
 		}
 	}
 
-	// 尝试执行命令，如果失败则重试一次
+	// 尝试执行命令，如果失败则重试一�?
 	output, err := c.executeCommandWithLogging(command, logPrefix)
 	if err != nil && strings.Contains(err.Error(), "failed to create SSH session") {
 		global.APP_LOG.Warn("SSH session创建失败，尝试重连后重试",
@@ -561,7 +622,7 @@ func (c *SSHClient) executeCommandWithLogging(command string, logPrefix string) 
 
 	// 记录执行前的信息
 	if global.APP_LOG != nil {
-		global.APP_LOG.Debug("SSH命令执行开始",
+		global.APP_LOG.Debug("SSH command execution started",
 			zap.String("log_prefix", logPrefix),
 			zap.String("original_command", command),
 			zap.String("wrapped_command", envCommand))
@@ -577,14 +638,14 @@ func (c *SSHClient) executeCommandWithLogging(command string, logPrefix string) 
 		close(done)
 	}()
 
-	// 等待命令完成或超时
+	// 等待命令完成或超�?
 	timeoutTimer := time.NewTimer(c.config.ExecuteTimeout)
 	defer timeoutTimer.Stop()
 
 	select {
 	case <-done:
 		if execErr != nil {
-			// 记录执行失败的详细信息
+			// 记录执行失败的详细信�?
 			if global.APP_LOG != nil {
 				global.APP_LOG.Error("SSH命令执行失败",
 					zap.String("log_prefix", logPrefix),
@@ -616,7 +677,7 @@ func (c *SSHClient) executeCommandWithLogging(command string, logPrefix string) 
 
 // UploadContent 上传内容到远程服务器指定路径
 func (c *SSHClient) UploadContent(content, remotePath string, perm os.FileMode) error {
-	// 创建SFTP客户端
+	// 创建SFTP客户�?
 	sftpClient, err := sftp.NewClient(c.client)
 	if err != nil {
 		return fmt.Errorf("failed to create SFTP client: %w", err)
@@ -663,11 +724,11 @@ func (c *SSHClient) UploadContent(content, remotePath string, perm os.FileMode) 
 func ResolveHostToIP(host string) ([]string, error) {
 	// 尝试解析为IP地址
 	if ip := net.ParseIP(host); ip != nil {
-		// 已经是IP地址，直接返回
+		// 已经是IP地址，直接返�?
 		return []string{host}, nil
 	}
 
-	// 是域名，需要解析
+	// 是域名，需要解�?
 	ips, err := net.LookupHost(host)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve hostname %s: %w", host, err)
@@ -680,7 +741,7 @@ func ResolveHostToIP(host string) ([]string, error) {
 	return ips, nil
 }
 
-// VerifySSHConnection 验证SSH连接的远程地址是否匹配预期的主机
+// VerifySSHConnection 验证SSH连接的远程地址是否匹配预期的主�?
 // 支持域名解析验证：如果expectedHost是域名，会解析后与实际连接的IP比对
 func VerifySSHConnection(client *ssh.Client, expectedHost string) error {
 	if client == nil || client.Conn == nil {
@@ -690,7 +751,7 @@ func VerifySSHConnection(client *ssh.Client, expectedHost string) error {
 	// 获取实际连接的远程地址
 	remoteAddr := client.Conn.RemoteAddr().String()
 
-	// 从 remoteAddr 提取IP（格式: "IP:Port"）
+	// �?remoteAddr 提取IP（格�? "IP:Port"�?
 	actualIP, _, err := net.SplitHostPort(remoteAddr)
 	if err != nil {
 		return fmt.Errorf("failed to parse remote address %s: %w", remoteAddr, err)
@@ -702,14 +763,14 @@ func VerifySSHConnection(client *ssh.Client, expectedHost string) error {
 		return fmt.Errorf("failed to resolve expected host %s: %w", expectedHost, err)
 	}
 
-	// 检查实际连接的IP是否在预期的IP列表中
+	// 检查实际连接的IP是否在预期的IP列表�?
 	for _, expectedIP := range expectedIPs {
 		if actualIP == expectedIP {
 			return nil // 匹配成功
 		}
 	}
 
-	// 如果都不匹配，返回错误
+	// 如果都不匹配，返回错�?
 	return fmt.Errorf("SSH connection address mismatch: expected to connect to %s (resolved to %v) but actually connected to %s",
 		expectedHost, expectedIPs, actualIP)
 }
@@ -722,11 +783,11 @@ func CreateSSHConnection(host string, port int, username, password string) (*ssh
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyTOFU(),
 		Timeout:         10 * time.Second,
 	}
 
-	// 连接SSH服务器
+	// 连接SSH服务�?
 	addr := net.JoinHostPort(host, fmt.Sprintf("%d", port))
 	client, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
@@ -751,7 +812,7 @@ func CreateSSHConnectionFromAddress(address, username, password string) (*ssh.Cl
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyTOFU(),
 		Timeout:         10 * time.Second,
 	}
 

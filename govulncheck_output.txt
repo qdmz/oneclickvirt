@@ -1,0 +1,35 @@
+﻿govulncheck : govulncheck: loading packages: 
+所在位置 行:1 字符: 79
++ ... utoclaw\workspace\oneclickvirt\server; govulncheck ./... 2>&1 | Out-F ...
++                                            ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (govulncheck: loading packages: :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+There are errors with the provided package patterns:
+
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\admin\product.go:238:2: expected declaration, fo
+und levelLimits
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\admin\product.go:47:3: undefined: fillProductRes
+ourcesFromLevelLimit
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\admin\product.go:81:2: undefined: fillProductRes
+ourcesFromLevelLimit
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\admin\product.go:120:2: undefined: fillProductRe
+sourcesFromLevelLimit
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\admin\product.go:4:2: "fmt" imported and not use
+d
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\user\order.go:23:2: gorm redeclared in this bloc
+k
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\user\order.go:10:2: 	other declaration of gorm
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\api\v1\user\order.go:23:2: "gorm.io/gorm" imported and 
+not used
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\scripts\init_contact_phone.go:21:6: main redeclared in 
+this block
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\scripts\check_config.go:12:6: 	other declaration of mai
+n
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\scripts\reset_products.go:17:6: main redeclared in this
+ block
+C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server\scripts\check_config.go:12:6: 	other declaration of mai
+n
+
+For details on package patterns, see https://pkg.go.dev/cmd/go#hdr-Package_lists_and_patterns.
+

@@ -22,6 +22,33 @@ import (
 	"gorm.io/gorm"
 )
 
+// defaultLowStockThreshold 默认低库存阈值
+const defaultLowStockThreshold = 10
+
+// productResponse 带库存状态的产品响应
+type productResponse struct {
+	productModel.Product
+	StockStatus string `json:"stockStatus"`
+}
+
+func newProductResponse(p productModel.Product, lowStockThreshold int) productResponse {
+	if lowStockThreshold <= 0 {
+		lowStockThreshold = defaultLowStockThreshold
+	}
+	return productResponse{
+		Product:     p,
+		StockStatus: p.StockStatus(lowStockThreshold),
+	}
+}
+
+func newProductResponses(products []productModel.Product, lowStockThreshold int) []productResponse {
+	result := make([]productResponse, len(products))
+	for i, p := range products {
+		result[i] = newProductResponse(p, lowStockThreshold)
+	}
+	return result
+}
+
 // fillProductResourcesFromLevelLimit 从用户等级限制中自动填充产品资源配置
 func fillProductResourcesFromLevelLimit(product *productModel.Product) {
 	// 获取全局配置中的等级限制
@@ -100,7 +127,7 @@ func GetUserOrders(c *gin.Context) {
 	page := 1
 	pageSize := 20
 	if p := c.Query("page"); p != "" {
-		if parsed, err := parseUint(p); err == nil && parsed > 0 {
+		if parsed, err := parseUint(p); err == nil && parsed > 0 && parsed <= 10000 {
 			page = int(parsed)
 		}
 	}
@@ -303,7 +330,7 @@ func GetUserProducts(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code":    200,
 		"message": "success",
-		"data":    availableProducts,
+		"data":    newProductResponses(availableProducts, defaultLowStockThreshold),
 	})
 }
 
@@ -359,6 +386,13 @@ func PurchaseProduct(c *gin.Context) {
 	if product.IsEnabled != 1 {
 		tx.Rollback()
 		c.JSON(400, gin.H{"code": 400, "message": "产品已下架"})
+		return
+	}
+
+	// 检查库存
+	if product.Stock != -1 && product.Stock <= 0 {
+		tx.Rollback()
+		c.JSON(400, gin.H{"code": 400, "message": "产品已售罄"})
 		return
 	}
 
@@ -495,6 +529,29 @@ func PurchaseProduct(c *gin.Context) {
 			global.APP_LOG.Error("升级用户等级失败", zap.Error(err))
 			c.JSON(500, gin.H{"code": 500, "message": "升级用户等级失败"})
 			return
+		}
+
+		// 更新库存和已售数量
+		if product.Stock != -1 {
+			if err := tx.Model(&productModel.Product{}).Where("id = ?", product.ID).
+				Updates(map[string]interface{}{
+					"stock":      gorm.Expr("GREATEST(stock - 1, 0)"),
+					"sold_count": gorm.Expr("sold_count + 1"),
+				}).Error; err != nil {
+				tx.Rollback()
+				global.APP_LOG.Error("更新库存失败", zap.Error(err))
+				c.JSON(500, gin.H{"code": 500, "message": "更新库存失败"})
+				return
+			}
+		} else {
+			// 无限库存，只更新已售数量
+			if err := tx.Model(&productModel.Product{}).Where("id = ?", product.ID).
+				Update("sold_count", gorm.Expr("sold_count + 1")).Error; err != nil {
+				tx.Rollback()
+				global.APP_LOG.Error("更新已售数量失败", zap.Error(err))
+				c.JSON(500, gin.H{"code": 500, "message": "购买失败"})
+				return
+			}
 		}
 	}
 

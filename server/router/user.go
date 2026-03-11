@@ -106,6 +106,13 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.GET("/user/products", user.GetUserProducts)
 		UserGroup.POST("/user/products/:id/purchase", user.PurchaseProduct)
 
+		// 域名管理
+		UserGroup.GET("/user/domains", user.GetDomains)
+		UserGroup.POST("/user/domains", user.CreateDomain)
+		UserGroup.PUT("/user/domains/:id", user.UpdateDomain)
+		UserGroup.DELETE("/user/domains/:id", user.DeleteDomain)
+		UserGroup.GET("/user/domains/quota", user.GetAvailableQuota)
+
 		// 购买状态检查
 		UserGroup.GET("/user/purchase-status", user.CheckUserPurchaseStatus)
 	}

@@ -1,13 +1,14 @@
 package auth
 
 import (
+	"oneclickvirt/model/common"
 	auth2 "oneclickvirt/service/auth"
+	agent2 "oneclickvirt/service/agent"
 	"strings"
 
 	"oneclickvirt/global"
 	"oneclickvirt/middleware"
 	"oneclickvirt/model/auth"
-	"oneclickvirt/model/common"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -151,6 +152,19 @@ func Register(c *gin.Context) {
 		zap.Uint("user_id", user.ID),
 		zap.String("ip", c.ClientIP()))
 
+	// 处理代理商推广码关联
+	if req.AgentCode != "" {
+		go func() {
+			agentSvc := agent2.NewAgentService()
+			a, err := agentSvc.GetAgentByCode(req.AgentCode)
+			if err == nil {
+				if err := agentSvc.CreateSubUserRelation(a.ID, user.ID); err != nil {
+					global.APP_LOG.Warn("创建子用户关系失败", zap.Uint("userID", user.ID), zap.Uint("agentID", a.ID), zap.Error(err))
+				}
+			}
+		}()
+	}
+
 	common.ResponseSuccess(c, gin.H{
 		"user":  user,
 		"token": token,
@@ -272,4 +286,82 @@ func SendVerifyCode(c *gin.Context) {
 		zap.String("ip", c.ClientIP()))
 
 	common.ResponseSuccess(c, nil, "验证码已发送，请查收")
+}
+
+// VerifyEmail 验证邮箱激活
+// @Summary 验证邮箱激活
+// @Description 通过token验证并激活用户邮箱
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param token query string true "邮箱激活token"
+// @Success 200 {object} common.Response "邮箱激活成功"
+// @Failure 400 {object} common.Response "请求参数错误或token无效"
+// @Router /auth/verify-email [get]
+func VerifyEmail(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		common.ResponseWithError(c, common.NewError(common.CodeInvalidParam, "激活token不能为空"))
+		return
+	}
+
+	authService := auth2.AuthService{}
+	if err := authService.VerifyEmail(token); err != nil {
+		common.ResponseWithError(c, err)
+		return
+	}
+
+	common.ResponseSuccess(c, nil, "邮箱激活成功")
+}
+
+// ResendVerification 重发激活邮件
+// @Summary 重发激活邮件
+// @Description 向指定邮箱重新发送激活邮件
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param request body auth.ResendVerificationRequest true "重发激活邮件请求参数"
+// @Success 200 {object} common.Response "激活邮件发送成功"
+// @Failure 400 {object} common.Response "请求参数错误"
+// @Router /auth/resend-verification [post]
+func ResendVerification(c *gin.Context) {
+	var req auth.ResendVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		common.ResponseWithError(c, common.NewError(common.CodeValidationError, err.Error()))
+		return
+	}
+
+	authService := auth2.AuthService{}
+	if err := authService.ResendVerification(req.Email); err != nil {
+		common.ResponseWithError(c, err)
+		return
+	}
+
+	common.ResponseSuccess(c, nil, "激活邮件已发送，请查收")
+}
+
+// VerifyResetToken 验证密码重置token
+// @Summary 验证密码重置token
+// @Description 检查密码重置token是否有效
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param token query string true "密码重置token"
+// @Success 200 {object} common.Response "token有效"
+// @Failure 400 {object} common.Response "token无效或已过期"
+// @Router /auth/verify-reset-token [get]
+func VerifyResetToken(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		common.ResponseWithError(c, common.NewError(common.CodeInvalidParam, "重置token不能为空"))
+		return
+	}
+
+	authService := auth2.AuthService{}
+	if err := authService.VerifyResetToken(token); err != nil {
+		common.ResponseWithError(c, err)
+		return
+	}
+
+	common.ResponseSuccess(c, nil, "重置链接有效")
 }

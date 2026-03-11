@@ -63,7 +63,7 @@
 
     <!-- 正常注册表单 -->
     <div
-      v-else
+      v-else-if="!emailVerificationSent"
       class="register-form"
     >
       <div class="register-header">
@@ -180,6 +180,31 @@
         </div>
       </el-form>
     </div>
+
+    <!-- 邮箱验证提示 -->
+    <div
+      v-if="emailVerificationSent"
+      class="register-form"
+    >
+      <div class="register-header">
+        <h2>📧 注册成功</h2>
+        <p>激活邮件已发送到您的邮箱</p>
+      </div>
+      <el-result
+        icon="success"
+        title="请查看邮箱"
+        :sub-title="'我们已向 ' + registerForm.email + ' 发送了激活邮件，请点击邮件中的链接完成激活。'"
+      >
+        <template #extra>
+          <el-button
+            type="primary"
+            @click="router.push('/login')"
+          >
+            前往登录
+          </el-button>
+        </template>
+      </el-result>
+    </div>
   </div>
 </template>
 
@@ -206,6 +231,8 @@ const showInviteCode = ref(false)
 const inviteCodeRequired = ref(false)
 const captchaImage = ref('')
 const registrationEnabled = ref(true)
+const emailVerificationRequired = ref(false)
+const emailVerificationSent = ref(false)
 const siteConfigs = ref({}) // 站点配置
 
 const registerForm = reactive({
@@ -298,7 +325,13 @@ const handleRegister = async () => {
       if (result.success && result.data) {
         // 注册成功，直接设置用户登录状态
         const responseData = result.data.data // 正确获取嵌套的data数据
-        
+
+        // 检查是否需要邮箱验证
+        if (emailVerificationRequired.value && registerForm.email) {
+          emailVerificationSent.value = true
+          return
+        }
+
         // 导入用户store
         const { useUserStore } = await import('@/pinia/modules/user')
         const userStore = useUserStore()
@@ -335,7 +368,10 @@ const checkRegistrationEnabled = async () => {
     
     // 邀请码必填的条件：启用邀请码系统且未启用公开注册
     inviteCodeRequired.value = inviteCodeEnabled && !enablePublicRegistration
-    
+
+    // 检查是否需要邮箱验证
+    emailVerificationRequired.value = config.auth?.enableEmailVerification ?? false
+
     return canRegister
   }, {
     showError: false, // 不显示错误消息
@@ -388,15 +424,16 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background: var(--auth-page-bg);
+  position: relative;
 }
 
 /* 顶部栏样式 */
 .auth-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--auth-header-bg);
   backdrop-filter: blur(20px);
-  box-shadow: 0 2px 20px rgba(22, 163, 74, 0.1);
-  border-bottom: 1px solid rgba(22, 163, 74, 0.1);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--auth-card-border);
 }
 
 .header-content {
@@ -416,8 +453,8 @@ onMounted(async () => {
 }
 
 .logo-image {
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
@@ -426,15 +463,14 @@ onMounted(async () => {
 }
 
 .logo h1 {
-  font-size: 28px;
-  color: #16a34a;
+  font-size: 22px;
+  color: #fff;
   margin: 0;
   font-weight: 700;
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  transition: all 0.3s ease;
 }
 
 .logo h1:hover {
@@ -452,45 +488,93 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 24px;
-  border-radius: 25px;
-  border: 1px solid #e5e7eb;
-  background: transparent;
-  color: #374151;
-  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .nav-link:hover {
-  background: rgba(22, 163, 74, 0.1);
-  color: #16a34a;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
   transform: translateY(-2px);
 }
 
 .nav-link.home-btn {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border: none;
-  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .nav-link.home-btn:hover {
-  background: linear-gradient(135deg, #15803d, #16a34a);
+  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
 }
 
 .register-form {
   margin: auto;
-  margin-top: 60px;
-  margin-bottom: 60px;
+  margin-top: 40px;
+  margin-bottom: 40px;
   width: 500px;
   padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: var(--auth-card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--border-radius-xl);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--auth-card-border);
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.register-form :deep(.el-form-item__label) {
+  color: var(--text-color-regular) !important;
+  font-weight: 500;
+}
+
+.register-form :deep(.el-input__wrapper) {
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15) inset !important;
+}
+
+.register-form :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset !important;
+}
+
+.register-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--primary-color-light) inset, 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+.register-form :deep(.el-input__inner) {
+  color: var(--text-color-primary) !important;
+}
+
+.register-form :deep(.el-button--primary) {
+  width: 100%;
+  height: 45px;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+  border: none !important;
+  border-radius: var(--border-radius-sm) !important;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4) !important;
+}
+
+.register-form :deep(.el-button--primary:hover) {
+  background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5) !important;
 }
 
 .registration-disabled {
@@ -500,19 +584,26 @@ onMounted(async () => {
   margin-bottom: 60px;
 }
 
+.registration-disabled :deep(.el-card) {
+  border-radius: var(--border-radius-xl) !important;
+  background: var(--auth-card-bg) !important;
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--auth-card-border);
+}
+
 .disabled-content {
   text-align: center;
   padding: 40px;
 }
 
 .disabled-content h2 {
-  color: #e6a23c;
+  color: var(--warning-color);
   margin: 20px 0;
   font-size: 24px;
 }
 
 .disabled-content p {
-  color: #666;
+  color: var(--text-color-secondary);
   margin-bottom: 30px;
   font-size: 16px;
   line-height: 1.5;
@@ -525,13 +616,14 @@ onMounted(async () => {
 
 .register-header h2 {
   font-size: 24px;
-  color: #303133;
+  color: var(--text-color-primary);
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .register-header p {
   font-size: 14px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .form-footer {
@@ -539,9 +631,14 @@ onMounted(async () => {
   margin-top: 20px;
 }
 
+.form-footer p {
+  color: var(--text-color-secondary);
+}
+
 .form-footer a {
-  color: #409eff;
+  color: var(--primary-color-light);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .captcha-container {
@@ -553,13 +650,14 @@ onMounted(async () => {
 .captcha-image {
   width: 38%;
   height: 40px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius-sm);
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .captcha-image img {
@@ -570,7 +668,7 @@ onMounted(async () => {
 
 .captcha-loading {
   font-size: 12px;
-  color: #909399;
+  color: var(--text-color-secondary);
 }
 
 .password-hint {
@@ -582,7 +680,7 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .register-form {
     width: 90%;
-    padding: 20px;
+    padding: 24px;
   }
 }
 </style>

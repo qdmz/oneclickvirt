@@ -14,6 +14,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// safeUint64ToInt64 安全地将uint64转换为int64，溢出时返回最大int64值
+func safeUint64ToInt64(v uint64) int64 {
+	if v > uint64(1<<63-1) {
+		return 1<<63 - 1
+	}
+	return int64(v)
+}
+
 type MonitoringService struct{}
 
 var startTime = time.Now()
@@ -198,7 +206,7 @@ func (s *MonitoringService) getRuntimeStats() system.RuntimeStats {
 		HeapIdle:   m.HeapIdle,
 		HeapInuse:  m.HeapInuse,
 		GCCycles:   m.NumGC,
-		LastGC:     time.Unix(0, int64(m.LastGC)),
+		LastGC:     time.Unix(0, safeUint64ToInt64(m.LastGC)),
 		Uptime:     time.Since(startTime).String(),
 	}
 }

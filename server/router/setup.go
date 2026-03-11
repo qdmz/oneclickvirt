@@ -6,9 +6,11 @@ import (
 	"oneclickvirt/api/v1/admin"
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/system"
+	"oneclickvirt/global"
 	"oneclickvirt/middleware"
 	authModel "oneclickvirt/model/auth"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -27,19 +29,38 @@ func isAPIPath(path string) bool {
 func SetupRouter() *gin.Engine {
 	Router := gin.Default()
 
-	// 信任所有代理（用于反向代理和Cloudflare Tunnel）
-	// 这样可以正确处理 X-Forwarded-* headers
-	Router.SetTrustedProxies(nil) // nil 表示信任所有代理
+	// 信任指定代理（用于反向代理和Cloudflare Tunnel）
+	// 仅信任本地回环地址和私有网络地址，避免信任任意代理
+	Router.SetTrustedProxies([]string{
+		"127.0.0.1",
+		"::1",
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+	})
 	Router.ForwardedByClientIP = true
 
 	// CORS配置
-	Router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+	corsConfig := cors.Config{
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"*"},
+		AllowHeaders:     []string{"Content-Type", "Authorization", "X-Token"},
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},
 		AllowCredentials: true,
-	}))
+		MaxAge:           12 * time.Hour,
+	}
+
+	// 优先使用CORS白名单，其次使用FrontendURL配置
+	if len(global.APP_CONFIG.Cors.Whitelist) > 0 {
+		corsConfig.AllowOrigins = global.APP_CONFIG.Cors.Whitelist
+	} else {
+		frontendURL := global.APP_CONFIG.System.FrontendURL
+		if frontendURL == "" {
+			frontendURL = "http://localhost:8080"
+		}
+		corsConfig.AllowOrigins = []string{frontendURL}
+	}
+
+	Router.Use(cors.New(corsConfig))
 
 	// 全局中间件
 	Router.Use(middleware.ErrorHandler())
@@ -138,6 +159,11 @@ func SetupRouter() *gin.Engine {
 		ResourceGroup.Use(middleware.DatabaseHealthCheck())
 		InitResourceRouter(ResourceGroup)
 		InitProviderRouter(ResourceGroup)
+
+		// 代理商路由
+		AgentGroup := ApiGroup.Group("")
+		AgentGroup.Use(middleware.DatabaseHealthCheck())
+		InitAgentRouter(AgentGroup)
 	}
 
 	// 设置静态文件路由（如果启用了嵌入模式）
