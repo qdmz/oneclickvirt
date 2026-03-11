@@ -19,6 +19,7 @@ import (
 	systemModel "oneclickvirt/model/system"
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
+	kycModel "oneclickvirt/model/kyc"
 	"oneclickvirt/service/database"
 
 	"go.uber.org/zap"
@@ -187,6 +188,9 @@ func RegisterTables(db *gorm.DB) {
 		&agentModel.Agent{},           // 代理商表
 		&agentModel.SubUserRelation{}, // 代理商子用户关系表
 		&agentModel.Commission{},      // 佣金记录表
+
+		// KYC real name verification
+		&kycModel.KYCRecord{}, // 实名认证记录表
 	)
 	if err != nil {
 		global.APP_LOG.Error("register table failed", zap.Error(err))

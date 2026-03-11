@@ -1,9 +1,10 @@
-
 # OneClickVirt
+
+[English](./README_EN.md) | 中文
 
 ## 📖 项目简介
 
-OneClickVirt是一个现代化的虚拟服务管理平台，支持多种虚拟化技术，提供完整的产品管理、用户管理、订单管理和资源监控功能。
+OneClickVirt 是一个现代化的虚拟服务管理平台，支持多种虚拟化技术（Docker、LXD、Incus、Proxmox VE），提供完整的产品管理、用户管理、代理商管理、域名绑定、订单管理、实名认证和资源监控功能。
 
 ## 🚀 快速开始
 
@@ -15,7 +16,6 @@ cd web
 npm install
 npm run dev
 ```
-
 前端将运行在 `http://localhost:8080`
 
 #### 后端开发
@@ -24,393 +24,277 @@ cd server
 go mod download
 go run main.go
 ```
-
 后端将运行在 `http://localhost:8890`
 
-### Docker部署
-
-#### 使用docker-compose (推荐)
+### Docker 部署（推荐）
 
 ```bash
 docker-compose -f docker-compose.yaml up -d
 ```
 
-或
-
-```bash
-docker-compose up -d
-```
-
-#### 手动构建和运行
-
-1. 构建镜像
-```bash
-docker build -t oneclickvirt .
-```
-
-2. 运行容器
-
-**基本运行（HTTP）**
-```bash
-docker run -d --name oneclickvirt -p 80:80 -e FRONTEND_URL="http://your-domain.com" oneclickvirt
-```
-
-**使用HTTPS（自动生成自签名证书）**
-```bash
-docker run -d --name oneclickvirt -p 80:80 -p 443:443 -e FRONTEND_URL="https://your-domain.com" oneclickvirt
-```
-
-**使用自定义SSL证书**
-```bash
-docker run -d --name oneclickvirt \
-  -p 80:80 -p 443:443 \
-  -e FRONTEND_URL="https://your-domain.com" \
-  -e SSL_CERT_PATH="/certs/cert.pem" \
-  -e SSL_KEY_PATH="/certs/key.pem" \
-  -v /path/to/your/certs:/certs \
-  oneclickvirt
-```
-
-**数据持久化运行（推荐用于生产环境）**
-```bash
-# 创建数据目录
-mkdir -p docker-data/mysql docker-data/storage docker-data/ssl
-
-# 运行容器（带数据卷挂载）
-docker run -d --name oneclickvirt \
-  -p 80:80 -p 443:443 \
-  -v $(pwd)/docker-data/mysql:/var/lib/mysql \
-  -v $(pwd)/docker-data/storage:/app/storage \
-  -v $(pwd)/docker-data/ssl:/etc/nginx/ssl \
-  -v $(pwd)/docker-data/config.yaml:/app/config.yaml \
-  oneclickvirt
-```
-
-**环境变量说明**
-- `FRONTEND_URL`: 前端访问URL（如 `https://your-domain.com` 或 `http://your-domain.com`）
-- `SSL_CERT_PATH`: SSL证书文件路径（可选）
-- `SSL_KEY_PATH`: SSL私钥文件路径（可选）
-
-**数据持久化说明**
-- `docker-data/mysql`: MySQL数据库文件（用户数据、订单、配置等）
-- `docker-data/storage`: 应用存储（日志、上传文件、缓存等）
-- `docker-data/ssl`: SSL证书文件
-- `docker-data/config.yaml`: 应用配置文件
-
-⚠️ **重要提示**: 使用数据卷挂载后，即使删除容器，数据也会保留在宿主机上。重新创建容器时只需使用相同的 `-v` 参数即可恢复数据。
-
 #### 数据初始化
 
-**首次部署（无数据持久化）**
+首次部署时，访问网站会自动跳转到初始化页面，按照提示设置管理员账户。
 
-首次部署时，访问网站会自动跳转到初始化页面，按照提示设置管理员账户即可。
-
-**使用数据持久化时的初始化**
-
-如果使用数据卷挂载部署，需要手动初始化数据库：
-
+也可以手动初始化：
 ```bash
-# 方法1: 在容器内执行初始化脚本
-docker exec -it oneclickvirt bash /app/scripts/init.sh --docker-internal
-
-# 方法2: 从宿主机执行
-./scripts/init.sh oneclickvirt
-
-# 方法3: 手动导入SQL
 docker exec -i oneclickvirt mysql -uroot oneclickvirt < scripts/init.sql
 ```
 
-初始化完成后，使用以下账户登录：
+默认管理员账户：
 - **用户名**: `admin`
 - **密码**: `admin123456`
 
-⚠️ 首次登录后请立即修改密码！
-
-**重置数据**
-
-如需重置所有数据，执行以下命令：
-
-```bash
-# 停止并删除容器
-docker stop oneclickvirt && docker rm oneclickvirt
-
-# 删除数据目录（谨慎操作！）
-rm -rf docker-data/mysql/*
-rm -f docker-data/storage/.system_initialized
-
-# 重新启动容器
-docker run -d --name oneclickvirt ...
-```
-
-#### 手动构建
-
-1. 构建前端
-```bash
-cd web
-npm install
-npm run build
-```
-
-2. 构建后端
-```bash
-cd server
-go build -o oneclickvirt main.go
-```
-
-3. 运行服务
-```bash
-./server/oneclickvirt
-```
-
-## 🔐 登录信息
-
-**本地开发环境:**
-```
-前端地址: http://localhost:8080
-后端API:  http://localhost:8890
-
-管理员账号:
-  用户名: admin
-  密码:   admin123456
-```
-
-**Docker部署环境:**
-```
-前端地址: http://your-domain.com (或 https://your-domain.com)
-后端API:  自动配置，无需手动访问
-
-管理员账号:
-  用户名: admin
-  密码:   admin123456
-```
-
-⚠️ 首次登录后建议立即修改密码!
-
-## 🌐 部署选项
-
-### 本地部署
-- 适合开发和测试环境
-- 快速启动，便于调试
-
-### Docker部署
-- 适合生产环境
-- 包含完整的服务栈
-- 便于扩展和维护
-
-### 云服务器部署
-- 适合线上生产环境
-- 支持高可用配置
+> ⚠️ 首次登录后请立即修改密码！
 
 ## ✨ 功能特性
 
 ### 管理员功能
 - ✅ 站点配置管理
-- ✅ 产品套餐管理
+- ✅ 产品套餐管理（支持库存量和销售计数）
 - ✅ 兑换码管理
 - ✅ 订单管理
-- ✅ 用户管理
-- ✅ 资源监控
-- ✅ 流量统计
-- ✅ **代用户登录** - 管理员可直接以用户身份登录系统
-- ✅ **实例转移归属** - 管理员可将实例从一个用户转移到另一个用户
-- ✅ **第三方支付配置** - 支持易支付和码支付接口配置
-- ✅ **产品库存管理** - 支持库存设置、销售计数和购买校验
-- ✅ **邮件服务配置** - 支持注册激活邮件和密码重置邮件
-- ✅ **代理商系统管理** - 支持子用户管理、佣金设置和审核
-- ✅ **域名绑定管理** - 支持DNS内部解析、Nginx反代和配额管理
+- ✅ 用户管理（批量操作：批量删除、批量修改等级、批量修改状态）
+- ✅ 虚拟实例管理（Docker/LXD/Incus/Proxmox）
+- ✅ 资源监控与性能分析
+- ✅ 流量统计与限速管理
+- ✅ 系统镜像管理
+- ✅ 公告管理
+- ✅ 邀请码管理
+- ✅ 端口映射管理
+- ✅ OAuth2 第三方登录配置（QQ/Telegram）
+- ✅ 多种支付方式（支付宝/微信/余额/易支付/码支付）
+- ✅ **代用户登录** — 管理员可直接以用户身份登录
+- ✅ **实例转移归属** — 管理员可将实例在用户间转移
+- ✅ **代理商系统管理** — 代理商审核、佣金调整、子用户管理
+- ✅ **域名绑定管理** — DNS 内部解析配置、Nginx 反代、用户域名配额
+- ✅ **实名认证管理** — 查看认证记录、手动审核
+
+### 代理商功能
+- ✅ 代理商申请与入驻
+- ✅ 子用户管理（创建/删除/批量操作）
+- ✅ 佣金记录与结算
+- ✅ 代理商钱包与提现
+- ✅ 代理商仪表盘（数据统计）
+- ✅ 推广链接与邀请码
 
 ### 用户功能
-- ✅ 虚拟实例管理
-- ✅ 产品购买
-- ✅ 钱包管理
-- ✅ 订单管理
+- ✅ 虚拟实例管理（创建/启停/删除/控制台）
+- ✅ 产品购买与订单管理
+- ✅ 钱包管理与充值
 - ✅ 流量监控
-- ✅ **多种支付方式** - 支持支付宝、微信支付、余额支付、易支付、码支付
-- ✅ **邮件验证** - 注册需要邮箱激活，支持密码重置邮件
-- ✅ **域名绑定** - 支持绑定自定义域名，内部DNS解析
-- ✅ **前端双主题** - 支持深色/浅色主题切换
-
-### 新增核心功能
-1. **🔒 安全审计** - 修复13个安全漏洞（含4个严重级）
-2. **📦 产品库存** - Stock/SoldCount + 购买校验 + 管理员调整API
-3. **📧 邮件验证** - 注册激活邮件 + 密码重置邮件 + 前端提示
-4. **🏢 代理商系统** - 完整系统（子用户/佣金/钱包/审核）+ 5个前端页面
-5. **🌐 域名绑定** - DNS内部解析 + Nginx反代 + 配额管理 + 3个前端页面
-6. **🎨 前端美化** - Indigo深色/浅色双主题 + 全局样式重构 + 主题切换按钮
+- ✅ SSH Web 终端连接
+- ✅ 端口映射查看
+- ✅ **邮件注册激活** — 注册后邮箱验证激活
+- ✅ **密码找回** — 通过邮件重置密码
+- ✅ **域名绑定** — 绑定自定义域名到虚拟机内部 IP:端口
+- ✅ **实名认证** — 支付宝实名认证（姓名+身份证号）
+- ✅ **深色/浅色主题切换**
 
 ## 📁 项目结构
 
 ```
-├── deploy/           # 部署相关配置
-│   ├── default.conf     # Nginx配置
-│   ├── my.cnf           # MySQL配置
-│   ├── nginx.dockerfile # Nginx Dockerfile
-│   └── server.dockerfile # 后端服务Dockerfile
-├── server/           # 后端代码
-│   ├── api/             # API路由
-│   │   └── v1/          # API版本
-│   │       ├── admin/    # 管理员API
-│   │       ├── user/     # 用户API
-│   │       └── agent/    # 代理商API
-│   ├── config/          # 配置管理
-│   ├── model/           # 数据模型
-│   │   ├── agent/       # 代理商模型
-│   │   ├── domain/      # 域名模型
-│   │   └── auth/        # 认证模型
-│   ├── middleware/      # 中间件
-│   ├── provider/        # 虚拟化提供商
-│   ├── service/         # 业务逻辑
-│   │   ├── agent/       # 代理商服务
-│   │   ├── domain/      # 域名服务
-│   │   └── email/       # 邮件服务
-│   └── main.go          # 主入口
-├── web/              # 前端代码
-│   ├── src/             # 源码
-│   │   ├── api/         # API调用
-│   │   ├── view/        # 页面
-│   │   │   ├── admin/   # 管理员页面
-│   │   │   │   ├── agents/      # 代理商管理
-│   │   │   │   └── domains/     # 域名管理
-│   │   │   ├── agent/   # 代理商页面
-│   │   │   └── user/    # 用户页面
-│   │   │       └── domains/     # 用户域名管理
-│   │   └── components/  # 组件
-│   ├── Dockerfile       # 前端Dockerfile
-│   └── package.json     # 依赖管理
-├── docker-compose.yaml # Docker Compose配置
-└── README.md          # 项目说明
+oneclickvirt/
+├── server/                    # Go 后端
+│   ├── api/v1/
+│   │   ├── admin/             # 管理员 API
+│   │   ├── user/              # 用户 API
+│   │   ├── agent/             # 代理商 API
+│   │   ├── payment/           # 支付回调 API
+│   │   ├── public/            # 公开 API
+│   │   └── system/            # 系统 API
+│   ├── config/                # 配置管理
+│   ├── middleware/            # 中间件（认证/权限/代理权限）
+│   ├── model/                 # 数据模型
+│   │   ├── user/              # 用户模型
+│   │   ├── product/           # 产品模型（含库存字段）
+│   │   ├── agent/             # 代理商/子用户/佣金模型
+│   │   ├── domain/            # 域名绑定/域名配置模型
+│   │   ├── kyc/               # 实名认证模型
+│   │   ├── auth/              # 认证/角色模型
+│   │   ├── order/             # 订单模型
+│   │   ├── wallet/            # 钱包模型
+│   │   └── provider/          # 节点/实例/端口模型
+│   ├── service/               # 业务逻辑
+│   │   ├── auth/              # 认证服务
+│   │   ├── agent/             # 代理商服务
+│   │   ├── domain/            # 域名服务（DNS/Nginx）
+│   │   ├── email/             # 邮件服务（SMTP）
+│   │   └── kyc/               # 实名认证服务（支付宝 API）
+│   ├── provider/              # 虚拟化提供商
+│   │   ├── docker/            # Docker 支持
+│   │   ├── lxd/               # LXD 支持
+│   │   ├── incus/             # Incus 支持
+│   │   └── proxmox/           # Proxmox VE 支持
+│   ├── router/                # 路由定义
+│   ├── initialize/            # 初始化（数据库/路由）
+│   ├── utils/                 # 工具函数
+│   ├── config.yaml            # 配置文件
+│   └── main.go               # 入口
+├── web/                       # Vue 3 前端
+│   ├── src/
+│   │   ├── api/               # API 封装
+│   │   ├── view/
+│   │   │   ├── admin/         # 管理员页面
+│   │   │   │   ├── agents/        # 代理商管理
+│   │   │   │   ├── domains/       # 域名管理
+│   │   │   │   ├── kyc/           # 实名认证管理
+│   │   │   │   ├── products/      # 产品管理
+│   │   │   │   ├── users/         # 用户管理
+│   │   │   │   └── ...
+│   │   │   ├── agent/         # 代理商页面（仪表盘/子用户/佣金/钱包/资料）
+│   │   │   └── user/          # 用户页面（实例/订单/钱包/域名/实名认证）
+│   │   ├── components/        # 公共组件
+│   │   ├── style/             # 全局样式 + 深色/浅色主题系统
+│   │   ├── pinia/             # 状态管理
+│   │   ├── router/            # 路由配置
+│   │   └── i18n/              # 国际化（中/英）
+│   └── package.json
+├── scripts/
+│   ├── init.sql               # 数据库初始化脚本
+│   └── init.sh                # 初始化脚本
+├── docker-compose.yaml        # Docker Compose 编排
+├── Dockerfile                 # Docker 构建文件
+└── SECURITY_AUDIT.md          # 安全审计报告
 ```
 
 ## 🔧 技术栈
 
 ### 后端
-- Go 1.24
-- Gin Web框架
-- GORM ORM框架
-- MySQL / SQLite
-- Redis (可选)
-- **SMTP邮件服务** - 支持邮件验证和密码重置
-- **DNS解析服务** - 支持域名绑定和内部解析
-- **Nginx反向代理** - 支持域名绑定和HTTPS
+| 技术 | 用途 |
+|------|------|
+| Go 1.24+ | 后端语言 |
+| Gin | Web 框架 |
+| GORM | ORM 框架 |
+| MySQL / SQLite | 数据库 |
+| JWT | 身份认证 |
+| net/smtp | 邮件服务 |
+| crypto/rsa | 支付宝签名（RSA2） |
+| WebSocket | SSH 终端 |
 
 ### 前端
-- Vue 3
-- Element Plus UI框架
-- Vite构建工具
-- **主题切换** - 支持深色/浅色双主题
-- **响应式设计** - 适配不同设备
+| 技术 | 用途 |
+|------|------|
+| Vue 3 | 前端框架 |
+| Element Plus | UI 组件库 |
+| Vite | 构建工具 |
+| Pinia | 状态管理 |
+| vue-i18n | 国际化 |
+| ECharts | 图表库 |
+| xterm.js | Web SSH 终端 |
+| SCSS + CSS Variables | 主题系统 |
 
-### 新增技术组件
-- **JWT Token认证** - 支持管理员代用户登录的权限降级
-- **MD5签名验证** - 第三方支付回调安全验证
-- **异步支付处理** - 支持多平台支付回调处理
-- **邮件服务** - 支持注册激活和密码重置
-- **DNS服务** - 支持域名绑定和内部解析
-- **主题系统** - 支持深色/浅色双主题
+## 📊 数据库表结构
 
-## 📝 开发规范
+### 核心表（自动创建）
+| 表名 | 说明 |
+|------|------|
+| `users` | 用户表（含 email_verified, real_name_verified） |
+| `roles` | 角色表 |
+| `user_roles` | 用户角色关联 |
+| `products` | 产品表（含 stock, sold_count） |
+| `product_purchases` | 产品购买记录 |
+| `orders` | 订单表 |
+| `payment_records` | 支付记录 |
+| `instances` | 虚拟实例 |
+| `providers` | 节点/提供商 |
+| `ports` | 端口映射 |
+| `user_wallets` | 用户钱包 |
+| `wallet_transactions` | 钱包交易记录 |
 
-### 后端
-- 遵循Go语言最佳实践
-- 分层架构设计
-- RESTful API设计
-- 详细的日志记录
-
-### 前端
-- 组件化开发
-- TypeScript支持
-- 响应式设计
-- 现代化UI风格
+### 新增功能表（自动创建）
+| 表名 | 说明 |
+|------|------|
+| `agents` | 代理商表 |
+| `sub_user_relations` | 代理商-子用户关联 |
+| `commissions` | 佣金记录 |
+| `domains` | 域名绑定 |
+| `domain_configs` | 域名系统配置 |
+| `kyc_records` | 实名认证记录 |
 
 ## 🔒 安全措施
 
-- JWT身份认证
-- 密码哈希存储
-- 权限控制
-- 防止SQL注入
-- 防止XSS攻击
-- **支付签名验证** - MD5签名确保支付回调安全性
-- **权限降级机制** - 管理员代用户登录时权限安全控制
-- **操作审计日志** - 记录敏感操作便于追踪
-- **安全审计** - 修复13个安全漏洞（含4个严重级）
-- **邮件验证** - 注册需要邮箱激活，防止恶意注册
-- **域名绑定安全** - 严格的域名验证和权限控制
+- ✅ JWT Token 认证 + Token 黑名单 + 密钥轮换
+- ✅ bcrypt 密码哈希（cost=12）
+- ✅ 基于角色的权限控制（RBAC）
+- ✅ CORS 白名单配置
+- ✅ 参数化 SQL 查询（防注入）
+- ✅ 文件上传白名单 + 安全扫描
+- ✅ SSH TOFU 主机密钥验证
+- ✅ WebSocket Origin 验证
+- ✅ pprof 仅开发环境暴露
+- ✅ 敏感配置环境变量注入
+- ✅ 实名认证身份证号加密存储 + SHA256 查重
 
-## 📊 本次更新改动统计
+完整安全审计报告见 [SECURITY_AUDIT.md](./SECURITY_AUDIT.md)
 
-### 功能模块
-| 模块 | 状态 |
-|------|------|
-| 📦 产品库存管理 | ✅ |
-| 📧 邮件注册激活+找回密码 | ✅ |
-| 🏢 代理商系统（子用户/佣金/钱包） | ✅ |
-| 🌐 域名绑定+内部DNS解析 | ✅ |
-| 🎨 前端深色/浅色双主题美化 | ✅ |
-| 🔒 安全漏洞修复（13项） | ✅ |
+## ⚙️ 配置说明
 
-### 技术改动
-- **新增 ~30 个 API 端点**
-- **新增 ~12 个前端页面**
-- **新增 5 张数据库表**
-- **修复 13 个安全漏洞**（含 4 个严重级）
-- **总计修改 40+ 文件**
+### 环境变量（敏感信息）
+
+```bash
+# 邮件 SMTP
+export EMAIL_PASSWORD="your_smtp_password"
+
+# 支付宝
+export ALIPRAY_APP_ID="your_app_id"
+export ALIPAY_PRIVATE_KEY="your_private_key"
+export ALIPAY_PUBLIC_KEY="alipay_public_key"
+
+# 微信支付
+export WECHAT_API_KEY="your_api_key"
+export WECHAT_API_V3_KEY="your_v3_key"
+export WECHAT_APP_ID="your_app_id"
+
+# 第三方支付
+export EPAY_KEY="your_epay_key"
+export MAPAY_KEY="your_mapay_key"
+
+# OAuth2
+export TELEGRAM_BOT_TOKEN="your_bot_token"
+export QQ_APP_ID="your_qq_app_id"
+export QQ_APP_KEY="your_qq_app_key"
+```
+
+### config.yaml 关键配置
+
+```yaml
+system:
+  env: production                    # 生产环境设为 production
+  frontend-url: "https://your-domain.com"
+
+auth:
+  enable-email: true
+  enable-email-verification: true    # 邮箱注册激活
+  email-activation-expire-hours: 24
+  enable-public-registration: true
+
+payment:
+  enable-alipay: true
+  enable-wechat: true
+  enable-epay: true
+  enable-mapay: true
+  enable-real-name: false            # 实名认证开关
+  require-real-name: false           # 强制实名
+  real-name-callback-url: "https://your-domain.com/api/v1/kyc/callback"
+```
 
 ## 🤝 贡献指南
 
-欢迎提交Issue和Pull Request!
-
-1. Fork项目
-2. 创建特性分支
-3. 提交修改
-4. 推送分支
-5. 创建Pull Request
+1. Fork 本项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交修改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
 
 ## 📄 许可证
 
-MIT License
-
-## 💳 支付配置说明
-
-### 易支付 (Epay) 配置
-
-在后台管理 → 系统设置 → 支付配置中配置以下参数：
-
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `商户ID (PID)` | 易支付平台分配的商户ID | `1234` |
-| `商户密钥 (Key)` | 易支付平台分配的商户密钥 | `your_secret_key_here` |
-| `API接口地址` | 易支付平台的API地址 | `https://pay.example.com/` |
-| **回调URL** | 支付成功后的异步通知地址 | `https://your-domain.com/api/v1/payment/epay/notify` |
-| **返回URL** | 支付成功后跳转的页面地址 | `https://your-domain.com/user/wallet` |
-
-⚠️ **重要提示**:
-- 回调URL必须是外网可访问的HTTPS地址
-- 回调URL末尾**不要**加空格或其他字符
-- 返回URL通常是用户钱包页面或订单页面
-- 确保易支付平台的回调白名单中已添加您的服务器IP
-
-### 码支付 (Mapay) 配置
-
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `商户ID` | 码支付平台分配的商户ID | `5678` |
-| `商户密钥` | 码支付平台分配的商户密钥 | `your_mapay_key_here` |
-| `API接口地址` | 码支付平台的API地址 | `https://mapay.example.com/` |
-| **回调URL** | 支付成功后的异步通知地址 | `https://your-domain.com/api/v1/payment/mapay/notify` |
-| **返回URL** | 支付成功后跳转的页面地址 | `https://your-domain.com/user/wallet` |
-
-### 支付配置检查清单
-
-- [ ] 已启用对应的支付方式（易支付/码支付）
-- [ ] 已正确填写商户ID和密钥
-- [ ] API接口地址以 `/` 结尾
-- [ ] 回调URL格式正确且可访问
-- [ ] 返回URL指向正确的页面
-- [ ] 支付平台已配置回调白名单
+[MIT License](./LICENSE)
 
 ## 📞 联系方式
 
-如有问题或建议，请创建Issue或联系项目维护者。
+如有问题或建议，请创建 [Issue](https://github.com/qdmz/oneclickvirt/issues)。
 
-**祝您使用愉快!** 🎉
+---
 
+**⭐ 如果觉得有用，请给个 Star！**

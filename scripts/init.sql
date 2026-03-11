@@ -60,9 +60,25 @@ INSERT INTO `site_configs` (`key`, `value`, `type`, `group`, `description`, `cre
 ('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
 ('site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
 ('site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
-('footer_text', '© 2024 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
+('footer_text', '© 2025 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
 ('icp_number', '', 'string', 'basic', 'ICP备案号', NOW(), NOW()),
 ('police_number', '', 'string', 'basic', '公安备案号', NOW(), NOW());
+
+-- ============================================
+-- 7. 创建默认域名配置
+-- ============================================
+INSERT INTO `domain_configs` (`max_domains_per_user`, `max_domains_per_agent_user`, `default_ttl`, `auto_ssl`, `allowed_suffixes`, `dns_type`, `dns_config_path`, `nginx_config_path`, `created_at`, `updated_at`) VALUES
+(3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/etc/nginx/conf.d/oneclickvirt-domains', NOW(), NOW());
+
+-- ============================================
+-- 8. 新增系统配置项 (email verify + real name + agent)
+-- ============================================
+INSERT INTO `system_configs` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES
+('enable_email_verification', 'false', '是否开启邮箱验证（注册后需验证邮箱）', NOW(), NOW()),
+('email_activation_expire_hours', '24', '邮箱激活链接过期时间（小时）', NOW(), NOW()),
+('enable_real_name', 'false', '是否开启实名认证', NOW(), NOW()),
+('require_real_name', 'false', '是否强制实名认证后才能使用服务', NOW(), NOW()),
+('enable_agent', 'true', '是否开启代理商功能', NOW(), NOW());
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -71,4 +87,20 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 默认管理员账户:
 --   用户名: admin
 --   密码: admin123456
+--
+-- 新增功能表（由 GORM AutoMigrate 自动创建）:
+--   domains          - 域名绑定表
+--   domain_configs   - 域名系统配置表
+--   agents           - 代理商表
+--   sub_user_relations - 代理商子用户关系表
+--   commissions      - 佣金记录表
+--   kyc_records      - 实名认证记录表
+--
+-- 产品表新增字段（AutoMigrate 自动添加）:
+--   stock            - 库存量（-1=无限）
+--   sold_count       - 已售数量
+--
+-- 用户表新增字段（AutoMigrate 自动添加）:
+--   email_verified   - 邮箱是否验证
+--   real_name_verified - 是否实名认证
 -- ============================================

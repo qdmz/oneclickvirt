@@ -183,3 +183,7 @@ payment:
     mapay-return-url: https://heyun.ypvps.com/user/wallet
     mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
     enable-mapay: true
+    # 实名认证配置
+    enable-real-name: false
+    require-real-name: false
+    real-name-callback-url: https://your-domain.com/api/v1/kyc/callback

@@ -205,5 +205,10 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.GET("/agents/:id/detail", admin.GetAgentDetail)
 		AdminGroup.GET("/agents/:id/sub-users", admin.GetAgentSubUsers)
 		AdminGroup.POST("/commissions/:id/settle", admin.SettleCommission)
+
+		// KYC Management
+		AdminGroup.GET("/kyc/records", admin.GetKYCRecords)
+		AdminGroup.PUT("/kyc/:id/status", admin.UpdateKYCStatus)
+		AdminGroup.GET("/kyc/stats", admin.GetKYCStats)
 	}
 }

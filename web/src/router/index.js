@@ -183,6 +183,16 @@ const routes = [
           requiresAuth: true,
           roles: ['user', 'admin']
         }
+      },
+      {
+        path: 'kyc',
+        name: 'UserKYC',
+        component: () => import('@/view/user/kyc/index.vue'),
+        meta: {
+          title: '实名认证',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
       }
     ]
   },
@@ -392,6 +402,16 @@ const routes = [
         component: () => import('@/view/admin/agents/index.vue'),
         meta: {
           title: '代理商管理',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'kyc',
+        name: 'AdminKYC',
+        component: () => import('@/view/admin/kyc/index.vue'),
+        meta: {
+          title: '实名管理',
           requiresAuth: true,
           roles: ['admin']
         }

@@ -3,6 +3,7 @@ package router
 import (
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/system"
+	"oneclickvirt/api/v1/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,5 +17,8 @@ func InitPublicRouter(Router *gin.RouterGroup) {
 		PublicRouter.GET("system-images/available", system.GetAvailableSystemImages)
 		PublicRouter.GET("products", public.GetPublicProducts)
 		PublicRouter.GET("payment-config", public.GetPaymentConfig)
+
+		// KYC callback
+		PublicRouter.GET("kyc/callback", user.HandleKYCCallback)
 	}
 }

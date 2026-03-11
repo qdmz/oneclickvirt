@@ -174,4 +174,8 @@ type Payment struct {
 	MapayReturnURL string `mapstructure:"mapay-return-url" json:"mapay-return-url" yaml:"mapay-return-url"` // 码支付返回URL
 	MapayNotifyURL string `mapstructure:"mapay-notify-url" json:"mapay-notify-url" yaml:"mapay-notify-url"` // 码支付回调URL
 	EnableMapay    bool   `mapstructure:"enable-mapay" json:"enable-mapay" yaml:"enable-mapay"`             // 是否启用码支付
+	// Real name KYC configuration
+	EnableRealName      bool   `mapstructure:"enable-real-name" json:"enable-real-name" yaml:"enable-real-name"`                   // enable real name verification
+	RequireRealName     bool   `mapstructure:"require-real-name" json:"require-real-name" yaml:"require-real-name"`                // require real name before using services
+	RealNameCallbackURL string `mapstructure:"real-name-callback-url" json:"real-name-callback-url" yaml:"real-name-callback-url"` // callback URL for alipay redirect
 }

@@ -115,5 +115,10 @@ func InitUserRouter(Router *gin.RouterGroup) {
 
 		// 购买状态检查
 		UserGroup.GET("/user/purchase-status", user.CheckUserPurchaseStatus)
+
+		// Real name verification (KYC)
+		UserGroup.POST("/user/kyc/submit", user.SubmitCertification)
+		UserGroup.GET("/user/kyc/status", user.GetKYCStatus)
+		UserGroup.POST("/user/kyc/query", user.QueryAndUpdate)
 	}
 }
