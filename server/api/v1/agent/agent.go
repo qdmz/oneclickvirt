@@ -263,6 +263,6 @@ func getUintFromContext(c *gin.Context, key string) (uint, error) {
 	return 0, common.NewError(common.CodeUnauthorized, "认证信息缺失")
 }
 
-func init() {
-	global.APP_LOG.Debug("agent API handlers loaded")
-}
+// func init() {
+// 	global.APP_LOG.Debug("agent API handlers loaded")
+// }

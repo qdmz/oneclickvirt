@@ -355,6 +355,22 @@ const userRoutes = computed(() => {
         }
       },
       {
+        path: '/admin/agents',
+        name: 'AdminAgents',
+        meta: {
+          title: '代理商管理',
+          icon: 'OfficeBuilding'
+        }
+      },
+      {
+        path: '/admin/kyc',
+        name: 'AdminKYC',
+        meta: {
+          title: '实名管理',
+          icon: 'User'
+        }
+      },
+      {
         path: '/admin/config',
         name: 'AdminConfig',
         meta: {

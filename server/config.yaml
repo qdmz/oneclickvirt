@@ -49,12 +49,12 @@ mysql:
     max-idle-conns: "10"
     max-lifetime: "3600"
     max-open-conns: "100"
-    password: ""
+    password: "123456"
     path: localhost
     port: "3306"
     prefix: ""
     singular: "false"
-    username: root
+    username: oneclickvirt
 quota:
     instance-type-permissions:
         min-level-for-container: 1
@@ -108,7 +108,7 @@ quota:
 redis:
     addr: ""
     db: 0
-    password: ""
+    password: "123456"
 system:
     addr: 8890
     db-type: mysql
@@ -169,14 +169,14 @@ payment:
     wechat-mch-id: ${WECHAT_MCH_ID}
     wechat-serial-no: ${WECHAT_SERIAL_NO}
     wechat-type: mp
-    # 易支付配置
+    # 易支付配�?
     epay-api-url: https://pay.example.com/creat_order
     epay-pid: "2093"
     epay-key: ${EPAY_KEY}
     epay-return-url: https://heyun.ypvps.com/user/wallet
     epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
     enable-epay: true
-    # 码支付配置
+    # 码支付配�?
     mapay-api-url: https://pay.example.com/pay
     mapay-id: "your-mapid"
     mapay-key: ${MAPAY_KEY}
