@@ -1,0 +1,18 @@
+mysql:
+    auto-create: "true"
+    config: charset=utf8mb4&parseTime=True&loc=Local
+    db-name: oneclickvirt
+    engine: InnoDB
+    log-mode: error
+    log-zap: "false"
+    max-idle-conns: "10"
+    max-lifetime: "3600"
+    max-open-conns: "100"
+    password: ""
+    # 使用 SQLite 模式
+    db-type: sqlite
+    path: ./.data/oneclickvirt.db
+    port: "3306"
+    prefix: ""
+    singular: "false"
+    username: root

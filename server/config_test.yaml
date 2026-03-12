@@ -1,0 +1,16 @@
+mysql:
+    auto-create: "true"
+    config: charset=utf8mb4&parseTime=True&loc=Local
+    db-name: oneclickvirt
+    engine: InnoDB
+    log-mode: error
+    log-zap: "false"
+    max-idle-conns: "10"
+    max-lifetime: "3600"
+    max-open-conns: "100"
+    password: "123456"
+    path: localhost
+    port: "3306"
+    prefix: ""
+    singular: "false"
+    username: oneclickvirt
