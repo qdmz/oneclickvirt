@@ -175,11 +175,10 @@ const userRoutes = computed(() => {
             icon: 'Wallet'
           }
         },
-        {
-          path: '/user/domains',
+        {  path: '/user/domains',
           name: 'UserDomains',
           meta: {
-            title: '域名管理',
+            title: t('sidebar.domainManagement'),
             icon: 'Link'
           }
         },
@@ -199,11 +198,10 @@ const userRoutes = computed(() => {
             icon: 'ShoppingCart'
           }
         },
-        {
-          path: '/user/kyc',
+        {  path: '/user/kyc',
           name: 'UserKYC',
           meta: {
-            title: '实名认证',
+            title: t('sidebar.kycManagement'),
             icon: 'User'
           }
         },
@@ -211,7 +209,7 @@ const userRoutes = computed(() => {
           path: '/agent/dashboard',
           name: 'AgentDashboard',
           meta: {
-            title: '代理商中心',
+            title: t('sidebar.agentDashboard'),
             icon: 'OfficeBuilding'
           }
         },
@@ -219,7 +217,7 @@ const userRoutes = computed(() => {
           path: '/agent/sub-users',
           name: 'AgentSubUsers',
           meta: {
-            title: '子用户管理',
+            title: t('sidebar.subUserManagement'),
             icon: 'UserFilled'
           }
         },
@@ -227,7 +225,7 @@ const userRoutes = computed(() => {
           path: '/agent/commissions',
           name: 'AgentCommissions',
           meta: {
-            title: '佣金记录',
+            title: t('sidebar.commissionRecords'),
             icon: 'Money'
           }
         },
@@ -235,7 +233,7 @@ const userRoutes = computed(() => {
           path: '/agent/profile',
           name: 'AgentProfile',
           meta: {
-            title: '代理商资料',
+            title: t('sidebar.agentProfile'),
             icon: 'User'
           }
         },
@@ -243,7 +241,7 @@ const userRoutes = computed(() => {
           path: '/agent/wallet',
           name: 'AgentWallet',
           meta: {
-            title: '钱包管理',
+            title: t('sidebar.wallet'),
             icon: 'Wallet'
           }
         },
@@ -330,19 +328,18 @@ const userRoutes = computed(() => {
           icon: 'Connection'
         }
       },
-      {
-        path: '/admin/domains',
-        name: 'AdminDomains',
-        meta: {
-          title: '域名管理',
-          icon: 'Link'
-        }
-      },
+      {  path: '/admin/domains',
+          name: 'AdminDomains',
+          meta: {
+            title: t('sidebar.domainManagement'),
+            icon: 'Link'
+          }
+        },
       {
         path: '/admin/domain-config',
         name: 'AdminDomainConfig',
         meta: {
-          title: '域名配置',
+          title: t('sidebar.domainConfiguration'),
           icon: 'Setting'
         }
       },
@@ -366,7 +363,7 @@ const userRoutes = computed(() => {
         path: '/admin/site-config',
         name: 'AdminSiteConfig',
         meta: {
-          title: '站点配置',
+          title: t('sidebar.siteConfiguration'),
           icon: 'Setting'
         }
       },
@@ -374,7 +371,7 @@ const userRoutes = computed(() => {
         path: '/admin/products',
         name: 'AdminProducts',
         meta: {
-          title: '产品管理',
+          title: t('sidebar.productManagement'),
           icon: 'ShoppingCart'
         }
       },
@@ -382,7 +379,7 @@ const userRoutes = computed(() => {
         path: '/admin/redemption-codes',
         name: 'AdminRedemptionCodes',
         meta: {
-          title: '兑换码管理',
+          title: t('sidebar.redemptionCodeManagement'),
           icon: 'Ticket'
         }
       },
@@ -398,7 +395,7 @@ const userRoutes = computed(() => {
         path: '/admin/agents',
         name: 'AdminAgents',
         meta: {
-          title: '代理商管理',
+          title: t('sidebar.agentManagement'),
           icon: 'OfficeBuilding'
         }
       },
@@ -406,7 +403,7 @@ const userRoutes = computed(() => {
         path: '/admin/kyc',
         name: 'AdminKYC',
         meta: {
-          title: '实名管理',
+          title: t('sidebar.kycManagement'),
           icon: 'User'
         }
       },
