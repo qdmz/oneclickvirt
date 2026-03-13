@@ -406,6 +406,19 @@ func filterConfigByScope(config map[string]interface{}, scope string, authCtx *a
 		hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
 		if hasAdminPermission {
 			allowedKeys["auth.enablePublicRegistration"] = true
+			// 允许邮箱相关配置
+			allowedKeys["auth.enableEmail"] = true
+			allowedKeys["auth.emailSMTPPort"] = true
+			allowedKeys["auth.emailSMTPHost"] = true
+			allowedKeys["auth.emailUsername"] = true
+			allowedKeys["auth.emailPassword"] = true
+			// 允许其他认证相关配置
+			allowedKeys["auth.enableTelegram"] = true
+			allowedKeys["auth.enableQQ"] = true
+			allowedKeys["auth.enableOAuth2"] = true
+			allowedKeys["auth.telegramBotToken"] = true
+			allowedKeys["auth.qqAppID"] = true
+			allowedKeys["auth.qqAppKey"] = true
 		}
 
 		for key, value := range config {

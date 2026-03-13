@@ -618,23 +618,28 @@ const fetchPublicStats = async () => {
     const resp = await getPublicStats()
     if (resp && (resp.code === 0 || resp.code === 200) && resp.data) {
       const d = resp.data
-      // 尝试从常见字段拾取数据，做多层回退以兼容不同返回结构
-      usersCount.value = d.userStats?.totalUsers ?? d.user_count ?? d.userCount ?? d.userTotal ?? null
-      // nodes 可能对应 regionStats 的 count 总和或 provider 总数
+      // 正确解析后端返回的数据结构
+      usersCount.value = d.userStats?.TotalUsers ?? 0
+      // 计算节点数量（regionStats中每个region的count之和）
       if (Array.isArray(d.regionStats) && d.regionStats.length > 0) {
         let total = 0
         d.regionStats.forEach(r => { total += r.count ?? 0 })
         nodesCount.value = total
       } else {
-        nodesCount.value = d.provider_count ?? d.node_count ?? d.nodeCount ?? null
+        nodesCount.value = 0
       }
 
-      // 容器/虚拟机：尝试从资源统计中读取
-      containersCount.value = d.resourceUsage?.container_count ?? d.resourceUsage?.containerCount ?? d.container_count ?? d.containerCount ?? null
-      vmsCount.value = d.resourceUsage?.vm_count ?? d.resourceUsage?.vmCount ?? d.vm_count ?? d.vmCount ?? null
+      // 容器/虚拟机数量
+      containersCount.value = d.resourceUsage?.ContainerCount ?? 0
+      vmsCount.value = d.resourceUsage?.VMCount ?? 0
     }
   } catch (error) {
     console.error('获取公开统计数据失败', error)
+    // 错误时设置默认值
+    usersCount.value = 0
+    nodesCount.value = 0
+    containersCount.value = 0
+    vmsCount.value = 0
   }
 }
 

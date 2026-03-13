@@ -102,9 +102,9 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 		}
 	}
 
-	// Check email verification
-	if !user.EmailVerified && global.APP_CONFIG.Auth.EnableEmailVerification {
-		return nil, "", common.NewError(4009, "email not verified")
+	// Check email verification (skip for admin users)
+	if !user.EmailVerified && global.APP_CONFIG.Auth.EnableEmailVerification && user.UserType != "admin" {
+		return nil, "", common.NewError(common.CodeEmailNotVerified, "邮箱未验证，请先验证邮箱")
 	}
 
 	global.APP_LOG.Info("用户登录成功", zap.String("username", user.Username), zap.String("userType", user.UserType), zap.Uint("userID", user.ID))
@@ -113,10 +113,13 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -156,10 +159,13 @@ func (s *AuthService) loginWithEmailCode(req auth.LoginRequest) (*userModel.User
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -199,10 +205,13 @@ func (s *AuthService) loginWithTelegramCode(req auth.LoginRequest) (*userModel.U
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -242,10 +251,13 @@ func (s *AuthService) loginWithQQCode(req auth.LoginRequest) (*userModel.User, s
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 

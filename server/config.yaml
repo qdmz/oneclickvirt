@@ -45,12 +45,12 @@ mysql:
     max-idle-conns: "10"
     max-lifetime: "3600"
     max-open-conns: "100"
-    password: "123456"
-    path: localhost
+    password: ""
+    path: mysql
     port: "3306"
     prefix: ""
     singular: "false"
-    username: oneclickvirt
+    username: root
 quota:
     instance-type-permissions:
         min-level-for-container: 1
@@ -59,6 +59,48 @@ quota:
         min-level-for-reset-container: 1
         min-level-for-reset-vm: 2
         min-level-for-vm: 2
+    level-limits:
+        "1":
+            max-instances: 1
+            max-resources:
+                bandwidth: 100
+                cpu: 1
+                disk: 2048
+                memory: 512
+            max-traffic: 102400
+        "2":
+            max-instances: 1
+            max-resources:
+                bandwidth: 200
+                cpu: 1
+                disk: 4096
+                memory: 1024
+            max-traffic: 204800
+        "3":
+            max-instances: 1
+            max-resources:
+                bandwidth: 500
+                cpu: 2
+                disk: 4096
+                memory: 2048
+            max-traffic: 307200
+        "4":
+            max-instances: 1
+            max-resources:
+                bandwidth: 1000
+                cpu: 4
+                disk: 5120
+                memory: 4096
+            max-traffic: 409600
+        "5":
+            max-instances: 20
+            max-resources:
+                bandwidth: 2000
+                cpu: 16
+                disk: 163840
+                memory: 8192
+            max-traffic: 512000
+    default-level: 1
 redis:
     addr: ""
     db: 0
@@ -98,13 +140,13 @@ zap:
     retention-day: 3
     show-line: false
     stacktrace-key: stacktrace
-max_avatar_size: 1
+max_avatar_size: 2
 default_language:
 signing_key_v1:
-    created_at: "2026-03-12T13:52:39.7982892+08:00"
-    expires_at: "2026-03-13T13:52:39.7982892+08:00"
+    created_at: "2026-03-13T17:31:11.874135305Z"
+    expires_at: "2026-03-14T17:31:11.874135305Z"
     is_active: false
-    key: e93c228bb22f3d614b2fb0c04b526ffc4f541f07ccaafdc0f3d44ccb853cae7e
+    key: fa05f116668833b1745cf02dfe448a0c5c4177dfd6c839e402948738213606c0
     version: 1
 active_version: 1
 payment:
@@ -112,15 +154,15 @@ payment:
     alipay-gateway: https://openapi.alipay.com/gateway.do
     alipay-private-key: ${ALIPAY_PRIVATE_KEY}
     alipay-public-key: ${ALIPAY_PUBLIC_KEY}
-    balance-daily-limit: 9998
-    balance-min-amount: 2
-    enable-alipay: true
+    balance-daily-limit: 10000
+    balance-min-amount: 0
+    enable-alipay: false
     enable-balance: true
     enable-epay: true
-    enable-mapay: true
-    enable-wechat: true
-    epay-api-url: https://pay.example.com/creat_order
-    epay-key: ${EPAY_KEY}
+    enable-mapay: false
+    enable-wechat: false
+    epay-api-url: https://pay.wanjuanxueyi.com/submit.php
+    epay-key: 7o6IxRTgt67ntX9nIZRx2koiPX9X2ix2
     epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
     epay-pid: "2093"
     epay-return-url: https://heyun.ypvps.com/user/wallet
@@ -138,7 +180,7 @@ payment:
 system_name: 虚拟化管理平台
 system_description: 支持多种虚拟化技术的管理平台
 enable_email_verification: false
-enable_captcha: false
+enable_captcha: true
 captcha_expire_time: 10
 max_login_attempts: 5
 login_lockout_duration: 30
@@ -156,3 +198,15 @@ smtp_port: 587
 smtp_username:
 smtp_password:
 smtp_secure: true
+site_name: OneClickVirt
+site_description: 虚拟化管理平台
+site_keywords: 虚拟化,Docker,LXD,Incus,Proxmox
+enable_registration: true
+enable_email_verify: false
+default_user_level: 1
+max_instances_per_user: 10
+default_instance_expiry_days: 30
+email_activation_expire_hours: 24
+enable_real_name: false
+require_real_name: false
+enable_agent: true

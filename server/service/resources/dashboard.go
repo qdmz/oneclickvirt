@@ -207,7 +207,7 @@ func (s *DashboardService) getResourceUsageStats() (*dashboard.ResourceUsageStat
 
 	// 使用条件聚合一次性获取两种实例数量（排除deleted、deleting、failed状态）
 	global.APP_DB.Model(&provider.Instance{}).
-		Select("SUM(CASE WHEN instance_type = 'vm' AND status NOT IN ('deleting', 'deleted', 'failed') THEN 1 ELSE 0 END) as vm_count, SUM(CASE WHEN instance_type = 'container' AND status NOT IN ('deleting', 'deleted', 'failed') THEN 1 ELSE 0 END) as container_count").
+		Select("SUM(CASE WHEN instance_type = 'vm' THEN 1 ELSE 0 END) as vm_count, SUM(CASE WHEN instance_type = 'container' THEN 1 ELSE 0 END) as container_count").
 		Scan(&instanceCounts)
 
 	var providerStats struct {
