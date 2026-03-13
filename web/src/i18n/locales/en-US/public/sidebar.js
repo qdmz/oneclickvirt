@@ -18,5 +18,16 @@ export default {
   systemImages: 'System Images',
   announcementManagement: 'Announcement Management',
   systemConfiguration: 'System Configuration',
-  performanceMonitoring: 'Performance Monitoring'
+  performanceMonitoring: 'Performance Monitoring',
+  domainManagement: 'Domain Management',
+  agentManagement: 'Agent Management',
+  subUserManagement: 'Sub-user Management',
+  commissionRecords: 'Commission Records',
+  agentProfile: 'Agent Profile',
+  siteConfiguration: 'Site Configuration',
+  productManagement: 'Product Management',
+  redemptionCodeManagement: 'Redemption Code Management',
+  kycManagement: 'KYC Management',
+  domainConfiguration: 'Domain Configuration',
+  agentDashboard: 'Agent Dashboard'
 }

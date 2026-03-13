@@ -52,7 +52,19 @@ export default {
   },
   products: {
     title: '产品列表',
-    description: '选择适合您的虚拟化产品套餐'
+    description: '选择适合您的虚拟化产品套餐',
+    permanent: '永久',
+    days: '天',
+    purchaseNow: '立即购买',
+    stock: '库存',
+    unlimited: '无限',
+    cores: '核',
+    memory: '内存',
+    disk: '硬盘',
+    bandwidth: '带宽',
+    traffic: '流量',
+    maxInstances: '最大VPS量',
+    units: '个'
   },
   errors: {
     fetchAnnouncementsFailed: '获取公告失败:',

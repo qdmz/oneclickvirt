@@ -18,5 +18,16 @@ export default {
   systemImages: '系统镜像',
   announcementManagement: '公告管理',
   systemConfiguration: '系统配置',
-  performanceMonitoring: '性能监控'
+  performanceMonitoring: '性能监控',
+  domainManagement: '域名管理',
+  agentManagement: '代理商管理',
+  subUserManagement: '子用户管理',
+  commissionRecords: '佣金记录',
+  agentProfile: '代理商资料',
+  siteConfiguration: '站点配置',
+  productManagement: '产品管理',
+  redemptionCodeManagement: '兑换码管理',
+  kycManagement: '实名管理',
+  domainConfiguration: '域名配置',
+  agentDashboard: '代理商中心'
 }

@@ -18,6 +18,15 @@
           </a>
         </div>
         <nav class="nav-menu">
+                  <!-- 模式切换按钮 -->
+          <button
+            class="nav-link language-btn"
+            @click="toggleTheme"
+          >
+            <el-icon v-if="isDarkMode"><Sunny /></el-icon>
+            <el-icon v-else><Moon /></el-icon>
+            {{ isDarkMode ? '亮色' : '灰色' }}
+          </button>
           <!-- 语言切换按钮 -->
           <button
             class="nav-link language-btn"
@@ -238,19 +247,19 @@
                   v-if="product.period === 0"
                   type="success"
                 >
-                  永久
+                  {{ t('home.products.permanent') }}
                 </el-tag>
                 <el-tag
                   v-else
                   type="info"
                 >
-                  {{ product.period }}天
+                  {{ product.period }} {{ t('home.products.days') }}
                 </el-tag>
               </div>
               <div class="product-body">
                 <div class="price">
                   <span class="amount">¥{{ (product.price / 100).toFixed(2) }}</span>
-                  <span class="unit">{{ product.period === 0 ? '/永久' : `/${product.period}天` }}</span>
+                  <span class="unit">{{ product.period === 0 ? `/${t('home.products.permanent')}` : `/${product.period} ${t('home.products.days')}` }}</span>
                 </div>
                 <div class="level-badge">
                   Lv.{{ product.level }}
@@ -258,31 +267,31 @@
                 <div class="features">
                   <div class="feature-item">
                     <i class="fas fa-microchip" />
-                    <span>CPU{{ product.cpu }} 核</span>
+                    <span>CPU{{ product.cpu }} {{ t('home.products.cores') }}</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-memory" />
-                    <span>内存{{ product.memory }} MB</span>
+                    <span>{{ t('home.products.memory') }}{{ product.memory }} MB</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-hdd" />
-                    <span>硬盘{{ product.disk }} MB</span>
+                    <span>{{ t('home.products.disk') }}{{ product.disk }} MB</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-wifi" />
-                    <span>带宽{{ product.bandwidth }} Mbps</span>
+                    <span>{{ t('home.products.bandwidth') }}{{ product.bandwidth }} Mbps</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-network-wired" />
-                    <span>流量{{ product.traffic }} MB</span>
+                    <span>{{ t('home.products.traffic') }}{{ product.traffic }} MB</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-server" />
-                    <span>最大VPS量{{ product.maxInstances }} 个</span>
+                    <span>{{ t('home.products.maxInstances') }}{{ product.maxInstances }} {{ t('home.products.units') }}</span>
                   </div>
                   <div class="feature-item">
                     <i class="fas fa-box" />
-                    <span>库存{{ product.stock === -1 ? '无限' : product.stock }} 个</span>
+                    <span>{{ t('home.products.stock') }}{{ product.stock === -1 ? t('home.products.unlimited') : product.stock }} {{ t('home.products.units') }}</span>
                   </div>
                 </div>
                 <router-link
@@ -290,7 +299,7 @@
                   type="primary"
                   class="purchase-btn"
                 >
-                  立即购买
+                  {{ t('home.products.purchaseNow') }}
                 </router-link>
               </div>
             </div>
@@ -448,7 +457,7 @@ import { useI18n } from 'vue-i18n'
 import { getPublicAnnouncements, getPublicStats, getPublicSiteConfigs, getPublicProducts } from '@/api/public'
 import { checkSystemInit } from '@/api/init'
 import { ElTag, ElMessage } from 'element-plus'
-import { Operation } from '@element-plus/icons-vue'
+import { Operation, Moon, Sunny } from '@element-plus/icons-vue'
 import { useLanguageStore } from '@/pinia/modules/language'
 import logoUrl from '@/assets/images/logo.png'
 
@@ -463,6 +472,8 @@ const usersCount = ref(null)
 const nodesCount = ref(null)
 const containersCount = ref(null)
 const vmsCount = ref(null)
+// 主题状态
+const isDarkMode = ref(false)
 // 调试用变量
 const debugApiResponse = ref('')
 const debugSiteConfigs = ref('')
@@ -575,6 +586,17 @@ const switchLanguage = () => {
   ElMessage.success(t('navbar.languageSwitched'))
 }
 
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  applyTheme()
+  ElMessage.success(isDarkMode.value ? '已切换到深色模式' : '已切换到浅色模式')
+}
+
+const applyTheme = () => {
+  document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light')
+  localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
+}
+
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString(locale.value === 'zh-CN' ? 'zh-CN' : 'en-US')
 }
@@ -641,6 +663,13 @@ onMounted(() => {
   console.log('VITE_BASE_PATH:', import.meta.env.VITE_BASE_PATH)
   console.log('VITE_SERVER_PORT:', import.meta.env.VITE_SERVER_PORT)
   console.log('All env vars:', import.meta.env)
+  
+  // 初始化主题
+  const saved = localStorage.getItem('theme')
+  if (saved) {
+    isDarkMode.value = saved === 'dark'
+  }
+  applyTheme()
   
   // 首先检查初始化状态
   checkInitStatus()

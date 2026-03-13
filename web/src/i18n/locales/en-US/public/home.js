@@ -39,6 +39,22 @@ export default {
     typeHomepage: 'Homepage Announcement',
     typeTopbar: 'Top Bar Announcement'
   },
+  products: {
+    title: 'Product List',
+    description: 'Choose the virtualization product package that suits you',
+    permanent: 'Permanent',
+    days: 'days',
+    purchaseNow: 'Purchase Now',
+    stock: 'Stock',
+    unlimited: 'Unlimited',
+    cores: 'cores',
+    memory: 'Memory',
+    disk: 'Disk',
+    bandwidth: 'Bandwidth',
+    traffic: 'Traffic',
+    maxInstances: 'Max VPS',
+    units: 'units'
+  },
   footer: {
     coreProjects: 'Core Projects',
     relatedProjects: 'Related Projects',
