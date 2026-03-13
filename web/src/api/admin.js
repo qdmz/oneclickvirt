@@ -774,6 +774,14 @@ export const toggleProduct = (id) => {
   })
 }
 
+export const updateProductStock = (id, data) => {
+  return request({
+    url: `/v1/admin/products/${id}/stock`,
+    method: 'put',
+    data
+  })
+}
+
 // 订单管理相关API
 export const getOrders = (params) => {
   return request({

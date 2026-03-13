@@ -1,0 +1,22 @@
+export default {
+  title: '身份实名认证',
+  notVerified: '您尚未进行身份实名认证',
+  realName: '真实姓名',
+  realNamePlaceholder: '请输入您的真实姓名',
+  idCardNumber: '身份证号码',
+  idCardPlaceholder: '请输入您的身份证号码',
+  submit: '提交认证',
+  notice: '实名认证信息将严格保密，仅用于身份验证',
+  pending: '认证审核中',
+  queryStatus: '查询状态',
+  certified: '认证成功',
+  certifiedAt: '认证时间',
+  idType: '证件类型',
+  rejected: '认证失败',
+  retry: '重新认证',
+  expired: '认证已过期',
+  submitSuccess: '提交成功，正在审核',
+  submitFailed: '提交失败，请稍后重试',
+  querySuccess: '查询成功',
+  queryFailed: '查询失败，请稍后重试'
+}

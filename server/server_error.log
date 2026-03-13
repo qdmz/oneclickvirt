@@ -1,0 +1,9 @@
+panic: close of closed channel
+
+goroutine 89 [running]:
+oneclickvirt/service/auth.(*JWTBlacklistService).Stop(...)
+	C:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/service/auth/blacklist.go:83
+oneclickvirt/initialize.InitServer.func1()
+	C:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/initialize/server.go:75 +0x149
+created by oneclickvirt/initialize.InitServer in goroutine 1
+	C:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/initialize/server.go:34 +0xce

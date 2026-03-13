@@ -174,9 +174,9 @@ const loadData = async () => {
       keyword: keyword.value,
       ...(statusFilter.value !== null ? { status: statusFilter.value } : {})
     })
-    if (res.data?.code === 0) {
-      agents.value = res.data.data?.list || []
-      total.value = res.data.data?.total || 0
+    if (res.code === 0 || res.code === 200) {
+      agents.value = res.data?.list || []
+      total.value = res.data?.total || 0
     }
   } catch { ElMessage.error('加载失败') }
   finally { loading.value = false }
@@ -224,8 +224,8 @@ const handleViewDetail = async (row) => {
       getAgentDetail(row.id),
       getAgentSubUsers(row.id, { page: 1, pageSize: 50 })
     ])
-    if (detailRes.data?.code === 0) detailData.value = detailRes.data.data
-    if (subRes.data?.code === 0) subUsers.value = subRes.data.data?.list || []
+    if (detailRes.code === 0 || detailRes.code === 200) detailData.value = detailRes.data
+    if (subRes.code === 0 || subRes.code === 200) subUsers.value = subRes.data?.list || []
   } catch { ElMessage.error('加载详情失败') }
 }
 

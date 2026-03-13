@@ -180,9 +180,11 @@ function formatDate(d) {
 async function fetchDomains() {
   loading.value = true
   try {
-    const { data } = await getDomains({ page: page.value, pageSize: pageSize.value })
-    domainList.value = data?.data?.list || []
-    total.value = data?.data?.total || 0
+    const res = await getDomains({ page: page.value, pageSize: pageSize.value })
+    if (res.code === 0) {
+      domainList.value = res.data?.list || []
+      total.value = res.data?.total || 0
+    }
   } finally {
     loading.value = false
   }
@@ -190,8 +192,10 @@ async function fetchDomains() {
 
 async function fetchQuota() {
   try {
-    const { data } = await getDomainQuota()
-    Object.assign(quota, data?.data || {})
+    const res = await getDomainQuota()
+    if (res.code === 0) {
+      Object.assign(quota, res.data || {})
+    }
   } catch {}
 }
 

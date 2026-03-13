@@ -1,25 +1,289 @@
 [SYSTEM] 工作目录: C:\Users\admin\.openclaw-autoclaw\workspace\oneclickvirt\server
-[oneclickvirt]2026/03/12 - 13:12:14.944	info	系统初始化开始
-[oneclickvirt]2026/03/12 - 13:12:14.957	info	系统配置加载完成	{"env": "production", "addr": 8890, "captcha_enabled": true}
-[oneclickvirt]2026/03/12 - 13:12:14.958	info	全局SSH连接池已初始化
-[oneclickvirt]2026/03/12 - 13:12:14.959	info	开始初始化存储目录结构	{"baseDir": "storage", "dirsCount": 8}
-[oneclickvirt]2026/03/12 - 13:12:14.960	info	存储目录结构初始化完成	{"baseDir": "storage", "dirs": 8}
-[oneclickvirt]2026/03/12 - 13:12:14.961	info	正在连接数据库...
-[oneclickvirt]2026/03/12 - 13:12:14.961	info	日志清理任务已安排	{"nextRun": "[oneclickvirt]2026/03/13 - 01:00:00.000", "duration": 42465.0387178}
-[oneclickvirt]2026/03/12 - 13:12:14.972	error	数据库初始化失败	{"error": "连接数据库失败: Error 1044 (42000): Access denied for user 'oneclickvirt'@'%' to database 'oneclickvirt'"}
-[oneclickvirt]2026/03/12 - 13:12:14.972	error	数据库初始化失败	{"error": "连接数据库失败: Error 1044 (42000): Access denied for user 'oneclickvirt'@'%' to database 'oneclickvirt'"}
-[oneclickvirt]2026/03/12 - 13:12:14.972	error	数据库初始化失败	{"error": "连接数据库失败: Error 1044 (42000): Access denied for user 'oneclickvirt'@'%' to database 'oneclickvirt'"}
-[oneclickvirt]2026/03/12 - 13:12:14.975	warn	数据库连接失败，系统将以待初始化模式运行	{"dbType": "mysql", "error": "连接数据库失败: Error 1044 (42000): Access denied for user 'oneclickvirt'@'%' to database 'oneclickvirt'"}
-[oneclickvirt]2026/03/12 - 13:12:14.975	warn	数据库连接失败，系统将以待初始化模式运行	{"dbType": "mysql", "error": "连接数据库失败: Error 1044 (42000): Access denied for user 'oneclickvirt'@'%' to database 'oneclickvirt'"}
-[oneclickvirt]2026/03/12 - 13:12:14.977	warn	系统未初始化，运行在待初始化模式
-[oneclickvirt]2026/03/12 - 13:12:14.977	warn	系统未初始化，运行在待初始化模式
-[oneclickvirt]2026/03/12 - 13:12:14.978	info	请访问前端初始化页面完成系统初始化
+[oneclickvirt]2026/03/12 - 14:34:51.463	info	系统初始化开始
+[oneclickvirt]2026/03/12 - 14:34:51.476	info	系统配置加载完成	{"env": "development", "addr": 8890, "captcha_enabled": false}
+[oneclickvirt]2026/03/12 - 14:34:51.477	info	全局SSH连接池已初始化
+[oneclickvirt]2026/03/12 - 14:34:51.479	info	开始初始化存储目录结构	{"baseDir": "storage", "dirsCount": 8}
+[oneclickvirt]2026/03/12 - 14:34:51.480	info	存储目录结构初始化完成	{"baseDir": "storage", "dirs": 8}
+[oneclickvirt]2026/03/12 - 14:34:51.481	info	正在连接数据库...
+[oneclickvirt]2026/03/12 - 14:34:51.481	info	日志清理任务已安排	{"nextRun": "[oneclickvirt]2026/03/13 - 01:00:00.000", "duration": 37508.5182517}
+[oneclickvirt]2026/03/12 - 14:34:51.492	info	数据库连接池状态	{"max_open_connections": 100, "open_connections": 1, "in_use": 0, "idle": 1}
+[oneclickvirt]2026/03/12 - 14:34:51.493	info	数据库连接成功
+[oneclickvirt]2026/03/12 - 14:34:51.494	info	数据库连接管理器初始化成功
+[oneclickvirt]2026/03/12 - 14:34:51.494	info	数据库心跳检测已启动
+[oneclickvirt]2026/03/12 - 14:34:51.495	info	开始数据库表结构自动迁移
+[oneclickvirt]2026/03/12 - 14:34:51.497	warn	修复重复数据时出现警告（可忽略，如果是新数据库）	{"error": "数据库连接不可用"}
+[oneclickvirt]2026/03/12 - 14:34:51.497	warn	修复重复数据时出现警告（可忽略，如果是新数据库）	{"error": "数据库连接不可用"}
+
+2026/03/12 14:34:51 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/initialize/gorm.go:112 [35;1mError 1060 (42S21): Duplicate column name 'user_id'
+[0m[33m[0.702ms] [34;1m[rows:0][0m CREATE TABLE `kyc_records` (`id` bigint unsigned AUTO_INCREMENT,`user_id` bigint unsigned NOT NULL,`certify_id` varchar(64),`real_name` varchar(64),`id_card_number` varchar(128),`id_card_hash` varchar(64),`status` bigint DEFAULT 0,`certified_at` datetime(3) NULL,`id_type` varchar(10) DEFAULT 'IDENTITY_CARD',`gender` varchar(4),`province` varchar(32),`city` varchar(32),`remark` varchar(255),`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,`deleted_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `idx_kyc_records_user_id` (`user_id`,`user_id`),INDEX `idx_kyc_records_certify_id` (`certify_id`),INDEX `idx_kyc_records_id_card_hash` (`id_card_hash`),INDEX `idx_kyc_records_status` (`status`),INDEX `idx_kyc_records_deleted_at` (`deleted_at`))
+[oneclickvirt]2026/03/12 - 14:34:51.965	error	register table failed	{"error": "Error 1060 (42S21): Duplicate column name 'user_id'"}
+[oneclickvirt]2026/03/12 - 14:34:51.965	error	register table failed	{"error": "Error 1060 (42S21): Duplicate column name 'user_id'"}
+[oneclickvirt]2026/03/12 - 14:34:51.965	error	register table failed	{"error": "Error 1060 (42S21): Duplicate column name 'user_id'"}
+[oneclickvirt]2026/03/12 - 14:34:51.967	info	数据库表结构迁移完成
+[oneclickvirt]2026/03/12 - 14:34:51.969	info	开始检查并修复 instance_traffic_histories 表中的重复数据...
+[oneclickvirt]2026/03/12 - 14:34:51.971	info	未发现重复数据，无需修复
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/initialize/gorm.go:112 [35;1mError 1060 (42S21): Duplicate column name 'user_id'
+[0m[33m[0.505ms] [34;1m[rows:0][0m CREATE TABLE `kyc_records` (`id` bigint unsigned AUTO_INCREMENT,`user_id` bigint unsigned NOT NULL,`certify_id` varchar(64),`real_name` varchar(64),`id_card_number` varchar(128),`id_card_hash` varchar(64),`status` bigint DEFAULT 0,`certified_at` datetime(3) NULL,`id_type` varchar(10) DEFAULT 'IDENTITY_CARD',`gender` varchar(4),`province` varchar(32),`city` varchar(32),`remark` varchar(255),`created_at` datetime(3) NULL,`updated_at` datetime(3) NULL,`deleted_at` datetime(3) NULL,PRIMARY KEY (`id`),UNIQUE INDEX `idx_kyc_records_user_id` (`user_id`,`user_id`),INDEX `idx_kyc_records_certify_id` (`certify_id`),INDEX `idx_kyc_records_id_card_hash` (`id_card_hash`),INDEX `idx_kyc_records_status` (`status`),INDEX `idx_kyc_records_deleted_at` (`deleted_at`))
+[oneclickvirt]2026/03/12 - 14:34:52.461	error	register table failed	{"error": "Error 1060 (42S21): Duplicate column name 'user_id'"}
+[oneclickvirt]2026/03/12 - 14:34:52.461	error	register table failed	{"error": "Error 1060 (42S21): Duplicate column name 'user_id'"}
+[oneclickvirt]2026/03/12 - 14:34:52.461	error	register table failed	{"error": "Error 1060 (42S21): Duplicate column name 'user_id'"}
+[oneclickvirt]2026/03/12 - 14:34:52.465	info	配置变更回调已提前注册
+[oneclickvirt]2026/03/12 - 14:34:52.467	info	配置加载策略分析	{"configModified": true, "dbConfigCount": 25}
+[oneclickvirt]2026/03/12 - 14:34:52.468	info	场景：已修改配置的重启或升级（数据库优先）
+[oneclickvirt]2026/03/12 - 14:34:52.483	info	执行策略：数据库 → YAML → global（保留用户配置，不补全默认值）
+[oneclickvirt]2026/03/12 - 14:34:52.485	info	开始从数据库恢复配置到YAML文件
+[oneclickvirt]2026/03/12 - 14:34:52.488	info	从数据库读取到配置	{"count": 25}
+[oneclickvirt]2026/03/12 - 14:34:52.490	info	过滤配置	{"totalCount": 25, "restoreCount": 25, "skippedSystemCount": 0}
+[oneclickvirt]2026/03/12 - 14:34:52.492	info	配置恢复统计	{"attemptedCount": 25, "restoredCount": 25}
+[oneclickvirt]2026/03/12 - 14:34:52.493	info	配置已成功从数据库恢复到YAML文件
+[oneclickvirt]2026/03/12 - 14:34:52.494	info	配置已从数据库恢复到YAML文件
+[oneclickvirt]2026/03/12 - 14:34:52.495	info	开始构建嵌套配置	{"flatConfigCount": 25}
+[oneclickvirt]2026/03/12 - 14:34:52.496	info	嵌套配置构建完成	{"nestedConfigCount": 25, "skippedSystemCount": 0, "topLevelKeys": ["smtp_host", "enable_audit_log", "active_version", "smtp_port", "smtp_username", "system_name", "enable_ssl", "system_description", "ssl_key_path", "enable_backup", "smtp_password", "enable_email_verification", "audit_log_retention_days", "max_login_attempts", "smtp_secure", "max_avatar_size", "captcha_expire_time", "login_lockout_duration", "backup_retention_days", "default_language", "enable_notification", "enable_captcha", "ssl_cert_path", "notification_email", "signing_key_v1"]}
+[oneclickvirt]2026/03/12 - 14:34:52.496	info	触发配置同步回调	{"key": "backup_retention_days", "valueType": "float64"}
+[oneclickvirt]2026/03/12 - 14:34:52.498	info	触发配置同步回调	{"key": "notification_email", "valueType": "string"}
+[oneclickvirt]2026/03/12 - 14:34:52.498	info	触发配置同步回调	{"key": "smtp_port", "valueType": "float64"}
+[oneclickvirt]2026/03/12 - 14:34:52.499	info	触发配置同步回调	{"key": "ssl_key_path", "valueType": "string"}
+[oneclickvirt]2026/03/12 - 14:34:52.500	info	触发配置同步回调	{"key": "max_login_attempts", "valueType": "float64"}
+[oneclickvirt]2026/03/12 - 14:34:52.500	info	数据库配置已成功同步到全局配置
+[oneclickvirt]2026/03/12 - 14:34:52.502	info	从数据库加载JWT密钥
+[oneclickvirt]2026/03/12 - 14:34:52.503	info	JWT密钥初始化成功
+[oneclickvirt]2026/03/12 - 14:34:52.504	info	JWT密钥系统已初始化	{"activeVersion": 1}
+[VIPER] 配置文件已更改: config.yaml
+[VIPER] 配置文件已更改: config.yaml
+[oneclickvirt]2026/03/12 - 14:34:52.506	info	开始初始化等级与带宽配置
+[oneclickvirt]2026/03/12 - 14:34:52.507	info	等级配置已存在，跳过初始化
+[oneclickvirt]2026/03/12 - 14:34:52.508	info	开始初始化产品数据
+[oneclickvirt]2026/03/12 - 14:34:52.513	info	更新产品	{"name": "入门级套餐", "level": 1}
+[oneclickvirt]2026/03/12 - 14:34:52.527	info	产品初始化完成
+[oneclickvirt]2026/03/12 - 14:34:52.528	info	开始初始化其他配置
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'max_avatar_size' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'max_avatar_size' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.568ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('max_avatar_size','2','用户头像上传的最大文件大小限制（单位：MB），仅支持PNG和JPEG格式','other','number',false,'2026-03-12 14:34:52.53','2026-03-12 14:34:52.53',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.531	error	创建max_avatar_size配置失败	{"error": "Error 1062 (23000): Duplicate entry 'max_avatar_size' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.531	error	创建max_avatar_size配置失败	{"error": "Error 1062 (23000): Duplicate entry 'max_avatar_size' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.531	error	创建max_avatar_size配置失败	{"error": "Error 1062 (23000): Duplicate entry 'max_avatar_size' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'default_language' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'default_language' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.518ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('default_language','','系统默认语言设置，支持zh-CN（中文）和en-US（英文）。留空则根据浏览器语言自动选择，非中文时显示英文，检测不到时默认显示中文','other','string',true,'2026-03-12 14:34:52.534','2026-03-12 14:34:52.534',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.535	error	创建default_language配置失败	{"error": "Error 1062 (23000): Duplicate entry 'default_language' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.535	error	创建default_language配置失败	{"error": "Error 1062 (23000): Duplicate entry 'default_language' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.535	error	创建default_language配置失败	{"error": "Error 1062 (23000): Duplicate entry 'default_language' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'system_name' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'system_name' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.517ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('system_name','虚拟化管理平台','系统名称，显示在登录页面和顶部导航栏','system','string',true,'2026-03-12 14:34:52.539','2026-03-12 14:34:52.539',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.540	error	创建system_name配置失败	{"error": "Error 1062 (23000): Duplicate entry 'system_name' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.540	error	创建system_name配置失败	{"error": "Error 1062 (23000): Duplicate entry 'system_name' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.540	error	创建system_name配置失败	{"error": "Error 1062 (23000): Duplicate entry 'system_name' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.539ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'system_description' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'system_description' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.529ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('system_description','支持多种虚拟化技术的管理平台','系统描述，显示在登录页面','system','string',true,'2026-03-12 14:34:52.545','2026-03-12 14:34:52.545',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.546	error	创建system_description配置失败	{"error": "Error 1062 (23000): Duplicate entry 'system_description' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.546	error	创建system_description配置失败	{"error": "Error 1062 (23000): Duplicate entry 'system_description' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.546	error	创建system_description配置失败	{"error": "Error 1062 (23000): Duplicate entry 'system_description' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.526ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'enable_email_verification' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.603ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('enable_email_verification','false','是否启用邮箱验证','auth','boolean',false,'2026-03-12 14:34:52.55','2026-03-12 14:34:52.55',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.551	error	创建enable_email_verification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.551	error	创建enable_email_verification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.551	error	创建enable_email_verification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.617ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'enable_captcha' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'enable_captcha' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.570ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('enable_captcha','true','是否启用验证码','auth','boolean',false,'2026-03-12 14:34:52.556','2026-03-12 14:34:52.556',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.557	error	创建enable_captcha配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_captcha' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.557	error	创建enable_captcha配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_captcha' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.557	error	创建enable_captcha配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_captcha' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'captcha_expire_time' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'captcha_expire_time' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.562ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('captcha_expire_time','10','验证码过期时间（分钟）','auth','number',false,'2026-03-12 14:34:52.562','2026-03-12 14:34:52.562',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.563	error	创建captcha_expire_time配置失败	{"error": "Error 1062 (23000): Duplicate entry 'captcha_expire_time' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.563	error	创建captcha_expire_time配置失败	{"error": "Error 1062 (23000): Duplicate entry 'captcha_expire_time' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.563	error	创建captcha_expire_time配置失败	{"error": "Error 1062 (23000): Duplicate entry 'captcha_expire_time' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'max_login_attempts' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'max_login_attempts' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.554ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('max_login_attempts','5','最大登录尝试次数','auth','number',false,'2026-03-12 14:34:52.568','2026-03-12 14:34:52.568',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.569	error	创建max_login_attempts配置失败	{"error": "Error 1062 (23000): Duplicate entry 'max_login_attempts' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.569	error	创建max_login_attempts配置失败	{"error": "Error 1062 (23000): Duplicate entry 'max_login_attempts' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.569	error	创建max_login_attempts配置失败	{"error": "Error 1062 (23000): Duplicate entry 'max_login_attempts' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.552ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'login_lockout_duration' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'login_lockout_duration' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.655ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('login_lockout_duration','30','登录锁定时间（分钟）','auth','number',false,'2026-03-12 14:34:52.573','2026-03-12 14:34:52.573',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.575	error	创建login_lockout_duration配置失败	{"error": "Error 1062 (23000): Duplicate entry 'login_lockout_duration' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.575	error	创建login_lockout_duration配置失败	{"error": "Error 1062 (23000): Duplicate entry 'login_lockout_duration' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.575	error	创建login_lockout_duration配置失败	{"error": "Error 1062 (23000): Duplicate entry 'login_lockout_duration' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'enable_ssl' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'enable_ssl' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.552ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('enable_ssl','false','是否启用SSL','system','boolean',false,'2026-03-12 14:34:52.579','2026-03-12 14:34:52.579',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.580	error	创建enable_ssl配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_ssl' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.580	error	创建enable_ssl配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_ssl' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.580	error	创建enable_ssl配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_ssl' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'ssl_cert_path' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'ssl_cert_path' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.522ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('ssl_cert_path','','SSL证书路径','system','string',false,'2026-03-12 14:34:52.584','2026-03-12 14:34:52.584',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.585	error	创建ssl_cert_path配置失败	{"error": "Error 1062 (23000): Duplicate entry 'ssl_cert_path' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.585	error	创建ssl_cert_path配置失败	{"error": "Error 1062 (23000): Duplicate entry 'ssl_cert_path' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.585	error	创建ssl_cert_path配置失败	{"error": "Error 1062 (23000): Duplicate entry 'ssl_cert_path' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.520ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'ssl_key_path' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'ssl_key_path' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.526ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('ssl_key_path','','SSL密钥路径','system','string',false,'2026-03-12 14:34:52.589','2026-03-12 14:34:52.589',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.591	error	创建ssl_key_path配置失败	{"error": "Error 1062 (23000): Duplicate entry 'ssl_key_path' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.591	error	创建ssl_key_path配置失败	{"error": "Error 1062 (23000): Duplicate entry 'ssl_key_path' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.591	error	创建ssl_key_path配置失败	{"error": "Error 1062 (23000): Duplicate entry 'ssl_key_path' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'enable_backup' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'enable_backup' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.527ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('enable_backup','true','是否启用备份功能','system','boolean',false,'2026-03-12 14:34:52.594','2026-03-12 14:34:52.594',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.595	error	创建enable_backup配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_backup' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.595	error	创建enable_backup配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_backup' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.595	error	创建enable_backup配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_backup' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'backup_retention_days' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'backup_retention_days' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.533ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('backup_retention_days','7','备份保留天数','system','number',false,'2026-03-12 14:34:52.599','2026-03-12 14:34:52.599',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.601	error	创建backup_retention_days配置失败	{"error": "Error 1062 (23000): Duplicate entry 'backup_retention_days' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.601	error	创建backup_retention_days配置失败	{"error": "Error 1062 (23000): Duplicate entry 'backup_retention_days' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.601	error	创建backup_retention_days配置失败	{"error": "Error 1062 (23000): Duplicate entry 'backup_retention_days' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.529ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'enable_audit_log' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'enable_audit_log' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.000ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('enable_audit_log','true','是否启用审计日志','system','boolean',false,'2026-03-12 14:34:52.605','2026-03-12 14:34:52.605',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.605	error	创建enable_audit_log配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_audit_log' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.605	error	创建enable_audit_log配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_audit_log' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.605	error	创建enable_audit_log配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_audit_log' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'audit_log_retention_days' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'audit_log_retention_days' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.566ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('audit_log_retention_days','30','审计日志保留天数','system','number',false,'2026-03-12 14:34:52.61','2026-03-12 14:34:52.61',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.611	error	创建audit_log_retention_days配置失败	{"error": "Error 1062 (23000): Duplicate entry 'audit_log_retention_days' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.611	error	创建audit_log_retention_days配置失败	{"error": "Error 1062 (23000): Duplicate entry 'audit_log_retention_days' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.611	error	创建audit_log_retention_days配置失败	{"error": "Error 1062 (23000): Duplicate entry 'audit_log_retention_days' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'enable_notification' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'enable_notification' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.524ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('enable_notification','true','是否启用通知功能','system','boolean',false,'2026-03-12 14:34:52.615','2026-03-12 14:34:52.615',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.616	error	创建enable_notification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_notification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.616	error	创建enable_notification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_notification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.616	error	创建enable_notification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_notification' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'notification_email' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'notification_email' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.530ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('notification_email','','通知邮箱','system','string',false,'2026-03-12 14:34:52.619','2026-03-12 14:34:52.619',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.621	error	创建notification_email配置失败	{"error": "Error 1062 (23000): Duplicate entry 'notification_email' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.621	error	创建notification_email配置失败	{"error": "Error 1062 (23000): Duplicate entry 'notification_email' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.621	error	创建notification_email配置失败	{"error": "Error 1062 (23000): Duplicate entry 'notification_email' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'smtp_host' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'smtp_host' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.528ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('smtp_host','','SMTP服务器地址','system','string',false,'2026-03-12 14:34:52.624','2026-03-12 14:34:52.624',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.625	error	创建smtp_host配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_host' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.625	error	创建smtp_host配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_host' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.625	error	创建smtp_host配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_host' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'smtp_port' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'smtp_port' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.519ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('smtp_port','587','SMTP服务器端口','system','number',false,'2026-03-12 14:34:52.628','2026-03-12 14:34:52.628',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.630	error	创建smtp_port配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_port' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.630	error	创建smtp_port配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_port' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.630	error	创建smtp_port配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_port' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'smtp_username' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'smtp_username' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.594ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('smtp_username','','SMTP用户名','system','string',false,'2026-03-12 14:34:52.634','2026-03-12 14:34:52.634',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.636	error	创建smtp_username配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_username' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.636	error	创建smtp_username配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_username' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.636	error	创建smtp_username配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_username' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.522ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'smtp_password' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'smtp_password' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.000ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('smtp_password','','SMTP密码','system','string',false,'2026-03-12 14:34:52.639','2026-03-12 14:34:52.639',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.641	error	创建smtp_password配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_password' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.641	error	创建smtp_password配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_password' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.641	error	创建smtp_password配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_password' for key 'system_configs.idx_system_configs_key'"}
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1076 [35;1mError 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'key = ? AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id`' at line 1
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `system_configs` WHERE key = 'smtp_secure' AND `system_configs`.`deleted_at` IS NULL ORDER BY `system_configs`.`id` LIMIT 1
+
+2026/03/12 14:34:52 [31;1mC:/Users/admin/.openclaw-autoclaw/workspace/oneclickvirt/server/source/seed.go:1081 [35;1mError 1062 (23000): Duplicate entry 'smtp_secure' for key 'system_configs.idx_system_configs_key'
+[0m[33m[0.524ms] [34;1m[rows:0][0m INSERT INTO `system_configs` (`key`,`value`,`description`,`category`,`type`,`is_public`,`created_at`,`updated_at`,`deleted_at`) VALUES ('smtp_secure','true','是否使用安全连接','system','boolean',false,'2026-03-12 14:34:52.644','2026-03-12 14:34:52.644',NULL)
+[oneclickvirt]2026/03/12 - 14:34:52.645	error	创建smtp_secure配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_secure' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.645	error	创建smtp_secure配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_secure' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.645	error	创建smtp_secure配置失败	{"error": "Error 1062 (23000): Duplicate entry 'smtp_secure' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/03/12 - 14:34:52.647	info	开始同步系统镜像列表
+[oneclickvirt]2026/03/12 - 14:34:52.648	info	镜像数据已存在，跳过同步	{"count": 376}
+[oneclickvirt]2026/03/12 - 14:34:52.651	info	开始同步Provider层面的数据（资源和流量统计）
+[oneclickvirt]2026/03/12 - 14:34:52.653	info	Task scheduler started
+[oneclickvirt]2026/03/12 - 14:34:52.653	info	Task scheduler main loop started with traffic aggregation
+[oneclickvirt]2026/03/12 - 14:34:52.654	info	启动监控调度器
+[oneclickvirt]2026/03/12 - 14:34:52.656	info	启动Provider健康检查调度器
+[oneclickvirt]2026/03/12 - 14:34:52.656	info	启动pmacct数据清理任务
+[oneclickvirt]2026/03/12 - 14:34:52.656	info	启动pmacct流量数据收集任务
+[oneclickvirt]2026/03/12 - 14:34:52.656	info	启动pmacct守护进程重置任务
+[oneclickvirt]2026/03/12 - 14:34:52.657	info	启动pmacct自适应批量处理器	{"minInterval": 5, "maxInterval": 30}
+[oneclickvirt]2026/03/12 - 14:34:52.659	info	所有调度器和全局服务已启动并注册到生命周期管理器
+[oneclickvirt]2026/03/12 - 14:34:52.660	info	系统完整初始化完成
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
+[INFO] 开发环境：启动pprof性能监控端点 http://localhost:6060/debug/pprof/
 [GIN-debug] GET    /health                   --> oneclickvirt/api/v1/public.HealthCheck (6 handlers)
 [GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (6 handlers)
 [GIN-debug] GET    /api/health               --> oneclickvirt/api/v1/public.HealthCheck (6 handlers)
@@ -298,4 +562,138 @@
 [GIN-debug] POST   /api/v1/agent/wallet/withdraw --> oneclickvirt/api/v1/agent.Withdraw (9 handlers)
 [SUCCESS] 服务器启动成功，监听端口: 8890
 [INFO] API文档路径: /swagger/index.html
-[oneclickvirt]2026/03/12 - 13:12:15.040	info	服务器启动成功	{"port": 8890}
+[oneclickvirt]2026/03/12 - 14:34:52.719	info	服务器启动成功	{"port": 8890}
+[GIN] 2026/03/12 - 14:34:57 | 200 |       505.4µs |             ::1 | GET      "/api/v1/public/init/check"
+[oneclickvirt]2026/03/12 - 14:35:46.763	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:35:46 | 200 |      4.5422ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773297346751"
+[GIN] 2026/03/12 - 14:35:46 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773297346764"
+[GIN] 2026/03/12 - 14:35:46 | 200 |       508.1µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773297346814"
+[GIN] 2026/03/12 - 14:35:46 | 200 |       748.9µs |             ::1 | GET      "/api/v1/public/site-configs?_t=1773297346889"
+[GIN] 2026/03/12 - 14:35:46 | 200 |      3.5116ms |             ::1 | GET      "/api/v1/auth/captcha?_t=1773297346900"
+[oneclickvirt]2026/03/12 - 14:35:49.694	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:35:49 | 200 |      3.0796ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773297349687"
+[GIN] 2026/03/12 - 14:35:49 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773297349694"
+[GIN] 2026/03/12 - 14:35:49 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773297349735"
+[GIN] 2026/03/12 - 14:35:49 | 200 |      1.2707ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773297349803"
+[GIN] 2026/03/12 - 14:35:49 | 200 |       506.3µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773297349819"
+[GIN] 2026/03/12 - 14:35:50 | 200 |       506.8µs |             ::1 | GET      "/api/v1/public/system-config?_t=1773297350765"
+[GIN] 2026/03/12 - 14:35:50 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773297350769"
+[GIN] 2026/03/12 - 14:35:50 | 200 |         688µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773297350816"
+[GIN] 2026/03/12 - 14:35:50 | 200 |      1.1065ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773297350880"
+[GIN] 2026/03/12 - 14:35:50 | 200 |       506.5µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773297350894"
+[GIN] 2026/03/12 - 14:35:58 | 403 |            0s |             ::1 | POST     "/api/v1/auth/login"
+[GIN] 2026/03/12 - 14:35:58 | 200 |       505.2µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773297358585"
+[oneclickvirt]2026/03/12 - 14:36:04.821	warn	用户登录失败	{"username": "admin", "error": "[4009] 邮箱未验证，请先验证邮箱: email not verified", "ip": "::1"}
+[oneclickvirt]2026/03/12 - 14:36:04.821	warn	用户登录失败	{"username": "admin", "error": "[4009] 邮箱未验证，请先验证邮箱: email not verified", "ip": "::1"}
+[GIN] 2026/03/12 - 14:36:04 | 400 |    230.3166ms |             ::1 | POST     "/api/v1/auth/login"
+[oneclickvirt]2026/03/12 - 14:37:40.953	info	用户登录成功	{"username": "admin", "userType": "admin", "userID": 1}
+[GIN] 2026/03/12 - 14:37:40 | 200 |    231.4341ms |             ::1 | POST     "/api/v1/auth/login"
+[oneclickvirt]2026/03/12 - 14:39:52.655	info	开始聚合流量数据	{"year": 2026, "month": 3}
+[oneclickvirt]2026/03/12 - 14:39:52.657	info	没有需要聚合的流量数据
+[oneclickvirt]2026/03/12 - 14:44:52.654	info	开始聚合流量数据	{"year": 2026, "month": 3}
+[oneclickvirt]2026/03/12 - 14:44:52.659	info	没有需要聚合的流量数据
+[oneclickvirt]2026/03/12 - 14:49:52.654	info	开始聚合流量数据	{"year": 2026, "month": 3}
+[oneclickvirt]2026/03/12 - 14:49:52.660	info	没有需要聚合的流量数据
+[oneclickvirt]2026/03/12 - 14:51:14.902	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:51:14 | 200 |      2.0735ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773298274897"
+[GIN] 2026/03/12 - 14:51:14 | 200 |      1.0551ms |             ::1 | GET      "/api/v1/public/init/check?_t=1773298274904"
+[GIN] 2026/03/12 - 14:51:14 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298274960"
+[GIN] 2026/03/12 - 14:51:15 | 200 |       963.6µs |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298275241"
+[GIN] 2026/03/12 - 14:51:15 | 200 |       509.4µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298275294"
+[oneclickvirt]2026/03/12 - 14:51:19.832	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:51:19 | 200 |       6.246ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773298279829"
+[GIN] 2026/03/12 - 14:51:19 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298279834"
+[GIN] 2026/03/12 - 14:51:19 | 200 |       673.4µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298279884"
+[GIN] 2026/03/12 - 14:51:19 | 200 |       624.3µs |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298279979"
+[GIN] 2026/03/12 - 14:51:19 | 200 |      1.1158ms |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298279987"
+[GIN] 2026/03/12 - 14:51:28 | 200 |       583.2µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298288893"
+[GIN] 2026/03/12 - 14:51:35 | 403 |            0s |             ::1 | POST     "/api/v1/auth/login"
+[GIN] 2026/03/12 - 14:51:35 | 200 |         628µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298295183"
+[GIN] 2026/03/12 - 14:51:40 | 403 |            0s |             ::1 | POST     "/api/v1/auth/login"
+[GIN] 2026/03/12 - 14:51:40 | 200 |       504.8µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298300375"
+[GIN] 2026/03/12 - 14:51:54 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298314551"
+[GIN] 2026/03/12 - 14:51:54 | 200 |       544.2µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298314585"
+[GIN] 2026/03/12 - 14:51:54 | 200 |       538.6µs |             ::1 | GET      "/api/v1/public/register-config?_t=1773298314585"
+[GIN] 2026/03/12 - 14:51:54 | 200 |      1.9159ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298314585"
+[GIN] 2026/03/12 - 14:51:54 | 200 |      3.1647ms |             ::1 | GET      "/api/v1/public/oauth2/providers?_t=1773298314635"
+[GIN] 2026/03/12 - 14:51:59 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298319383"
+[GIN] 2026/03/12 - 14:51:59 | 200 |            0s |             ::1 | GET      "/api/v1/public/register-config?_t=1773298319420"
+[GIN] 2026/03/12 - 14:51:59 | 200 |       1.017ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298319442"
+[GIN] 2026/03/12 - 14:51:59 | 200 |       506.4µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298319456"
+[GIN] 2026/03/12 - 14:52:29 | 200 |       506.2µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298349381"
+[GIN] 2026/03/12 - 14:52:30 | 200 |       508.2µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298350917"
+[GIN] 2026/03/12 - 14:52:33 | 200 |       505.1µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298353388"
+[GIN] 2026/03/12 - 14:52:35 | 200 |       696.1µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298355196"
+[GIN] 2026/03/12 - 14:52:35 | 200 |      5.8303ms |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298355886"
+[GIN] 2026/03/12 - 14:52:41 | 403 |            0s |             ::1 | POST     "/api/v1/auth/register"
+[GIN] 2026/03/12 - 14:52:41 | 200 |       506.8µs |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298361847"
+[GIN] 2026/03/12 - 14:52:44 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298364711"
+[GIN] 2026/03/12 - 14:52:44 | 200 |      1.2423ms |             ::1 | GET      "/api/v1/auth/captcha?_t=1773298364731"
+[GIN] 2026/03/12 - 14:52:44 | 200 |       506.5µs |             ::1 | GET      "/api/v1/public/register-config?_t=1773298364731"
+[GIN] 2026/03/12 - 14:52:44 | 200 |      1.0292ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298364731"
+[GIN] 2026/03/12 - 14:52:44 | 200 |       507.2µs |             ::1 | GET      "/api/v1/public/oauth2/providers?_t=1773298364775"
+[GIN] 2026/03/12 - 14:52:47 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298367990"
+[GIN] 2026/03/12 - 14:52:48 | 200 |       547.6µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298368007"
+[GIN] 2026/03/12 - 14:52:48 | 200 |         519µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298368037"
+[GIN] 2026/03/12 - 14:52:48 | 200 |      1.1276ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298368037"
+[GIN] 2026/03/12 - 14:52:48 | 200 |       3.765ms |             ::1 | GET      "/api/v1/public/products?_t=1773298368037"
+[GIN] 2026/03/12 - 14:52:48 | 200 |      5.6004ms |             ::1 | GET      "/api/v1/public/announcements?type=homepage&_t=1773298368037"
+[GIN] 2026/03/12 - 14:52:48 | 200 |      9.2527ms |             ::1 | GET      "/api/v1/public/stats?_t=1773298368037"
+[oneclickvirt]2026/03/12 - 14:52:57.613	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:52:57 | 200 |      3.1026ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773298377609"
+[GIN] 2026/03/12 - 14:52:57 | 200 |       507.4µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298377613"
+[GIN] 2026/03/12 - 14:52:57 | 200 |       623.9µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298377704"
+[GIN] 2026/03/12 - 14:52:57 | 200 |       786.4µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298377769"
+[GIN] 2026/03/12 - 14:52:57 | 200 |      1.6569ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298377769"
+[GIN] 2026/03/12 - 14:52:57 | 200 |       532.5µs |             ::1 | GET      "/api/v1/public/stats?_t=1773298377769"
+[GIN] 2026/03/12 - 14:52:57 | 200 |      1.6156ms |             ::1 | GET      "/api/v1/public/announcements?type=homepage&_t=1773298377769"
+[GIN] 2026/03/12 - 14:52:57 | 200 |      1.6156ms |             ::1 | GET      "/api/v1/public/products?_t=1773298377769"
+[oneclickvirt]2026/03/12 - 14:53:03.650	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:53:03 | 200 |      2.2858ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773298383646"
+[GIN] 2026/03/12 - 14:53:03 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298383651"
+[GIN] 2026/03/12 - 14:53:03 | 200 |       509.6µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298383693"
+[GIN] 2026/03/12 - 14:53:03 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298383754"
+[GIN] 2026/03/12 - 14:53:03 | 200 |      1.8061ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298383754"
+[GIN] 2026/03/12 - 14:53:03 | 200 |      1.8573ms |             ::1 | GET      "/api/v1/public/products?_t=1773298383754"
+[GIN] 2026/03/12 - 14:53:03 | 200 |            0s |             ::1 | GET      "/api/v1/public/stats?_t=1773298383754"
+[GIN] 2026/03/12 - 14:53:03 | 200 |      3.7434ms |             ::1 | GET      "/api/v1/public/announcements?type=homepage&_t=1773298383754"
+[oneclickvirt]2026/03/12 - 14:53:10.599	info	从数据库查询到的公开配置数量	{"count": 3}
+[GIN] 2026/03/12 - 14:53:10 | 200 |      4.0816ms |             ::1 | GET      "/api/v1/public/system-config?_t=1773298390595"
+[GIN] 2026/03/12 - 14:53:10 | 200 |       509.7µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298390600"
+[GIN] 2026/03/12 - 14:53:10 | 200 |       730.5µs |             ::1 | GET      "/api/v1/public/init/check?_t=1773298390650"
+[GIN] 2026/03/12 - 14:53:10 | 200 |            0s |             ::1 | GET      "/api/v1/public/init/check?_t=1773298390720"
+[GIN] 2026/03/12 - 14:53:10 | 200 |      1.8927ms |             ::1 | GET      "/api/v1/public/site-configs?_t=1773298390720"
+[GIN] 2026/03/12 - 14:53:10 | 200 |      3.5458ms |             ::1 | GET      "/api/v1/public/announcements?type=homepage&_t=1773298390720"
+[GIN] 2026/03/12 - 14:53:10 | 200 |      4.2771ms |             ::1 | GET      "/api/v1/public/products?_t=1773298390720"
+[GIN] 2026/03/12 - 14:53:10 | 200 |      10.789ms |             ::1 | GET      "/api/v1/public/stats?_t=1773298390720"
+[oneclickvirt]2026/03/12 - 14:53:37.269	info	Shutdown Server ...
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	开始关闭所有已注册服务	{"count": 12}
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	日志轮转任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	Dashboard统计缓存刷新任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	Provider健康检查任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	任务context清理goroutine已停止
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	采样器清理任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	pmacct自适应批量处理器已停止，所有后台任务已完成
+[oneclickvirt]2026/03/12 - 14:53:37.275	info	Provider工作池清理goroutine已停止
+[oneclickvirt]2026/03/12 - 14:53:37.277	info	正在关闭服务	{"name": "LogRotationService"}
+[oneclickvirt]2026/03/12 - 14:53:37.283	info	服务已关闭	{"name": "LogRotationService"}
+[oneclickvirt]2026/03/12 - 14:53:37.284	info	HTTP Transport已全部清理
+[oneclickvirt]2026/03/12 - 14:53:37.285	info	HTTP Transport定期清理已停止
+[oneclickvirt]2026/03/12 - 14:53:37.285	info	正在关闭服务	{"name": "ResourceReservationService"}
+[oneclickvirt]2026/03/12 - 14:53:37.287	info	服务已关闭	{"name": "ResourceReservationService"}
+[oneclickvirt]2026/03/12 - 14:53:37.288	info	已关闭所有SSH连接
+[oneclickvirt]2026/03/12 - 14:53:37.288	info	SSH连接池清理goroutine已停止
+[oneclickvirt]2026/03/12 - 14:53:37.289	info	停止Provider健康检查调度器
+[oneclickvirt]2026/03/12 - 14:53:37.290	info	停止监控调度器
+[oneclickvirt]2026/03/12 - 14:53:37.291	info	监控调度器所有后台任务已完成
+[oneclickvirt]2026/03/12 - 14:53:37.291	info	pmacct守护进程重置任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.291	info	pmacct数据收集任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.291	info	pmacct数据清理任务已停止
+[oneclickvirt]2026/03/12 - 14:53:37.293	info	正在关闭服务	{"name": "SchedulerService"}
+[oneclickvirt]2026/03/12 - 14:53:37.295	warn	服务没有实现已知的关闭接口	{"name": "SchedulerService"}
+[oneclickvirt]2026/03/12 - 14:53:37.295	warn	服务没有实现已知的关闭接口	{"name": "SchedulerService"}
+[oneclickvirt]2026/03/12 - 14:53:37.297	info	开始关闭任务服务，等待所有后台任务完成...
+[oneclickvirt]2026/03/12 - 14:53:37.299	info	所有后台任务已完成
+[oneclickvirt]2026/03/12 - 14:53:37.299	info	TaskService关闭完成
+[oneclickvirt]2026/03/12 - 14:53:37.300	info	服务已关闭	{"name": "TaskService"}
+[oneclickvirt]2026/03/12 - 14:53:37.301	info	所有服务关闭完成
