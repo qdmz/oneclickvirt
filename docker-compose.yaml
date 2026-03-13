@@ -41,7 +41,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./data/mysql:/var/lib/mysql
-      - ./deploy/my.cnf:/etc/mysql/conf.d/custom.cnf
+      - ./deploy/my.cnf/my.cnf:/etc/mysql/conf.d/custom.cnf
     networks:
       - default
 

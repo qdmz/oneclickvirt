@@ -40,12 +40,111 @@ if [ ! -z "$FRONTEND_URL" ]; then
     # Detect if URL is HTTPS and update nginx config accordingly
     if echo "$FRONTEND_URL" | grep -q "^https://"; then
         echo "Detected HTTPS frontend, SSL will be enabled"
-        # Generate self-signed certificate if not provided or empty
+        # Use Certbot to obtain free SSL certificate if not provided
         if [ ! -f "/etc/nginx/ssl/cert.pem" ] || [ ! -f "/etc/nginx/ssl/key.pem" ] || [ ! -s "/etc/nginx/ssl/cert.pem" ] || [ ! -s "/etc/nginx/ssl/key.pem" ]; then
-            echo "Generating self-signed SSL certificate for $DOMAIN..."
+            echo "Obtaining free SSL certificate for $DOMAIN using Certbot..."
+            # Create self-signed certificate for initial setup
+            echo "Creating self-signed SSL certificate for $DOMAIN"
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem -out /etc/nginx/ssl/cert.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=$DOMAIN"
             chmod 644 /etc/nginx/ssl/cert.pem
             chmod 600 /etc/nginx/ssl/key.pem
+            echo "Self-signed SSL certificate created successfully"
+            
+            # Add HTTPS server configuration to nginx.conf
+            # First, remove the closing } of the http block
+            sed -i '$d' /etc/nginx/nginx.conf
+            
+            # Now add the HTTPS server configuration
+            cat >> /etc/nginx/nginx.conf << 'EOF'
+
+    # HTTPS server
+    server {
+        listen 443 ssl;
+        server_name DOMAIN_PLACEHOLDER;
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+        root /var/www/html;
+        index index.html;
+        client_max_body_size 10M;
+        
+        location /api/ {
+            proxy_pass http://127.0.0.1:8890;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header REMOTE-HOST $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-Port 443;
+            
+            # WebSocket support
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_http_version 1.1;
+            
+            # SSL settings
+            proxy_ssl_server_name off;
+            proxy_ssl_name $proxy_host;
+            
+            # Timeout settings for SSH connections
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
+            
+            # Disable buffering for real-time data
+            proxy_buffering off;
+            add_header X-Cache $upstream_cache_status;
+            add_header Cache-Control no-cache;
+        }
+        
+        location /swagger/ {
+            proxy_pass http://127.0.0.1:8890;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        
+        # WebSocket endpoints for SSH connections
+        location /v1/ {
+            proxy_pass http://127.0.0.1:8890;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header REMOTE-HOST $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-Port 443;
+            
+            # WebSocket support
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_http_version 1.1;
+            
+            # Timeout settings for SSH connections
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
+            
+            # Disable buffering for real-time data
+            proxy_buffering off;
+            add_header X-Cache $upstream_cache_status;
+            add_header Cache-Control no-cache;
+        }
+        
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+EOF
+            
+            # Replace the domain placeholder
+            sed -i "s/DOMAIN_PLACEHOLDER/$DOMAIN/g" /etc/nginx/nginx.conf
+            
+            # Create cron job for automatic certificate renewal attempt
+            echo "0 0 * * * certbot --nginx --non-interactive --agree-tos --email admin@$DOMAIN --domains $DOMAIN && nginx -s reload || true" > /etc/cron.d/certbot-renewal
+            chmod 644 /etc/cron.d/certbot-renewal
+            echo "Created cron job for automatic certificate renewal"
         fi
     else
         echo "Detected HTTP frontend, using default nginx config"
@@ -125,18 +224,18 @@ if [ "$INIT_NEEDED" = "true" ]; then
     $DB_DAEMON --user=mysql --skip-networking --skip-grant-tables --socket=/var/run/mysqld/mysqld.sock --pid-file=/var/run/mysqld/mysqld.pid --log-error=/var/log/mysql/error.log &
     mysql_pid=$!
     
-for i in {1..30}; do
-    if mysql --socket=/var/run/mysqld/mysqld.sock -e "SELECT 1" >/dev/null 2>&1; then
-        echo "$DB_TYPE started successfully"
-        break
-    fi
-    echo "Waiting for $DB_TYPE to start... ($i/30)"
-    if [ $i -eq 30 ]; then
-        echo "$DB_TYPE failed to start"
-        kill $mysql_pid 2>/dev/null || true
-        exit 1
-    fi
-    sleep 1
+    for i in {1..30}; do
+        if mysql --socket=/var/run/mysqld/mysqld.sock -e "SELECT 1" >/dev/null 2>&1; then
+            echo "$DB_TYPE started successfully"
+            break
+        fi
+        echo "Waiting for $DB_TYPE to start... ($i/30)"
+        if [ $i -eq 30 ]; then
+            echo "$DB_TYPE failed to start"
+            kill $mysql_pid 2>/dev/null || true
+            exit 1
+        fi
+        sleep 1
     done
     
     echo "Configuring $DB_TYPE users and database..."
@@ -144,10 +243,8 @@ for i in {1..30}; do
         mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
 FLUSH PRIVILEGES;
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
-DROP USER IF EXISTS 'root'@'127.0.0.1';
-DROP USER IF EXISTS 'root'@'%';
-CREATE USER 'root'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY '';
-CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '';
+CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY '';
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED WITH mysql_native_password BY '';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
@@ -273,6 +370,168 @@ INSERT IGNORE INTO invite_codes (id, code, creator_id, creator_name, description
 
 INSERT IGNORE INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
 (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
+
+-- Create products table if not exists
+CREATE TABLE IF NOT EXISTS products (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '产品名称',
+  description text COLLATE utf8mb4_unicode_ci COMMENT '产品描述',
+  level bigint NOT NULL COMMENT '产品等级',
+  price bigint NOT NULL COMMENT '价格(分)',
+  period bigint NOT NULL COMMENT '周期(月), 0为永久',
+  cpu bigint NOT NULL COMMENT 'CPU核心数',
+  memory bigint NOT NULL COMMENT '内存(MB)',
+  disk bigint NOT NULL COMMENT '磁盘(MB)',
+  bandwidth bigint NOT NULL COMMENT '带宽(Mbps)',
+  traffic bigint NOT NULL COMMENT '流量限制(MB)',
+  max_instances bigint NOT NULL COMMENT '最大实例数',
+  is_enabled bigint DEFAULT '1' COMMENT '是否启用(1:启用, 0:禁用)',
+  sort_order bigint DEFAULT '0' COMMENT '排序',
+  features text COLLATE utf8mb4_unicode_ci COMMENT '特性(JSON格式)',
+  allow_repeat bigint DEFAULT '1' COMMENT '是否允许重复购买(1:允许, 0:不允许)',
+  stock bigint DEFAULT '-1' COMMENT '库存(-1为无限)',
+  sold_count bigint DEFAULT '0' COMMENT '已售数量',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create roles table if not exists
+CREATE TABLE IF NOT EXISTS roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  code varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci,
+  status bigint DEFAULT '1',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_roles_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create user_roles table if not exists
+CREATE TABLE IF NOT EXISTS user_roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  user_id bigint unsigned NOT NULL,
+  role_id bigint unsigned NOT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_user_roles_user_role (user_id,role_id),
+  KEY idx_user_roles_role_id (role_id),
+  CONSTRAINT fk_user_roles_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE,
+  CONSTRAINT fk_user_roles_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create system_configs table if not exists
+CREATE TABLE IF NOT EXISTS system_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_system_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create site_configs table if not exists
+CREATE TABLE IF NOT EXISTS site_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `group` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_site_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create domain_configs table if not exists
+CREATE TABLE IF NOT EXISTS domain_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  max_domains_per_user bigint DEFAULT '3',
+  max_domains_per_agent_user bigint DEFAULT '5',
+  default_ttl bigint DEFAULT '300',
+  auto_ssl bigint DEFAULT '0',
+  allowed_suffixes text COLLATE utf8mb4_unicode_ci,
+  dns_type varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'dnsmasq',
+  dns_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/dnsmasq.d/oneclickvirt-hosts.conf',
+  nginx_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/nginx/conf.d/oneclickvirt-domains',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert roles data
+INSERT IGNORE INTO roles (name, code, description, status, created_at, updated_at) VALUES
+('admin', 'admin', '系统管理员角色', 1, NOW(), NOW()),
+('user', 'user', '普通用户角色', 1, NOW(), NOW());
+
+-- Update users table to include necessary fields
+ALTER TABLE users ADD COLUMN IF NOT EXISTS uuid varchar(36) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname varchar(50) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone varchar(20) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS level_expire_at datetime DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_type varchar(20) DEFAULT 'user';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS real_name_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD UNIQUE KEY IF NOT EXISTS idx_users_uuid (uuid);
+
+-- Update existing users with missing fields
+UPDATE users SET uuid = IFNULL(uuid, CONCAT('user-', id)), nickname = IFNULL(nickname, username), user_type = IFNULL(user_type, 'user') WHERE id IN (1, 2);
+
+-- Insert user_roles data
+INSERT IGNORE INTO user_roles (user_id, role_id, created_at, updated_at) VALUES
+(1, 1, NOW(), NOW()),
+(2, 2, NOW(), NOW());
+
+-- Insert system_configs data
+INSERT IGNORE INTO system_configs (`key`, `value`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', '网站名称', NOW(), NOW()),
+('site_description', '虚拟化管理平台', '网站描述', NOW(), NOW()),
+('site_keywords', '虚拟化,Docker,LXD,Incus,Proxmox', '网站关键词', NOW(), NOW()),
+('enable_registration', 'true', '是否开启注册', NOW(), NOW()),
+('enable_email_verify', 'false', '是否开启邮箱验证', NOW(), NOW()),
+('default_user_level', '1', '默认用户等级', NOW(), NOW()),
+('max_instances_per_user', '10', '每个用户最大实例数', NOW(), NOW()),
+('default_instance_expiry_days', '30', '默认实例过期天数', NOW(), NOW()),
+('enable_email_verification', 'false', '是否开启邮箱验证（注册后需验证邮箱）', NOW(), NOW()),
+('email_activation_expire_hours', '24', '邮箱激活链接过期时间（小时）', NOW(), NOW()),
+('enable_real_name', 'false', '是否开启实名认证', NOW(), NOW()),
+('require_real_name', 'false', '是否强制实名认证后才能使用服务', NOW(), NOW()),
+('enable_agent', 'true', '是否开启代理商功能', NOW(), NOW());
+
+-- Insert site_configs data
+INSERT IGNORE INTO site_configs (`key`, `value`, `type`, `group`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
+('site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
+('site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
+('footer_text', '© 2025 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
+('icp_number', '', 'string', 'basic', 'ICP备案号', NOW(), NOW()),
+('police_number', '', 'string', 'basic', '公安备案号', NOW(), NOW());
+
+-- Insert domain_configs data
+INSERT IGNORE INTO domain_configs (max_domains_per_user, max_domains_per_agent_user, default_ttl, auto_ssl, allowed_suffixes, dns_type, dns_config_path, nginx_config_path, created_at, updated_at) VALUES
+(3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/etc/nginx/conf.d/oneclickvirt-domains', NOW(), NOW());
+
+-- Update products table to match init.sql structure
+ALTER TABLE products ADD COLUMN IF NOT EXISTS billing_cycle varchar(20) DEFAULT 'monthly';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cpu_limit bigint DEFAULT cpu;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS memory_limit bigint DEFAULT memory;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS disk_limit bigint DEFAULT disk;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS bandwidth_limit bigint DEFAULT bandwidth;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS instance_limit bigint DEFAULT max_instances;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS status bigint DEFAULT is_enabled;
+
+-- Insert products data
+INSERT IGNORE INTO products (id, name, description, price, billing_cycle, cpu_limit, memory_limit, disk_limit, bandwidth_limit, instance_limit, features, status, sort_order, created_at, updated_at) VALUES
+(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0.00, 'monthly', 1, 512, 10240, 100, 1, '{"cpu": "1核", "memory": "512MB", "disk": "10GB", "bandwidth": "100Mbps", "instances": "1个实例"}', 1, 1, NOW(), NOW()),
+(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 9.90, 'monthly', 2, 1024, 20480, 200, 3, '{"cpu": "2核", "memory": "1GB", "disk": "20GB", "bandwidth": "200Mbps", "instances": "3个实例"}', 1, 2, NOW(), NOW()),
+(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 29.90, 'monthly', 4, 2048, 40960, 500, 5, '{"cpu": "4核", "memory": "2GB", "disk": "40GB", "bandwidth": "500Mbps", "instances": "5个实例"}', 1, 3, NOW(), NOW()),
+(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 99.90, 'monthly', 8, 4096, 102400, 1000, 10, '{"cpu": "8核", "memory": "4GB", "disk": "100GB", "bandwidth": "1000Mbps", "instances": "10个实例"}', 1, 4, NOW(), NOW());
 SQLEND
             echo "Default admin, user and system image data imported successfully"
         else
@@ -293,6 +552,168 @@ INSERT INTO invite_codes (id, code, creator_id, creator_name, description, max_u
 
 INSERT INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
 (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
+
+-- Create products table if not exists
+CREATE TABLE IF NOT EXISTS products (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '产品名称',
+  description text COLLATE utf8mb4_unicode_ci COMMENT '产品描述',
+  level bigint NOT NULL COMMENT '产品等级',
+  price bigint NOT NULL COMMENT '价格(分)',
+  period bigint NOT NULL COMMENT '周期(月), 0为永久',
+  cpu bigint NOT NULL COMMENT 'CPU核心数',
+  memory bigint NOT NULL COMMENT '内存(MB)',
+  disk bigint NOT NULL COMMENT '磁盘(MB)',
+  bandwidth bigint NOT NULL COMMENT '带宽(Mbps)',
+  traffic bigint NOT NULL COMMENT '流量限制(MB)',
+  max_instances bigint NOT NULL COMMENT '最大实例数',
+  is_enabled bigint DEFAULT '1' COMMENT '是否启用(1:启用, 0:禁用)',
+  sort_order bigint DEFAULT '0' COMMENT '排序',
+  features text COLLATE utf8mb4_unicode_ci COMMENT '特性(JSON格式)',
+  allow_repeat bigint DEFAULT '1' COMMENT '是否允许重复购买(1:允许, 0:不允许)',
+  stock bigint DEFAULT '-1' COMMENT '库存(-1为无限)',
+  sold_count bigint DEFAULT '0' COMMENT '已售数量',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create roles table if not exists
+CREATE TABLE IF NOT EXISTS roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  code varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci,
+  status bigint DEFAULT '1',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_roles_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create user_roles table if not exists
+CREATE TABLE IF NOT EXISTS user_roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  user_id bigint unsigned NOT NULL,
+  role_id bigint unsigned NOT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_user_roles_user_role (user_id,role_id),
+  KEY idx_user_roles_role_id (role_id),
+  CONSTRAINT fk_user_roles_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE,
+  CONSTRAINT fk_user_roles_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create system_configs table if not exists
+CREATE TABLE IF NOT EXISTS system_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_system_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create site_configs table if not exists
+CREATE TABLE IF NOT EXISTS site_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `group` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_site_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create domain_configs table if not exists
+CREATE TABLE IF NOT EXISTS domain_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  max_domains_per_user bigint DEFAULT '3',
+  max_domains_per_agent_user bigint DEFAULT '5',
+  default_ttl bigint DEFAULT '300',
+  auto_ssl bigint DEFAULT '0',
+  allowed_suffixes text COLLATE utf8mb4_unicode_ci,
+  dns_type varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'dnsmasq',
+  dns_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/dnsmasq.d/oneclickvirt-hosts.conf',
+  nginx_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/nginx/conf.d/oneclickvirt-domains',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert roles data
+INSERT IGNORE INTO roles (name, code, description, status, created_at, updated_at) VALUES
+('admin', 'admin', '系统管理员角色', 1, NOW(), NOW()),
+('user', 'user', '普通用户角色', 1, NOW(), NOW());
+
+-- Update users table to include necessary fields
+ALTER TABLE users ADD COLUMN IF NOT EXISTS uuid varchar(36) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname varchar(50) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone varchar(20) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS level_expire_at datetime DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_type varchar(20) DEFAULT 'user';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS real_name_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD UNIQUE KEY IF NOT EXISTS idx_users_uuid (uuid);
+
+-- Update existing users with missing fields
+UPDATE users SET uuid = IFNULL(uuid, CONCAT('user-', id)), nickname = IFNULL(nickname, username), user_type = IFNULL(user_type, 'user') WHERE id IN (1, 2);
+
+-- Insert user_roles data
+INSERT IGNORE INTO user_roles (user_id, role_id, created_at, updated_at) VALUES
+(1, 1, NOW(), NOW()),
+(2, 2, NOW(), NOW());
+
+-- Insert system_configs data
+INSERT IGNORE INTO system_configs (`key`, `value`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', '网站名称', NOW(), NOW()),
+('site_description', '虚拟化管理平台', '网站描述', NOW(), NOW()),
+('site_keywords', '虚拟化,Docker,LXD,Incus,Proxmox', '网站关键词', NOW(), NOW()),
+('enable_registration', 'true', '是否开启注册', NOW(), NOW()),
+('enable_email_verify', 'false', '是否开启邮箱验证', NOW(), NOW()),
+('default_user_level', '1', '默认用户等级', NOW(), NOW()),
+('max_instances_per_user', '10', '每个用户最大实例数', NOW(), NOW()),
+('default_instance_expiry_days', '30', '默认实例过期天数', NOW(), NOW()),
+('enable_email_verification', 'false', '是否开启邮箱验证（注册后需验证邮箱）', NOW(), NOW()),
+('email_activation_expire_hours', '24', '邮箱激活链接过期时间（小时）', NOW(), NOW()),
+('enable_real_name', 'false', '是否开启实名认证', NOW(), NOW()),
+('require_real_name', 'false', '是否强制实名认证后才能使用服务', NOW(), NOW()),
+('enable_agent', 'true', '是否开启代理商功能', NOW(), NOW());
+
+-- Insert site_configs data
+INSERT IGNORE INTO site_configs (`key`, `value`, `type`, `group`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
+('site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
+('site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
+('footer_text', '© 2025 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
+('icp_number', '', 'string', 'basic', 'ICP备案号', NOW(), NOW()),
+('police_number', '', 'string', 'basic', '公安备案号', NOW(), NOW());
+
+-- Insert domain_configs data
+INSERT IGNORE INTO domain_configs (max_domains_per_user, max_domains_per_agent_user, default_ttl, auto_ssl, allowed_suffixes, dns_type, dns_config_path, nginx_config_path, created_at, updated_at) VALUES
+(3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/etc/nginx/conf.d/oneclickvirt-domains', NOW(), NOW());
+
+-- Update products table to match init.sql structure
+ALTER TABLE products ADD COLUMN IF NOT EXISTS billing_cycle varchar(20) DEFAULT 'monthly';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cpu_limit bigint DEFAULT cpu;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS memory_limit bigint DEFAULT memory;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS disk_limit bigint DEFAULT disk;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS bandwidth_limit bigint DEFAULT bandwidth;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS instance_limit bigint DEFAULT max_instances;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS status bigint DEFAULT is_enabled;
+
+-- Insert products data
+INSERT IGNORE INTO products (id, name, description, price, billing_cycle, cpu_limit, memory_limit, disk_limit, bandwidth_limit, instance_limit, features, status, sort_order, created_at, updated_at) VALUES
+(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0.00, 'monthly', 1, 512, 10240, 100, 1, '{"cpu": "1核", "memory": "512MB", "disk": "10GB", "bandwidth": "100Mbps", "instances": "1个实例"}', 1, 1, NOW(), NOW()),
+(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 9.90, 'monthly', 2, 1024, 20480, 200, 3, '{"cpu": "2核", "memory": "1GB", "disk": "20GB", "bandwidth": "200Mbps", "instances": "3个实例"}', 1, 2, NOW(), NOW()),
+(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 29.90, 'monthly', 4, 2048, 40960, 500, 5, '{"cpu": "4核", "memory": "2GB", "disk": "40GB", "bandwidth": "500Mbps", "instances": "5个实例"}', 1, 3, NOW(), NOW()),
+(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 99.90, 'monthly', 8, 4096, 102400, 1000, 10, '{"cpu": "8核", "memory": "4GB", "disk": "100GB", "bandwidth": "1000Mbps", "instances": "10个实例"}', 1, 4, NOW(), NOW());
 SQLEND
                 echo "System image default data imported successfully"
             else
@@ -374,7 +795,7 @@ export DB_USER="root"
 export DB_PASSWORD=""
 
 # Create a script to check and import users after services start
-cat > /check_users.sh << 'EOF'
+cat > /check_users.sh << 'EOF2'
 #!/bin/bash
 
 # Wait for MySQL to start
@@ -477,6 +898,168 @@ INSERT IGNORE INTO invite_codes (id, code, creator_id, creator_name, description
 
 INSERT IGNORE INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
 (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
+
+-- Create products table if not exists
+CREATE TABLE IF NOT EXISTS products (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '产品名称',
+  description text COLLATE utf8mb4_unicode_ci COMMENT '产品描述',
+  level bigint NOT NULL COMMENT '产品等级',
+  price bigint NOT NULL COMMENT '价格(分)',
+  period bigint NOT NULL COMMENT '周期(月), 0为永久',
+  cpu bigint NOT NULL COMMENT 'CPU核心数',
+  memory bigint NOT NULL COMMENT '内存(MB)',
+  disk bigint NOT NULL COMMENT '磁盘(MB)',
+  bandwidth bigint NOT NULL COMMENT '带宽(Mbps)',
+  traffic bigint NOT NULL COMMENT '流量限制(MB)',
+  max_instances bigint NOT NULL COMMENT '最大实例数',
+  is_enabled bigint DEFAULT '1' COMMENT '是否启用(1:启用, 0:禁用)',
+  sort_order bigint DEFAULT '0' COMMENT '排序',
+  features text COLLATE utf8mb4_unicode_ci COMMENT '特性(JSON格式)',
+  allow_repeat bigint DEFAULT '1' COMMENT '是否允许重复购买(1:允许, 0:不允许)',
+  stock bigint DEFAULT '-1' COMMENT '库存(-1为无限)',
+  sold_count bigint DEFAULT '0' COMMENT '已售数量',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create roles table if not exists
+CREATE TABLE IF NOT EXISTS roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  code varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci,
+  status bigint DEFAULT '1',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_roles_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create user_roles table if not exists
+CREATE TABLE IF NOT EXISTS user_roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  user_id bigint unsigned NOT NULL,
+  role_id bigint unsigned NOT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_user_roles_user_role (user_id,role_id),
+  KEY idx_user_roles_role_id (role_id),
+  CONSTRAINT fk_user_roles_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE,
+  CONSTRAINT fk_user_roles_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create system_configs table if not exists
+CREATE TABLE IF NOT EXISTS system_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_system_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create site_configs table if not exists
+CREATE TABLE IF NOT EXISTS site_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `group` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_site_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create domain_configs table if not exists
+CREATE TABLE IF NOT EXISTS domain_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  max_domains_per_user bigint DEFAULT '3',
+  max_domains_per_agent_user bigint DEFAULT '5',
+  default_ttl bigint DEFAULT '300',
+  auto_ssl bigint DEFAULT '0',
+  allowed_suffixes text COLLATE utf8mb4_unicode_ci,
+  dns_type varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'dnsmasq',
+  dns_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/dnsmasq.d/oneclickvirt-hosts.conf',
+  nginx_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/nginx/conf.d/oneclickvirt-domains',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert roles data
+INSERT IGNORE INTO roles (name, code, description, status, created_at, updated_at) VALUES
+('admin', 'admin', '系统管理员角色', 1, NOW(), NOW()),
+('user', 'user', '普通用户角色', 1, NOW(), NOW());
+
+-- Update users table to include necessary fields
+ALTER TABLE users ADD COLUMN IF NOT EXISTS uuid varchar(36) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname varchar(50) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone varchar(20) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS level_expire_at datetime DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_type varchar(20) DEFAULT 'user';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS real_name_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD UNIQUE KEY IF NOT EXISTS idx_users_uuid (uuid);
+
+-- Update existing users with missing fields
+UPDATE users SET uuid = IFNULL(uuid, CONCAT('user-', id)), nickname = IFNULL(nickname, username), user_type = IFNULL(user_type, 'user') WHERE id IN (1, 2);
+
+-- Insert user_roles data
+INSERT IGNORE INTO user_roles (user_id, role_id, created_at, updated_at) VALUES
+(1, 1, NOW(), NOW()),
+(2, 2, NOW(), NOW());
+
+-- Insert system_configs data
+INSERT IGNORE INTO system_configs (`key`, `value`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', '网站名称', NOW(), NOW()),
+('site_description', '虚拟化管理平台', '网站描述', NOW(), NOW()),
+('site_keywords', '虚拟化,Docker,LXD,Incus,Proxmox', '网站关键词', NOW(), NOW()),
+('enable_registration', 'true', '是否开启注册', NOW(), NOW()),
+('enable_email_verify', 'false', '是否开启邮箱验证', NOW(), NOW()),
+('default_user_level', '1', '默认用户等级', NOW(), NOW()),
+('max_instances_per_user', '10', '每个用户最大实例数', NOW(), NOW()),
+('default_instance_expiry_days', '30', '默认实例过期天数', NOW(), NOW()),
+('enable_email_verification', 'false', '是否开启邮箱验证（注册后需验证邮箱）', NOW(), NOW()),
+('email_activation_expire_hours', '24', '邮箱激活链接过期时间（小时）', NOW(), NOW()),
+('enable_real_name', 'false', '是否开启实名认证', NOW(), NOW()),
+('require_real_name', 'false', '是否强制实名认证后才能使用服务', NOW(), NOW()),
+('enable_agent', 'true', '是否开启代理商功能', NOW(), NOW());
+
+-- Insert site_configs data
+INSERT IGNORE INTO site_configs (`key`, `value`, `type`, `group`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
+('site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
+('site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
+('footer_text', '© 2025 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
+('icp_number', '', 'string', 'basic', 'ICP备案号', NOW(), NOW()),
+('police_number', '', 'string', 'basic', '公安备案号', NOW(), NOW());
+
+-- Insert domain_configs data
+INSERT IGNORE INTO domain_configs (max_domains_per_user, max_domains_per_agent_user, default_ttl, auto_ssl, allowed_suffixes, dns_type, dns_config_path, nginx_config_path, created_at, updated_at) VALUES
+(3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/etc/nginx/conf.d/oneclickvirt-domains', NOW(), NOW());
+
+-- Update products table to match init.sql structure
+ALTER TABLE products ADD COLUMN IF NOT EXISTS billing_cycle varchar(20) DEFAULT 'monthly';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cpu_limit bigint DEFAULT cpu;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS memory_limit bigint DEFAULT memory;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS disk_limit bigint DEFAULT disk;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS bandwidth_limit bigint DEFAULT bandwidth;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS instance_limit bigint DEFAULT max_instances;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS status bigint DEFAULT is_enabled;
+
+-- Insert products data
+INSERT IGNORE INTO products (id, name, description, price, billing_cycle, cpu_limit, memory_limit, disk_limit, bandwidth_limit, instance_limit, features, status, sort_order, created_at, updated_at) VALUES
+(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0.00, 'monthly', 1, 512, 10240, 100, 1, '{"cpu": "1核", "memory": "512MB", "disk": "10GB", "bandwidth": "100Mbps", "instances": "1个实例"}', 1, 1, NOW(), NOW()),
+(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 9.90, 'monthly', 2, 1024, 20480, 200, 3, '{"cpu": "2核", "memory": "1GB", "disk": "20GB", "bandwidth": "200Mbps", "instances": "3个实例"}', 1, 2, NOW(), NOW()),
+(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 29.90, 'monthly', 4, 2048, 40960, 500, 5, '{"cpu": "4核", "memory": "2GB", "disk": "40GB", "bandwidth": "500Mbps", "instances": "5个实例"}', 1, 3, NOW(), NOW()),
+(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 99.90, 'monthly', 8, 4096, 102400, 1000, 10, '{"cpu": "8核", "memory": "4GB", "disk": "100GB", "bandwidth": "1000Mbps", "instances": "10个实例"}', 1, 4, NOW(), NOW());
 SQLEND
         echo "Default admin, user and system image data imported successfully"
     else
@@ -551,6 +1134,168 @@ INSERT INTO invite_codes (id, code, creator_id, creator_name, description, max_u
 
 INSERT INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
 (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
+
+-- Create products table if not exists
+CREATE TABLE IF NOT EXISTS products (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '产品名称',
+  description text COLLATE utf8mb4_unicode_ci COMMENT '产品描述',
+  level bigint NOT NULL COMMENT '产品等级',
+  price bigint NOT NULL COMMENT '价格(分)',
+  period bigint NOT NULL COMMENT '周期(月), 0为永久',
+  cpu bigint NOT NULL COMMENT 'CPU核心数',
+  memory bigint NOT NULL COMMENT '内存(MB)',
+  disk bigint NOT NULL COMMENT '磁盘(MB)',
+  bandwidth bigint NOT NULL COMMENT '带宽(Mbps)',
+  traffic bigint NOT NULL COMMENT '流量限制(MB)',
+  max_instances bigint NOT NULL COMMENT '最大实例数',
+  is_enabled bigint DEFAULT '1' COMMENT '是否启用(1:启用, 0:禁用)',
+  sort_order bigint DEFAULT '0' COMMENT '排序',
+  features text COLLATE utf8mb4_unicode_ci COMMENT '特性(JSON格式)',
+  allow_repeat bigint DEFAULT '1' COMMENT '是否允许重复购买(1:允许, 0:不允许)',
+  stock bigint DEFAULT '-1' COMMENT '库存(-1为无限)',
+  sold_count bigint DEFAULT '0' COMMENT '已售数量',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create roles table if not exists
+CREATE TABLE IF NOT EXISTS roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  code varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci,
+  status bigint DEFAULT '1',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_roles_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create user_roles table if not exists
+CREATE TABLE IF NOT EXISTS user_roles (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  user_id bigint unsigned NOT NULL,
+  role_id bigint unsigned NOT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_user_roles_user_role (user_id,role_id),
+  KEY idx_user_roles_role_id (role_id),
+  CONSTRAINT fk_user_roles_role_id FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE,
+  CONSTRAINT fk_user_roles_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create system_configs table if not exists
+CREATE TABLE IF NOT EXISTS system_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_system_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create site_configs table if not exists
+CREATE TABLE IF NOT EXISTS site_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `group` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  description varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_site_configs_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create domain_configs table if not exists
+CREATE TABLE IF NOT EXISTS domain_configs (
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
+  max_domains_per_user bigint DEFAULT '3',
+  max_domains_per_agent_user bigint DEFAULT '5',
+  default_ttl bigint DEFAULT '300',
+  auto_ssl bigint DEFAULT '0',
+  allowed_suffixes text COLLATE utf8mb4_unicode_ci,
+  dns_type varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'dnsmasq',
+  dns_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/dnsmasq.d/oneclickvirt-hosts.conf',
+  nginx_config_path varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT '/etc/nginx/conf.d/oneclickvirt-domains',
+  created_at datetime(3) DEFAULT NULL,
+  updated_at datetime(3) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert roles data
+INSERT IGNORE INTO roles (name, code, description, status, created_at, updated_at) VALUES
+('admin', 'admin', '系统管理员角色', 1, NOW(), NOW()),
+('user', 'user', '普通用户角色', 1, NOW(), NOW());
+
+-- Update users table to include necessary fields
+ALTER TABLE users ADD COLUMN IF NOT EXISTS uuid varchar(36) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname varchar(50) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone varchar(20) DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS level_expire_at datetime DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS user_type varchar(20) DEFAULT 'user';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS real_name_verified tinyint(1) DEFAULT '0';
+ALTER TABLE users ADD UNIQUE KEY IF NOT EXISTS idx_users_uuid (uuid);
+
+-- Update existing users with missing fields
+UPDATE users SET uuid = IFNULL(uuid, CONCAT('user-', id)), nickname = IFNULL(nickname, username), user_type = IFNULL(user_type, 'user') WHERE id IN (1, 2);
+
+-- Insert user_roles data
+INSERT IGNORE INTO user_roles (user_id, role_id, created_at, updated_at) VALUES
+(1, 1, NOW(), NOW()),
+(2, 2, NOW(), NOW());
+
+-- Insert system_configs data
+INSERT IGNORE INTO system_configs (`key`, `value`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', '网站名称', NOW(), NOW()),
+('site_description', '虚拟化管理平台', '网站描述', NOW(), NOW()),
+('site_keywords', '虚拟化,Docker,LXD,Incus,Proxmox', '网站关键词', NOW(), NOW()),
+('enable_registration', 'true', '是否开启注册', NOW(), NOW()),
+('enable_email_verify', 'false', '是否开启邮箱验证', NOW(), NOW()),
+('default_user_level', '1', '默认用户等级', NOW(), NOW()),
+('max_instances_per_user', '10', '每个用户最大实例数', NOW(), NOW()),
+('default_instance_expiry_days', '30', '默认实例过期天数', NOW(), NOW()),
+('enable_email_verification', 'false', '是否开启邮箱验证（注册后需验证邮箱）', NOW(), NOW()),
+('email_activation_expire_hours', '24', '邮箱激活链接过期时间（小时）', NOW(), NOW()),
+('enable_real_name', 'false', '是否开启实名认证', NOW(), NOW()),
+('require_real_name', 'false', '是否强制实名认证后才能使用服务', NOW(), NOW()),
+('enable_agent', 'true', '是否开启代理商功能', NOW(), NOW());
+
+-- Insert site_configs data
+INSERT IGNORE INTO site_configs (`key`, `value`, `type`, `group`, description, created_at, updated_at) VALUES
+('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
+('site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
+('site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
+('footer_text', '© 2025 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
+('icp_number', '', 'string', 'basic', 'ICP备案号', NOW(), NOW()),
+('police_number', '', 'string', 'basic', '公安备案号', NOW(), NOW());
+
+-- Insert domain_configs data
+INSERT IGNORE INTO domain_configs (max_domains_per_user, max_domains_per_agent_user, default_ttl, auto_ssl, allowed_suffixes, dns_type, dns_config_path, nginx_config_path, created_at, updated_at) VALUES
+(3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/etc/nginx/conf.d/oneclickvirt-domains', NOW(), NOW());
+
+-- Update products table to match init.sql structure
+ALTER TABLE products ADD COLUMN IF NOT EXISTS billing_cycle varchar(20) DEFAULT 'monthly';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cpu_limit bigint DEFAULT cpu;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS memory_limit bigint DEFAULT memory;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS disk_limit bigint DEFAULT disk;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS bandwidth_limit bigint DEFAULT bandwidth;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS instance_limit bigint DEFAULT max_instances;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS status bigint DEFAULT is_enabled;
+
+-- Insert products data
+INSERT IGNORE INTO products (id, name, description, price, billing_cycle, cpu_limit, memory_limit, disk_limit, bandwidth_limit, instance_limit, features, status, sort_order, created_at, updated_at) VALUES
+(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0.00, 'monthly', 1, 512, 10240, 100, 1, '{"cpu": "1核", "memory": "512MB", "disk": "10GB", "bandwidth": "100Mbps", "instances": "1个实例"}', 1, 1, NOW(), NOW()),
+(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 9.90, 'monthly', 2, 1024, 20480, 200, 3, '{"cpu": "2核", "memory": "1GB", "disk": "20GB", "bandwidth": "200Mbps", "instances": "3个实例"}', 1, 2, NOW(), NOW()),
+(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 29.90, 'monthly', 4, 2048, 40960, 500, 5, '{"cpu": "4核", "memory": "2GB", "disk": "40GB", "bandwidth": "500Mbps", "instances": "5个实例"}', 1, 3, NOW(), NOW()),
+(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 99.90, 'monthly', 8, 4096, 102400, 1000, 10, '{"cpu": "8核", "memory": "4GB", "disk": "100GB", "bandwidth": "1000Mbps", "instances": "10个实例"}', 1, 4, NOW(), NOW());
 SQLEND
             echo "System image default data imported successfully"
         else
@@ -558,7 +1303,7 @@ SQLEND
         fi
     fi
 fi
-EOF
+EOF2
 
 chmod +x /check_users.sh
 

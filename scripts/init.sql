@@ -34,11 +34,11 @@ INSERT INTO `announcements` (`title`, `content`, `content_html`, `type`, `status
 -- ============================================
 -- 4. 创建默认产品套餐
 -- ============================================
-INSERT INTO `products` (`name`, `description`, `price`, `billing_cycle`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `instance_limit`, `features`, `status`, `sort_order`, `created_at`, `updated_at`) VALUES
-('入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0.00, 'monthly', 1, 512, 10240, 100, 1, '{"cpu": "1核", "memory": "512MB", "disk": "10GB", "bandwidth": "100Mbps", "instances": "1个实例"}', 1, 1, NOW(), NOW()),
-('标准套餐', '适合小型团队的标准套餐，包含更多资源', 9.90, 'monthly', 2, 1024, 20480, 200, 3, '{"cpu": "2核", "memory": "1GB", "disk": "20GB", "bandwidth": "200Mbps", "instances": "3个实例"}', 1, 2, NOW(), NOW()),
-('专业套餐', '适合中型团队的专业套餐，包含完整功能', 29.90, 'monthly', 4, 2048, 40960, 500, 5, '{"cpu": "4核", "memory": "2GB", "disk": "40GB", "bandwidth": "500Mbps", "instances": "5个实例"}', 1, 3, NOW(), NOW()),
-('企业套餐', '适合大型团队的企业套餐，包含无限资源', 99.90, 'monthly', 8, 4096, 102400, 1000, 10, '{"cpu": "8核", "memory": "4GB", "disk": "100GB", "bandwidth": "1000Mbps", "instances": "10个实例"}', 1, 4, NOW(), NOW());
+INSERT INTO `products` (`name`, `description`, `price`, `billing_cycle`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `instance_limit`, `features`, `status`, `sort_order`, `is_enabled`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `period`, `allow_repeat`, `created_at`, `updated_at`) VALUES
+('入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0, 'monthly', 1, 512, 10240, 100, 1, '{}', 1, 1, 1, 1, 512, 10240, 100, 0, 30, 1, NOW(), NOW()),
+('标准套餐', '适合小型团队的标准套餐，包含更多资源', 990, 'monthly', 2, 1024, 20480, 200, 3, '{}', 1, 2, 1, 2, 1024, 20480, 200, 0, 30, 1, NOW(), NOW()),
+('专业套餐', '适合中型团队的专业套餐，包含完整功能', 2990, 'monthly', 4, 2048, 40960, 500, 5, '{}', 1, 3, 1, 4, 2048, 40960, 500, 0, 30, 1, NOW(), NOW()),
+('企业套餐', '适合大型团队的企业套餐，包含无限资源', 9990, 'monthly', 8, 4096, 102400, 1000, 10, '{}', 1, 4, 1, 8, 4096, 102400, 1000, 0, 30, 1, NOW(), NOW());
 
 -- ============================================
 -- 5. 创建默认系统配置

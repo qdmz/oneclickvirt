@@ -21,9 +21,9 @@ type QuotaStat struct {
 }
 
 type UserStat struct {
-	TotalUsers  int `json:"totalUsers"`
-	ActiveUsers int `json:"activeUsers"`
-	AdminUsers  int `json:"adminUsers"`
+	TotalUsers  int `json:"TotalUsers"`
+	ActiveUsers int `json:"ActiveUsers"`
+	AdminUsers  int `json:"AdminUsers"`
 }
 
 // TaskStatusCount 任务状态统计
@@ -34,8 +34,8 @@ type TaskStatusCount struct {
 
 // ResourceUsageStats 资源使用统计
 type ResourceUsageStats struct {
-	VMCount        int64 `json:"vm_count"`
-	ContainerCount int64 `json:"container_count"`
+	VMCount        int64 `json:"VMCount"`
+	ContainerCount int64 `json:"ContainerCount"`
 	UsedCPUCores   int64 `json:"used_cpu_cores"`
 	UsedMemory     int64 `json:"used_memory"`
 	UsedDisk       int64 `json:"used_disk"`
