@@ -6,7 +6,7 @@
         <el-card class="wallet-card">
           <template #header>
             <div class="card-header">
-              <span>钱包余额</span>
+              <span>{{ t('user.wallet.walletBalance') }}</span>
               <el-icon><Wallet /></el-icon>
             </div>
           </template>
@@ -18,13 +18,13 @@
               :column="1"
               size="small"
             >
-              <el-descriptions-item label="累计充值">
+              <el-descriptions-item :label="t('user.wallet.totalRecharge')">
                 ¥{{ (walletInfo.totalRecharge / 100).toFixed(2) }}
               </el-descriptions-item>
-              <el-descriptions-item label="累计消费">
+              <el-descriptions-item :label="t('user.wallet.totalExpense')">
                 ¥{{ (walletInfo.totalExpense / 100).toFixed(2) }}
               </el-descriptions-item>
-              <el-descriptions-item label="冻结金额">
+              <el-descriptions-item :label="t('user.wallet.frozenAmount')">
                 ¥{{ (walletInfo.frozen / 100).toFixed(2) }}
               </el-descriptions-item>
             </el-descriptions>
@@ -35,9 +35,9 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>充值</span>
+              <span>{{ t('user.wallet.recharge') }}</span>
               <el-tag type="info">
-                快捷充值
+                {{ t('user.wallet.quickRecharge') }}
               </el-tag>
             </div>
           </template>
@@ -45,7 +45,7 @@
             :model="rechargeForm"
             label-width="100px"
           >
-            <el-form-item label="充值金额">
+            <el-form-item :label="t('user.wallet.rechargeAmount')">
               <el-radio-group v-model="rechargeForm.amount">
                 <el-radio-button :label="10">
                   ¥10
@@ -71,7 +71,7 @@
                 class="custom-amount"
               />
             </el-form-item>
-            <el-form-item label="支付方式">
+            <el-form-item :label="t('user.wallet.paymentMethod')">
               <el-radio-group v-model="rechargeForm.paymentMethod">
                 <el-radio
                   v-if="paymentConfig.enableAlipay"
@@ -80,7 +80,7 @@
                   <el-icon color="#1677ff">
                     <Wallet />
                   </el-icon>
-                  支付宝
+                  {{ t('user.wallet.paymentMethods.alipay') }}
                 </el-radio>
                 <el-radio
                   v-if="paymentConfig.enableWechat"
@@ -89,7 +89,7 @@
                   <el-icon color="#07c160">
                     <ChatDotRound />
                   </el-icon>
-                  微信支付
+                  {{ t('user.wallet.paymentMethods.wechat') }}
                 </el-radio>
                 <el-radio
                   v-if="paymentConfig.enableMapay"
@@ -98,7 +98,7 @@
                   <el-icon color="#f7ba2a">
                     <Wallet />
                   </el-icon>
-                  码支付
+                  {{ t('user.wallet.paymentMethods.mapay') }}
                 </el-radio>
                 <el-radio
                   v-if="paymentConfig.enableEpay"
@@ -107,7 +107,7 @@
                   <el-icon color="#409eff">
                     <Wallet />
                   </el-icon>
-                  易支付
+                  {{ t('user.wallet.paymentMethods.epay') }}
                 </el-radio>
               </el-radio-group>
             </el-form-item>
@@ -117,10 +117,10 @@
                 :loading="recharging"
                 @click="handleRecharge"
               >
-                立即充值
+                {{ t('user.wallet.rechargeNow') }}
               </el-button>
               <el-button @click="showExchangeDialog = true">
-                使用兑换码
+                {{ t('user.wallet.useRedemptionCode') }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -132,8 +132,8 @@
     <el-card class="mt-20">
       <template #header>
         <div class="card-header">
-          <span>交易记录</span>
-          <el-tag>{{ transactions.total }} 条记录</el-tag>
+          <span>{{ t('user.wallet.transactionRecords') }}</span>
+          <el-tag>{{ transactions.total }} {{ t('user.wallet.transactionRecords') }}</el-tag>
         </div>
       </template>
       <el-table
@@ -148,7 +148,7 @@
           width="80"
         />
         <el-table-column
-          label="交易类型"
+          :label="t('user.wallet.transactionType')"
           width="120"
         >
           <template #default="{ row }">
@@ -158,7 +158,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="金额"
+          :label="t('user.wallet.amount')"
           width="150"
         >
           <template #default="{ row }">
@@ -169,7 +169,7 @@
         </el-table-column>
         <el-table-column
           prop="balance"
-          label="余额"
+          :label="t('user.wallet.balance')"
           width="150"
         >
           <template #default="{ row }">
@@ -178,11 +178,11 @@
         </el-table-column>
         <el-table-column
           prop="description"
-          label="说明"
+          :label="t('user.wallet.description')"
           show-overflow-tooltip
         />
         <el-table-column
-          label="交易时间"
+          :label="t('user.wallet.transactionTime')"
           width="180"
         >
           <template #default="{ row }">
@@ -302,6 +302,9 @@ import {
   getRechargeOrderStatus
 } from '@/api/user-payment'
 import { getPaymentConfig } from '@/api/public'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const recharging = ref(false)

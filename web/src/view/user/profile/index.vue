@@ -106,6 +106,20 @@
                     :placeholder="t('user.profile.pleaseEnterEmail')"
                     clearable
                   />
+                  <div class="form-tip">
+                    <span v-if="emailVerified" class="email-verified">邮箱已验证</span>
+                    <span v-else class="email-unverified">邮箱未验证</span>
+                    <el-button
+                      v-if="!emailVerified && profileForm.email"
+                      type="info"
+                      size="small"
+                      @click="resendVerificationEmail"
+                      :loading="sendingVerification"
+                      style="margin-left: 10px;"
+                    >
+                      重发验证邮件
+                    </el-button>
+                  </div>
                 </el-form-item>
 
                 <el-form-item
@@ -275,6 +289,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { useUserStore } from '@/pinia/modules/user'
 import { updateProfile as updateProfileApi, resetPassword } from '@/api/user'
+import { resendVerification } from '@/api/auth'
 import { validateImageFileSecure } from '@/utils/uploadValidator'
 
 const { t } = useI18n()
@@ -290,6 +305,8 @@ const profileFormRef = ref()
 const loading = ref(true)
 const updating = ref(false)
 const resetPasswordLoading = ref(false)
+const sendingVerification = ref(false)
+const emailVerified = ref(false)
 
 // 头像相关
 const showAvatarDialog = ref(false)
@@ -363,6 +380,29 @@ const initForm = () => {
     profileForm.nickname = userStore.user.nickname || ''
     profileForm.email = userStore.user.email || ''
     profileForm.phone = userStore.user.phone || ''
+    emailVerified.value = userStore.user.email_verified || userStore.user.emailVerified || false
+  }
+}
+
+// 重发验证邮件
+const resendVerificationEmail = async () => {
+  if (!profileForm.email) {
+    ElMessage.warning('请先输入邮箱地址')
+    return
+  }
+  
+  sendingVerification.value = true
+  try {
+    const response = await resendVerification({ email: profileForm.email })
+    if (response.code === 0 || response.code === 200) {
+      ElMessage.success('验证邮件已发送，请查收')
+    } else {
+      ElMessage.error(response.msg || '发送失败，请稍后重试')
+    }
+  } catch (error) {
+    ElMessage.error('发送失败，请稍后重试')
+  } finally {
+    sendingVerification.value = false
   }
 }
 
@@ -648,6 +688,16 @@ onUnmounted(() => {
   font-size: 12px;
   color: #999;
   margin-top: 5px;
+}
+
+.email-verified {
+  color: #67c23a;
+  font-weight: 500;
+}
+
+.email-unverified {
+  color: #e6a23c;
+  font-weight: 500;
 }
 
 .password-section h3 {

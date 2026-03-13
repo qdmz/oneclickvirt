@@ -29,6 +29,9 @@ import userTrafficOverview from './zh-CN/user/trafficOverview.js'
 import userTraffic from './zh-CN/user/traffic.js'
 import userResources from './zh-CN/user/resources.js'
 import userApply from './zh-CN/user/apply.js'
+import userKyc from './zh-CN/user/kyc.js'
+import userPurchase from './zh-CN/user/purchase.js'
+import userWallet from './zh-CN/user/wallet.js'
 
 // 管理员模块
 import adminDashboard from './zh-CN/admin/dashboard.js'
@@ -44,6 +47,7 @@ import adminTraffic from './zh-CN/admin/traffic.js'
 import adminPortMapping from './zh-CN/admin/portMapping.js'
 import adminOauth2 from './zh-CN/admin/oauth2.js'
 import adminPerformance from './zh-CN/admin/performance.js'
+import adminKyc from './zh-CN/admin/kyc.js'
 
 export default {
   common,
@@ -66,7 +70,10 @@ export default {
     trafficOverview: userTrafficOverview,
     traffic: userTraffic,
     resources: userResources,
-    apply: userApply
+    apply: userApply,
+    kyc: userKyc,
+    purchase: userPurchase,
+    wallet: userWallet
   },
   admin: {
     dashboard: adminDashboard,
@@ -81,7 +88,8 @@ export default {
     traffic: adminTraffic,
     portMapping: adminPortMapping,
     oauth2: adminOauth2,
-    performance: adminPerformance
+    performance: adminPerformance,
+    kyc: adminKyc
   },
   validation,
   message,

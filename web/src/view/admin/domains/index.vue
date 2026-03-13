@@ -101,9 +101,11 @@ async function fetchDomains() {
     if (filters.domain) params.domain = filters.domain
     if (filters.userId) params.userId = filters.userId
     if (filters.status !== undefined && filters.status !== null) params.status = filters.status
-    const { data } = await adminGetDomains(params)
-    domainList.value = data?.data?.list || []
-    total.value = data?.data?.total || 0
+    const res = await adminGetDomains(params)
+    if (res.code === 0) {
+      domainList.value = res.data?.list || []
+      total.value = res.data?.total || 0
+    }
   } finally {
     loading.value = false
   }

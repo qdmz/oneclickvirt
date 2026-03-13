@@ -82,13 +82,27 @@
           </template>
         </el-table-column>
         <el-table-column
+          prop="stock"
+          label="库存"
+          width="100"
+        >
+          <template #default="{ row }">
+            {{ row.stock === -1 ? '无限' : row.stock }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="soldCount"
+          label="已售"
+          width="80"
+        />
+        <el-table-column
           prop="sortOrder"
           label="排序"
           width="80"
         />
         <el-table-column
           label="操作"
-          width="200"
+          width="250"
           fixed="right"
         >
           <template #default="{ row }">
@@ -105,6 +119,13 @@
               @click="handleToggle(row)"
             >
               {{ row.isEnabled ? '禁用' : '启用' }}
+            </el-button>
+            <el-button
+              type="info"
+              size="small"
+              @click="handleUpdateStock(row)"
+            >
+              库存
             </el-button>
             <el-button
               type="danger"
@@ -304,6 +325,31 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="库存"
+              prop="stock"
+            >
+              <el-input-number
+                v-model="form.stock"
+                :min="-1"
+              />
+              <span class="ml-2">-1表示无限</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="已售数量"
+              prop="soldCount"
+            >
+              <el-input-number
+                v-model="form.soldCount"
+                :min="0"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="特性(JSON)">
           <el-input
             v-model="form.features"
@@ -326,6 +372,47 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 库存管理对话框 -->
+    <el-dialog
+      v-model="stockDialogVisible"
+      title="库存管理"
+      width="500px"
+    >
+      <el-form
+        :model="stockForm"
+        label-width="120px"
+      >
+        <el-form-item
+          label="库存"
+        >
+          <el-input-number
+            v-model="stockForm.stock"
+            :min="-1"
+          />
+          <span class="ml-2">-1表示无限</span>
+        </el-form-item>
+        <el-form-item
+          label="已售数量"
+        >
+          <el-input-number
+            v-model="stockForm.soldCount"
+            :min="0"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="stockDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleStockSubmit"
+        >
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -337,7 +424,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  toggleProduct
+  toggleProduct,
+  updateProductStock
 } from '@/api/admin'
 
 const loading = ref(false)
@@ -362,6 +450,8 @@ const form = ref({
   isEnabled: true,
   sortOrder: 0,
   allowRepeat: true,
+  stock: -1,
+  soldCount: 0,
   features: '[]'
 })
 
@@ -439,6 +529,9 @@ const handleAdd = () => {
     maxInstances: 1,
     isEnabled: true,
     sortOrder: 0,
+    allowRepeat: true,
+    stock: -1,
+    soldCount: 0,
     features: '[]'
   }
   dialogVisible.value = true
@@ -544,6 +637,43 @@ const handleSubmit = async () => {
       }
     }
   })
+}
+
+// 库存管理
+const stockDialogVisible = ref(false)
+const stockForm = ref({
+  id: '',
+  stock: -1,
+  soldCount: 0
+})
+
+const handleUpdateStock = (row) => {
+  stockForm.value = {
+    id: row.id,
+    stock: row.stock,
+    soldCount: row.soldCount
+  }
+  stockDialogVisible.value = true
+}
+
+// 提交库存更新
+const handleStockSubmit = async () => {
+  try {
+    const res = await updateProductStock(stockForm.value.id, {
+      stock: stockForm.value.stock,
+      soldCount: stockForm.value.soldCount
+    })
+    if (res.code === 200 || res.code === 0) {
+      ElMessage.success('库存更新成功')
+      stockDialogVisible.value = false
+      loadProducts()
+    } else {
+      ElMessage.error(res.message || '库存更新失败')
+    }
+  } catch (error) {
+    console.error('库存更新失败:', error)
+    ElMessage.error('库存更新失败')
+  }
 }
 
 // 对话框关闭

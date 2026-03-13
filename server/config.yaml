@@ -1,22 +1,18 @@
 auth:
-    # 安全提示：以下敏感配置请通过环境变量注入，不要在配置文件中硬编码
-    # 示例: export EMAIL_PASSWORD="your_password"
     email-password: ${EMAIL_PASSWORD}
     email-smtp-host: smtp.gmail.com
     email-smtp-port: 25
     email-username: qdmzhost
     enable-email: true
-    enable-email-verification: true
-    email-activation-expire-hours: 24
-    enable-oauth2: true
+    enable-oauth2: false
     enable-public-registration: true
-    enable-qq: true
-    enable-telegram: true
+    enable-qq: false
+    enable-telegram: false
     qq-app-id: ${QQ_APP_ID}
     qq-app-key: ${QQ_APP_KEY}
     telegram-bot-token: ${TELEGRAM_BOT_TOKEN}
 captcha:
-    enabled: true
+    enabled: false
     expire-time: 300
     height: 40
     length: 4
@@ -32,7 +28,7 @@ cors:
     mode: ""
     whitelist: []
 invite-code:
-    enabled: true
+    enabled: false
     required: false
 jwt:
     buffer-time: 1d
@@ -59,52 +55,10 @@ quota:
     instance-type-permissions:
         min-level-for-container: 1
         min-level-for-delete-container: 1
-        min-level-for-delete-vm: 1
+        min-level-for-delete-vm: 2
         min-level-for-reset-container: 1
-        min-level-for-reset-vm: 1
-        min-level-for-vm: 1
-    level-limits:
-        "1":
-            max-instances: 1
-            max-resources:
-                bandwidth: 2
-                cpu: 1
-                disk: 512
-                memory: 128
-            max-traffic: 1024
-        "2":
-            max-instances: 2
-            max-resources:
-                bandwidth: 200
-                cpu: 2
-                disk: 2048
-                memory: 1024
-            max-traffic: 204800
-        "3":
-            max-instances: 3
-            max-resources:
-                bandwidth: 300
-                cpu: 3
-                disk: 3072
-                memory: 1536
-            max-traffic: 307200
-        "4":
-            max-instances: 4
-            max-resources:
-                bandwidth: 400
-                cpu: 4
-                disk: 4096
-                memory: 4096
-            max-traffic: 409600
-        "5":
-            max-instances: 5
-            max-resources:
-                bandwidth: 500
-                cpu: 5
-                disk: 5120
-                memory: 5120
-            max-traffic: 512000
-    default-level: 1
+        min-level-for-reset-vm: 2
+        min-level-for-vm: 2
 redis:
     addr: ""
     db: 0
@@ -112,8 +66,8 @@ redis:
 system:
     addr: 8890
     db-type: mysql
-    env: production
-    frontend-url: "https://heyun.ypvps.com"
+    env: development
+    frontend-url: "http://localhost:8080"
     iplimit-count: 15000
     iplimit-time: 3600
     oauth2-state-token-minutes: 15
@@ -128,7 +82,7 @@ upload:
     max-avatar-size: 2
 other:
     default-language: zh-CN
-    max-avatar-size: 2
+    max-avatar-size: 1
 zap:
     director: storage/logs
     encode-level: LowercaseLevelEncoder
@@ -144,13 +98,13 @@ zap:
     retention-day: 3
     show-line: false
     stacktrace-key: stacktrace
-max_avatar_size: 2
+max_avatar_size: 1
 default_language:
 signing_key_v1:
-    created_at: "2025-12-30T15:38:24.4622672+08:00"
-    expires_at: "2025-12-31T15:38:24.4622672+08:00"
+    created_at: "2026-03-12T13:52:39.7982892+08:00"
+    expires_at: "2026-03-13T13:52:39.7982892+08:00"
     is_active: false
-    key: 3d60046ddbb61b7cfe6e400eafdd4baf493f34e35ab728b70c96a5c0bdeeb75a
+    key: e93c228bb22f3d614b2fb0c04b526ffc4f541f07ccaafdc0f3d44ccb853cae7e
     version: 1
 active_version: 1
 payment:
@@ -162,28 +116,43 @@ payment:
     balance-min-amount: 2
     enable-alipay: true
     enable-balance: true
+    enable-epay: true
+    enable-mapay: true
     enable-wechat: true
+    epay-api-url: https://pay.example.com/creat_order
+    epay-key: ${EPAY_KEY}
+    epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
+    epay-pid: "2093"
+    epay-return-url: https://heyun.ypvps.com/user/wallet
+    mapay-api-url: https://pay.example.com/pay
+    mapay-id: your-mapid
+    mapay-key: ${MAPAY_KEY}
+    mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
+    mapay-return-url: https://heyun.ypvps.com/user/wallet
     wechat-api-key: ${WECHAT_API_KEY}
     wechat-api-v3-key: ${WECHAT_API_V3_KEY}
     wechat-app-id: ${WECHAT_APP_ID}
     wechat-mch-id: ${WECHAT_MCH_ID}
     wechat-serial-no: ${WECHAT_SERIAL_NO}
     wechat-type: mp
-    # 易支付配�?
-    epay-api-url: https://pay.example.com/creat_order
-    epay-pid: "2093"
-    epay-key: ${EPAY_KEY}
-    epay-return-url: https://heyun.ypvps.com/user/wallet
-    epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
-    enable-epay: true
-    # 码支付配�?
-    mapay-api-url: https://pay.example.com/pay
-    mapay-id: "your-mapid"
-    mapay-key: ${MAPAY_KEY}
-    mapay-return-url: https://heyun.ypvps.com/user/wallet
-    mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
-    enable-mapay: true
-    # 实名认证配置
-    enable-real-name: false
-    require-real-name: false
-    real-name-callback-url: https://your-domain.com/api/v1/kyc/callback
+system_name: 虚拟化管理平台
+system_description: 支持多种虚拟化技术的管理平台
+enable_email_verification: false
+enable_captcha: false
+captcha_expire_time: 10
+max_login_attempts: 5
+login_lockout_duration: 30
+enable_ssl: false
+ssl_cert_path:
+ssl_key_path:
+enable_backup: true
+backup_retention_days: 7
+enable_audit_log: true
+audit_log_retention_days: 30
+enable_notification: true
+notification_email:
+smtp_host:
+smtp_port: 587
+smtp_username:
+smtp_password:
+smtp_secure: true

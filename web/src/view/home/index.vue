@@ -280,6 +280,10 @@
                     <i class="fas fa-server" />
                     <span>最大VPS量{{ product.maxInstances }} 个</span>
                   </div>
+                  <div class="feature-item">
+                    <i class="fas fa-box" />
+                    <span>库存{{ product.stock === -1 ? '无限' : product.stock }} 个</span>
+                  </div>
                 </div>
                 <router-link
                   :to="'/login'"

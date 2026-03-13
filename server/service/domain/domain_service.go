@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"oneclickvirt/global"
@@ -201,12 +202,12 @@ func (s *DomainService) GetDomainConfig() (*domainModel.DomainConfig, error) {
 		if err == gorm.ErrRecordNotFound {
 			// 创建默认配置
 			config = domainModel.DomainConfig{
-				MaxDomainsPerUser:     3,
+				MaxDomainsPerUser:      3,
 				MaxDomainsPerAgentUser: 5,
-				DefaultTTL:            300,
-				DNSType:               "dnsmasq",
-				DNSConfigPath:         "/etc/dnsmasq.d/oneclickvirt-hosts.conf",
-				NginxConfigPath:       "/etc/nginx/conf.d/oneclickvirt-domains",
+				DefaultTTL:             300,
+				DNSType:                "dnsmasq",
+				DNSConfigPath:          "/etc/dnsmasq.d/oneclickvirt-hosts.conf",
+				NginxConfigPath:        "/etc/nginx/conf.d/oneclickvirt-domains",
 			}
 			s.db.Create(&config)
 			return &config, nil
@@ -243,6 +244,12 @@ func (s *DomainService) configureDNS(domainName, internalIP string) error {
 
 // configureDnsmasq 配置dnsmasq
 func (s *DomainService) configureDnsmasq(domainName, internalIP, configPath string) error {
+	// 检查操作系统
+	if runtime.GOOS == "windows" {
+		// 在Windows上，我们不使用dnsmasq，而是使用hosts文件
+		return s.configureHosts(domainName, internalIP)
+	}
+
 	// 确保目录存在
 	dir := configPath[:strings.LastIndex(configPath, "/")]
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -281,9 +288,16 @@ func (s *DomainService) configureDnsmasq(domainName, internalIP, configPath stri
 	return nil
 }
 
-// configureHosts 配置/etc/hosts
+// configureHosts 配置hosts文件
 func (s *DomainService) configureHosts(domainName, internalIP string) error {
-	data, err := os.ReadFile("/etc/hosts")
+	var hostsPath string
+	if runtime.GOOS == "windows" {
+		hostsPath = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+	} else {
+		hostsPath = "/etc/hosts"
+	}
+
+	data, err := os.ReadFile(hostsPath)
 	if err != nil {
 		return fmt.Errorf("读取hosts文件失败: %v", err)
 	}
@@ -294,7 +308,7 @@ func (s *DomainService) configureHosts(domainName, internalIP string) error {
 		return nil
 	}
 
-	f, err := os.OpenFile("/etc/hosts", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(hostsPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("打开hosts文件失败: %v", err)
 	}
@@ -344,7 +358,14 @@ func (s *DomainService) removeDnsmasqEntry(domainName, configPath string) error 
 
 // removeHostsEntry 移除hosts记录
 func (s *DomainService) removeHostsEntry(domainName string) error {
-	data, err := os.ReadFile("/etc/hosts")
+	var hostsPath string
+	if runtime.GOOS == "windows" {
+		hostsPath = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+	} else {
+		hostsPath = "/etc/hosts"
+	}
+
+	data, err := os.ReadFile(hostsPath)
 	if err != nil {
 		return nil
 	}
@@ -357,7 +378,7 @@ func (s *DomainService) removeHostsEntry(domainName string) error {
 		}
 	}
 
-	return os.WriteFile("/etc/hosts", []byte(strings.Join(newLines, "\n")), 0644)
+	return os.WriteFile(hostsPath, []byte(strings.Join(newLines, "\n")), 0644)
 }
 
 // rebuildAllDNS 重建整个DNS配置
@@ -396,7 +417,14 @@ func (s *DomainService) rebuildDnsmasq(domains []domainModel.Domain, configPath 
 }
 
 func (s *DomainService) rebuildHosts(domains []domainModel.Domain) error {
-	data, _ := os.ReadFile("/etc/hosts")
+	var hostsPath string
+	if runtime.GOOS == "windows" {
+		hostsPath = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+	} else {
+		hostsPath = "/etc/hosts"
+	}
+
+	data, _ := os.ReadFile(hostsPath)
 	lines := strings.Split(string(data), "\n")
 	var newLines []string
 	for _, line := range lines {
@@ -416,7 +444,7 @@ func (s *DomainService) rebuildHosts(domains []domainModel.Domain) error {
 		newLines = append(newLines, fmt.Sprintf("%s %s", d.InternalIP, d.Domain))
 	}
 
-	return os.WriteFile("/etc/hosts", []byte(strings.Join(newLines, "\n")), 0644)
+	return os.WriteFile(hostsPath, []byte(strings.Join(newLines, "\n")), 0644)
 }
 
 // configureNginx 配置Nginx反代

@@ -134,88 +134,128 @@ const userRoutes = computed(() => {
   // 用户特定路由
   const userTypeRoutes = {
     // 普通用户路由
-    user: [
-      {
-        path: '/user/dashboard',
-        name: 'UserDashboard',
-        meta: {
-          title: t('sidebar.dashboard'),
-          icon: 'Odometer'
+      user: [
+        {
+          path: '/user/dashboard',
+          name: 'UserDashboard',
+          meta: {
+            title: t('sidebar.dashboard'),
+            icon: 'Odometer'
+          }
+        },
+        {
+          path: '/user/instances',
+          name: 'UserInstances',
+          meta: {
+            title: t('sidebar.myInstances'),
+            icon: 'Box'
+          }
+        },
+        {
+          path: '/user/apply',
+          name: 'UserApply',
+          meta: {
+            title: t('sidebar.apply'),
+            icon: 'Plus'
+          }
+        },
+        {
+          path: '/user/tasks',
+          name: 'UserTasks',
+          meta: {
+            title: t('sidebar.taskList'),
+            icon: 'List'
+          }
+        },
+        {
+          path: '/user/wallet',
+          name: 'UserWallet',
+          meta: {
+            title: t('sidebar.wallet'),
+            icon: 'Wallet'
+          }
+        },
+        {
+          path: '/user/domains',
+          name: 'UserDomains',
+          meta: {
+            title: '域名管理',
+            icon: 'Link'
+          }
+        },
+        {
+          path: '/user/orders',
+          name: 'UserOrders',
+          meta: {
+            title: t('sidebar.myOrders'),
+            icon: 'Document'
+          }
+        },
+        {
+          path: '/user/purchase',
+          name: 'UserPurchase',
+          meta: {
+            title: t('sidebar.purchase'),
+            icon: 'ShoppingCart'
+          }
+        },
+        {
+          path: '/user/kyc',
+          name: 'UserKYC',
+          meta: {
+            title: '实名认证',
+            icon: 'User'
+          }
+        },
+        {
+          path: '/agent/dashboard',
+          name: 'AgentDashboard',
+          meta: {
+            title: '代理商中心',
+            icon: 'OfficeBuilding'
+          }
+        },
+        {
+          path: '/agent/sub-users',
+          name: 'AgentSubUsers',
+          meta: {
+            title: '子用户管理',
+            icon: 'UserFilled'
+          }
+        },
+        {
+          path: '/agent/commissions',
+          name: 'AgentCommissions',
+          meta: {
+            title: '佣金记录',
+            icon: 'Money'
+          }
+        },
+        {
+          path: '/agent/profile',
+          name: 'AgentProfile',
+          meta: {
+            title: '代理商资料',
+            icon: 'User'
+          }
+        },
+        {
+          path: '/agent/wallet',
+          name: 'AgentWallet',
+          meta: {
+            title: '钱包管理',
+            icon: 'Wallet'
+          }
+        },
+        {
+          path: '/user/profile',
+          name: 'UserProfile',
+          meta: {
+            title: t('sidebar.personalCenter'),
+            icon: 'User'
+          }
         }
-      },
-      {
-        path: '/user/instances',
-        name: 'UserInstances',
-        meta: {
-          title: t('sidebar.myInstances'),
-          icon: 'Box'
-        }
-      },
-      {
-        path: '/user/apply',
-        name: 'UserApply',
-        meta: {
-          title: t('sidebar.apply'),
-          icon: 'Plus'
-        }
-      },
-      {
-        path: '/user/tasks',
-        name: 'UserTasks',
-        meta: {
-          title: t('sidebar.taskList'),
-          icon: 'List'
-        }
-      },
-      {
-        path: '/user/wallet',
-        name: 'UserWallet',
-        meta: {
-          title: t('sidebar.wallet'),
-          icon: 'Wallet'
-        }
-      },
-      {
-        path: '/user/domains',
-        name: 'UserDomains',
-        meta: {
-          title: '域名管理',
-          icon: 'Link'
-        }
-      },
-      {
-        path: '/user/orders',
-        name: 'UserOrders',
-        meta: {
-          title: t('sidebar.myOrders'),
-          icon: 'Document'
-        }
-      },
-      {
-        path: '/user/purchase',
-        name: 'UserPurchase',
-        meta: {
-          title: t('sidebar.purchase'),
-          icon: 'ShoppingCart'
-        }
-      },
-      {
-        path: '/agent/dashboard',
-        name: 'AgentDashboard',
-        meta: {
-          title: '代理商中心',
-          icon: 'OfficeBuilding'
-        }
-      },
-      {
-        path: '/user/profile',
-        name: 'UserProfile',
-        meta: {
-          title: t('sidebar.personalCenter'),
-          icon: 'User'
-        }
-      }
-    ],
+      ],
     // 管理员路由
     admin: [
       {

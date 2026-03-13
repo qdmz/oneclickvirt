@@ -1,0 +1,22 @@
+export default {
+  title: 'Identity Verification',
+  notVerified: 'You have not completed identity verification',
+  realName: 'Real Name',
+  realNamePlaceholder: 'Please enter your real name',
+  idCardNumber: 'ID Card Number',
+  idCardPlaceholder: 'Please enter your ID card number',
+  submit: 'Submit Verification',
+  notice: 'Verification information will be kept strictly confidential and only used for identity verification',
+  pending: 'Verification in progress',
+  queryStatus: 'Query Status',
+  certified: 'Verification successful',
+  certifiedAt: 'Verification time',
+  idType: 'ID Type',
+  rejected: 'Verification failed',
+  retry: 'Reverify',
+  expired: 'Verification expired',
+  submitSuccess: 'Submission successful, under review',
+  submitFailed: 'Submission failed, please try again later',
+  querySuccess: 'Query successful',
+  queryFailed: 'Query failed, please try again later'
+}

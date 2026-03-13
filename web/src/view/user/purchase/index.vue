@@ -3,9 +3,9 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>产品购买</span>
+          <span>{{ t('user.purchase.title') }}</span>
           <el-tag type="info">
-            选择适合您的套餐
+            {{ t('user.purchase.subtitle') }}
           </el-tag>
         </div>
       </template>
@@ -31,20 +31,20 @@
                   v-if="product.period === 0"
                   type="success"
                 >
-                  永久
+                  {{ t('user.purchase.permanent') }}
                 </el-tag>
                 <el-tag
                   v-else
                   type="info"
                 >
-                  {{ product.period }}天
+                  {{ product.period }} {{ t('user.purchase.days') }}
                 </el-tag>
               </div>
             </template>
             <div class="product-body">
               <div class="price">
                 <span class="amount">¥{{ (product.price / 100).toFixed(2) }}</span>
-                <span class="unit">{{ product.period === 0 ? '/永久' : `/${product.period}天` }}</span>
+                <span class="unit">{{ product.period === 0 ? `/` + t('user.purchase.permanent') : `/${product.period} ` + t('user.purchase.days') }}</span>
               </div>
               <div class="level-badge">
                 Lv.{{ product.level }}
@@ -54,23 +54,26 @@
                   :column="1"
                   size="small"
                 >
-                  <el-descriptions-item label="CPU">
-                    {{ product.cpu }} 核
+                  <el-descriptions-item :label="t('user.purchase.cpu')">
+                    {{ product.cpu }}{{ t('user.purchase.cores') }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="内存">
+                  <el-descriptions-item :label="t('user.purchase.memory')">
                     {{ formatMemory(product.memory) }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="磁盘">
+                  <el-descriptions-item :label="t('user.purchase.disk')">
                     {{ formatDisk(product.disk) }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="带宽">
-                    {{ product.bandwidth }} Mbps
+                  <el-descriptions-item :label="t('user.purchase.bandwidth')">
+                    {{ product.bandwidth }}{{ t('user.purchase.Mbps') }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="流量">
+                  <el-descriptions-item :label="t('user.purchase.traffic')">
                     {{ formatTraffic(product.traffic) }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="最大实例">
-                    {{ product.maxInstances }} 个
+                  <el-descriptions-item :label="t('user.purchase.maxInstances')">
+                    {{ product.maxInstances }}{{ t('user.purchase.units') }}
+                  </el-descriptions-item>
+                  <el-descriptions-item :label="t('user.purchase.stock')">
+                    {{ product.stock === -1 ? (locale.value === 'en-US' ? 'Unlimited' : '无限') : product.stock }} {{ locale.value === 'en-US' ? 'units' : '个' }}
                   </el-descriptions-item>
                 </el-descriptions>
               </div>
@@ -80,7 +83,7 @@
                 class="purchase-btn"
                 @click="handlePurchase(product)"
               >
-                {{ product.isEnabled ? '立即购买' : '已下架' }}
+                {{ product.isEnabled ? t('user.purchase.buyNow') : t('user.purchase.soldOut') }}
               </el-button>
             </div>
           </el-card>
@@ -91,7 +94,7 @@
     <!-- 支付方式选择对话框 -->
     <el-dialog
       v-model="paymentDialogVisible"
-      title="选择支付方式"
+      :title="t('user.purchase.choosePaymentMethod')"
       width="400px"
     >
       <div class="payment-info">
@@ -99,7 +102,7 @@
           {{ selectedProduct?.name }}
         </p>
         <p class="order-amount">
-          订单金额: ¥{{ (selectedProduct?.price / 100).toFixed(2) }}
+          {{ t('user.purchase.orderAmount', { amount: (selectedProduct?.price / 100).toFixed(2) }) }}
         </p>
       </div>
       <el-radio-group
@@ -114,7 +117,7 @@
           <el-icon color="#1677ff">
             <Wallet />
           </el-icon>
-          <span>支付宝支付</span>
+          <span>{{ t('user.purchase.alipay') }}</span>
         </el-radio>
         <el-radio
           v-if="paymentConfig.enableWechat"
@@ -124,7 +127,7 @@
           <el-icon color="#07c160">
             <ChatDotRound />
           </el-icon>
-          <span>微信支付</span>
+          <span>{{ t('user.purchase.wechat') }}</span>
         </el-radio>
         <el-radio
           v-if="paymentConfig.enableMapay"
@@ -134,7 +137,7 @@
           <el-icon color="#f7ba2a">
             <Wallet />
           </el-icon>
-          <span>码支付</span>
+          <span>{{ t('user.purchase.mapay') }}</span>
         </el-radio>
         <el-radio
           v-if="paymentConfig.enableEpay"
@@ -144,7 +147,7 @@
           <el-icon color="#409eff">
             <Wallet />
           </el-icon>
-          <span>易支付</span>
+          <span>{{ t('user.purchase.epay') }}</span>
         </el-radio>
         <el-radio
           v-if="paymentConfig.enableBalance"
@@ -154,7 +157,7 @@
           <el-icon color="#67c23a">
             <Coin />
           </el-icon>
-          <span>余额支付</span>
+          <span>{{ t('user.purchase.balance') }}</span>
         </el-radio>
       </el-radio-group>
       <template #footer>
@@ -166,7 +169,7 @@
           :loading="purchasing"
           @click="handleConfirmPurchase"
         >
-          确认购买
+          {{ t('user.purchase.confirmPurchase') }}
         </el-button>
       </template>
     </el-dialog>
@@ -174,7 +177,7 @@
     <!-- 支付二维码对话框 -->
     <el-dialog
       v-model="qrDialogVisible"
-      title="扫码支付"
+      :title="t('user.purchase.scanToPay')"
       width="400px"
       @close="handleCloseQRDialog"
     >
@@ -189,7 +192,7 @@
             class="mb-20"
           >
             <template #title>
-              请点击下方按钮跳转支付页面
+              {{ t('user.purchase.clickToPay') }}
             </template>
           </el-alert>
           <el-button
@@ -197,7 +200,7 @@
             size="large"
             @click="openPaymentUrl"
           >
-            立即支付
+            {{ t('user.purchase.payNow') }}
           </el-button>
         </div>
         <el-image
@@ -207,13 +210,13 @@
           class="qr-code"
         />
         <p class="amount-text">
-          支付金额: ¥{{ (currentOrder?.amount / 100).toFixed(2) }}
+          {{ t('user.purchase.paymentAmount', { amount: (currentOrder?.amount / 100).toFixed(2) }) }}
         </p>
         <p class="tip-text">
-          请使用{{ getPaymentMethodName(paymentMethod) }}{{ paymentMethod === 'epay' || paymentMethod === 'mapay' ? '完成支付' : '扫描二维码' }}
+          {{ t('user.purchase.pleaseUse', { method: getPaymentMethodName(paymentMethod), action: paymentMethod === 'epay' || paymentMethod === 'mapay' ? t('user.purchase.completePayment') : t('user.purchase.scanQRCode') }) }}
         </p>
         <el-alert
-          title="支付完成后页面将自动跳转"
+          :title="t('user.purchase.paymentCompleted')"
           type="info"
           :closable="false"
           class="mt-20"
@@ -231,6 +234,9 @@ import { Wallet, ChatDotRound, Coin } from '@element-plus/icons-vue'
 import { getUserProducts, purchaseProduct, getAlipayQR, getWechatQR, getPurchaseOrderStatus, getPurchaseEpayQR, getPurchaseMapayQR } from '@/api/user-payment'
 import { getUserProfile } from '@/api/user'
 import { getPaymentConfig } from '@/api/public'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
 
 const router = useRouter()
 
@@ -401,11 +407,11 @@ const formatTraffic = (traffic) => {
 // 获取支付方式名称
 const getPaymentMethodName = (method) => {
   const map = {
-    alipay: '支付宝',
-    wechat: '微信',
-    mapay: '码支付',
-    epay: '易支付',
-    balance: '余额'
+    alipay: t('user.purchase.alipay'),
+    wechat: t('user.purchase.wechat'),
+    mapay: t('user.purchase.mapay'),
+    epay: t('user.purchase.epay'),
+    balance: t('user.purchase.balance')
   }
   return map[method] || method
 }
@@ -428,27 +434,27 @@ const handleConfirmPurchase = async () => {
     })
 
     if (res.code === 200) {
-      currentOrder.value = res.data
-      paymentDialogVisible.value = false
+        currentOrder.value = res.data
+        paymentDialogVisible.value = false
 
-      // 如果是余额支付,直接完成
-      if (paymentMethod.value === 'balance') {
-        ElMessage.success('购买成功')
-        loadProducts()
-        // 跳转到实例创建页面
-        router.push('/user/apply')
+        // 如果是余额支付,直接完成
+        if (paymentMethod.value === 'balance') {
+          ElMessage.success(t('user.purchase.purchaseSuccess'))
+          loadProducts()
+          // 跳转到实例创建页面
+          router.push('/user/apply')
+        } else {
+          // 获取支付二维码
+          await getQRCode()
+          qrDialogVisible.value = true
+          // 开始轮询订单状态
+          startPollOrderStatus()
+        }
       } else {
-        // 获取支付二维码
-        await getQRCode()
-        qrDialogVisible.value = true
-        // 开始轮询订单状态
-        startPollOrderStatus()
+        ElMessage.error(res.message || t('user.purchase.createOrderFailed'))
       }
-    } else {
-      ElMessage.error(res.message || '创建订单失败')
-    }
   } catch (error) {
-    ElMessage.error('创建订单失败')
+    ElMessage.error(t('user.purchase.createOrderFailed'))
   } finally {
     purchasing.value = false
   }
@@ -471,10 +477,10 @@ const getQRCode = async () => {
     if (res.code === 200) {
       qrCodeUrl.value = res.data.qrCode
     } else {
-      ElMessage.error('获取支付二维码失败')
+      ElMessage.error(t('user.purchase.getQRCodeFailed'))
     }
   } catch (error) {
-    ElMessage.error('获取支付二维码失败')
+    ElMessage.error(t('user.purchase.getQRCodeFailed'))
   }
 }
 
@@ -490,23 +496,23 @@ const startPollOrderStatus = () => {
       if (res.code === 200) {
         const status = res.data.status
         if (status === 'paid') {
-          // 支付成功
-          clearInterval(pollTimer.value)
-          pollTimer.value = null
-          ElMessage.success('购买成功')
-          qrDialogVisible.value = false
-          qrCodeUrl.value = ''
-          loadProducts()
-          // 跳转到实例创建页面
-          router.push('/user/apply')
-        } else if (status === 'cancelled' || status === 'expired') {
-          // 订单已取消或过期
-          clearInterval(pollTimer.value)
-          pollTimer.value = null
-          ElMessage.warning('订单已' + (status === 'cancelled' ? '取消' : '过期'))
-          qrDialogVisible.value = false
-          qrCodeUrl.value = ''
-        }
+            // 支付成功
+            clearInterval(pollTimer.value)
+            pollTimer.value = null
+            ElMessage.success(t('user.purchase.purchaseSuccess'))
+            qrDialogVisible.value = false
+            qrCodeUrl.value = ''
+            loadProducts()
+            // 跳转到实例创建页面
+            router.push('/user/apply')
+          } else if (status === 'cancelled' || status === 'expired') {
+            // 订单已取消或过期
+            clearInterval(pollTimer.value)
+            pollTimer.value = null
+            ElMessage.warning(t('user.purchase.' + (status === 'cancelled' ? 'orderCancelled' : 'orderExpired')))
+            qrDialogVisible.value = false
+            qrCodeUrl.value = ''
+          }
       }
     } catch (error) {
       console.error('查询订单状态失败:', error)

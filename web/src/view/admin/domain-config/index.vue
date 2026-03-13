@@ -62,8 +62,8 @@ const config = reactive({
 async function fetchConfig() {
   loading.value = true
   try {
-    const { data } = await getDomainConfig()
-    if (data?.data) Object.assign(config, data.data)
+    const res = await getDomainConfig()
+    if (res.code === 0 && res.data) Object.assign(config, res.data)
   } finally {
     loading.value = false
   }
@@ -72,8 +72,8 @@ async function fetchConfig() {
 async function handleSave() {
   saving.value = true
   try {
-    const { data } = await updateDomainConfig({ ...config })
-    if (data?.data) Object.assign(config, data.data)
+    const res = await updateDomainConfig({ ...config })
+    if (res.code === 0 && res.data) Object.assign(config, res.data)
     ElMessage.success('保存成功')
   } catch (e) {
     ElMessage.error(e?.response?.data?.message || '保存失败')
