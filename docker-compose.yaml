@@ -1,4 +1,15 @@
 services:
+  init:
+    image: mysql:8.0
+    container_name: oneclickvirt-init
+    command: bash -c "sleep 30 && mysql -h mysql -u root oneclickvirt < /init/complete_init.sql"
+    volumes:
+      - ./complete_init.sql:/init/complete_init.sql
+    depends_on:
+      - mysql
+    networks:
+      - default
+
   web:
     build:
       context: ./web
@@ -11,6 +22,8 @@ services:
       - ./data/nginx:/etc/nginx/conf.d
       - ./data/certs:/etc/nginx/certs
     restart: always
+    depends_on:
+      - init
     networks:
       - default
 
@@ -26,6 +39,8 @@ services:
       - ./data/config:/app/config
       - ./server/config.yaml:/app/config.yaml:rw
     restart: always
+    depends_on:
+      - init
     networks:
       - default
 

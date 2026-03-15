@@ -30,9 +30,12 @@ if [ $? -eq 0 ]; then
     echo "默认密码: password"
     echo "默认普通用户账号: user"
     echo "默认密码: password"
+    echo "OAuth2 提供商已配置：GitHub, Google"
+    echo "请在管理后台配置 OAuth2 提供商的客户端 ID 和密钥"
 else
     echo "数据库初始化失败，请检查错误信息"
     exit 1
 fi
 
 echo "初始化完成！"
+echo "系统已准备就绪，可以开始使用了。"

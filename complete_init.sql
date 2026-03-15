@@ -23,13 +23,35 @@ CREATE TABLE IF NOT EXISTS `users` (
   `max_cpu` int DEFAULT '1',
   `max_memory` int DEFAULT '512',
   `max_disk` int DEFAULT '10240',
+  `max_bandwidth` int DEFAULT '100',
+  `used_quota` int DEFAULT '0',
+  `total_quota` int DEFAULT '0',
+  `total_traffic` bigint DEFAULT '0',
+  `traffic_reset_at` datetime DEFAULT NULL,
+  `traffic_limited` tinyint(1) DEFAULT '0',
+  `invite_code` varchar(32) DEFAULT NULL,
+  `last_login_at` datetime DEFAULT NULL,
+  `telegram` varchar(64) DEFAULT NULL,
+  `qq` varchar(32) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `oauth2_provider_id` int DEFAULT NULL,
+  `oauth2_uid` varchar(255) DEFAULT NULL,
+  `oauth2_username` varchar(255) DEFAULT NULL,
+  `oauth2_email` varchar(255) DEFAULT NULL,
+  `oauth2_avatar` varchar(512) DEFAULT NULL,
+  `oauth2_extra` text,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   `deleted_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `uuid` (`uuid`)
+  UNIQUE KEY `uuid` (`uuid`),
+  KEY `idx_email` (`email`),
+  KEY `idx_status` (`status`),
+  KEY `idx_level` (`level`),
+  KEY `oauth2_provider_id` (`oauth2_provider_id`),
+  KEY `oauth2_uid` (`oauth2_uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. 创建 roles 表
@@ -86,66 +108,28 @@ CREATE TABLE IF NOT EXISTS `announcements` (
 -- 5. 创建 products 表
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(36) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text,
-  `price` int DEFAULT '0',
-  `duration` int DEFAULT '30',
-  `level` int DEFAULT '1',
-  `max_instances` int DEFAULT '1',
-  `max_cpu` int DEFAULT '1',
-  `max_memory` int DEFAULT '512',
-  `max_disk` int DEFAULT '10240',
-  `max_bandwidth` int DEFAULT '100',
-  `max_traffic` int DEFAULT '0',
-  `traffic_limited` int DEFAULT '0',
-  `status` int DEFAULT '1',
-  `type` varchar(32) DEFAULT 'standard',
-  `is_featured` int DEFAULT '0',
-  `is_recommended` int DEFAULT '0',
-  `sort_order` int DEFAULT '0',
-  `icon` varchar(255) DEFAULT NULL,
-  `cpu_limit` int DEFAULT '1',
-  `memory_limit` int DEFAULT '512',
-  `disk_limit` int DEFAULT '10240',
-  `bandwidth_limit` int DEFAULT '100',
-  `traffic_limit` int DEFAULT '0',
-  `instance_limit` int DEFAULT '1',
-  `enable_auto_renewal` int DEFAULT '0',
-  `auto_renewal_discount` decimal(5,2) DEFAULT '0.00',
-  `billing_cycle` varchar(32) DEFAULT 'monthly',
-  `setup_fee` decimal(10,2) DEFAULT '0.00',
-  `recurring_fee` decimal(10,2) DEFAULT '0.00',
-  `trial_duration` int DEFAULT '0',
-  `trial_enabled` int DEFAULT '0',
-  `refund_policy` text,
-  `terms_of_service` text,
-  `recommended_for` text,
-  `target_audience` text,
-  `tags` text,
-  `metadata` text,
-  `stock` int DEFAULT '-1',
-  `sold_count` int DEFAULT '0',
+  `name` varchar(100) NOT NULL COMMENT '产品名称',
+  `description` text COMMENT '产品描述',
+  `level` int NOT NULL COMMENT '对应等级',
+  `price` bigint NOT NULL COMMENT '价格(分)',
+  `period` int NOT NULL COMMENT '有效期(天), 0表示永久',
+  `cpu` int NOT NULL COMMENT 'CPU核心数',
+  `memory` int NOT NULL COMMENT '内存(MB)',
+  `disk` int NOT NULL COMMENT '磁盘(MB)',
+  `bandwidth` int NOT NULL COMMENT '带宽(Mbps)',
+  `traffic` bigint NOT NULL COMMENT '流量配额(MB)',
+  `max_instances` int NOT NULL COMMENT '最大实例数',
+  `is_enabled` int DEFAULT '1' COMMENT '是否启用(1:启用, 0:禁用)',
+  `sort_order` int DEFAULT '0' COMMENT '排序',
+  `features` text COMMENT '特性(JSON数组)',
+  `allow_repeat` int DEFAULT '1' COMMENT '是否允许重复购买(1:允许, 0:不允许)',
+  `stock` int DEFAULT '-1' COMMENT '库存量(-1表示无限)',
+  `sold_count` int DEFAULT '0' COMMENT '已售数量',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
-  `deleted_at` datetime(3) DEFAULT NULL,
-  `is_enabled` int DEFAULT '1',
-  `cpu` int DEFAULT '0',
-  `memory` int DEFAULT '0',
-  `disk` int DEFAULT '0',
-  `bandwidth` int DEFAULT '0',
-  `traffic` int DEFAULT '0',
-  `period` int DEFAULT '0',
-  `allow_repeat` int DEFAULT '0',
-  `features` text,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uuid` (`uuid`),
-  KEY `status` (`status`),
-  KEY `type` (`type`),
-  KEY `is_featured` (`is_featured`),
-  KEY `is_recommended` (`is_recommended`),
-  KEY `sort_order` (`sort_order`),
-  KEY `is_enabled` (`is_enabled`)
+  KEY `is_enabled` (`is_enabled`),
+  KEY `sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 6. 创建 system_configs 表
@@ -796,16 +780,30 @@ CREATE TABLE IF NOT EXISTS `traffic_monitor_tasks` (
 CREATE TABLE IF NOT EXISTS `o_auth2_providers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
+  `display_name` varchar(128) NOT NULL,
+  `provider_type` varchar(32) NOT NULL,
   `client_id` varchar(255) NOT NULL,
   `client_secret` varchar(255) NOT NULL,
   `redirect_uri` varchar(512) NOT NULL,
-  `scopes` varchar(255) DEFAULT NULL,
   `auth_url` varchar(512) NOT NULL,
   `token_url` varchar(512) NOT NULL,
   `user_info_url` varchar(512) NOT NULL,
-  `enabled` int DEFAULT '1',
+  `user_id_field` varchar(128) DEFAULT 'id',
+  `username_field` varchar(128) DEFAULT 'username',
+  `email_field` varchar(128) DEFAULT 'email',
+  `avatar_field` varchar(128) DEFAULT 'avatar',
+  `nickname_field` varchar(128) DEFAULT NULL,
+  `trust_level_field` varchar(128) DEFAULT NULL,
+  `max_registrations` int DEFAULT '0',
+  `current_registrations` int DEFAULT '0',
+  `level_mapping` text,
+  `default_level` int DEFAULT '1',
+  `total_users` int DEFAULT '0',
+  `sort` int DEFAULT '0',
+  `enabled` tinyint(1) DEFAULT '0',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `enabled` (`enabled`)
@@ -832,19 +830,19 @@ CREATE TABLE IF NOT EXISTS `resource_reservations` (
 -- 38. 创建 product_purchases 表
 CREATE TABLE IF NOT EXISTS `product_purchases` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `order_id` int DEFAULT NULL,
-  `status` varchar(32) DEFAULT 'active',
-  `start_at` datetime(3) DEFAULT NULL,
-  `end_at` datetime(3) DEFAULT NULL,
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `product_id` int NOT NULL COMMENT '产品ID',
+  `order_id` int DEFAULT NULL COMMENT '订单ID',
+  `level` int NOT NULL COMMENT '购买后的等级',
+  `start_date` datetime(3) DEFAULT NULL COMMENT '开始时间',
+  `end_date` datetime(3) DEFAULT NULL COMMENT '结束时间, 为空表示永久',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT '是否激活',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
+  KEY `idx_user_purchase` (`user_id`),
   KEY `product_id` (`product_id`),
-  KEY `order_id` (`order_id`),
-  KEY `status` (`status`)
+  KEY `order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 39. 创建 redemption_codes 表
@@ -943,11 +941,11 @@ INSERT IGNORE INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`, `upda
 (2, 2, 2, NOW(), NOW());
 
 -- 4. 导入产品数据
-INSERT IGNORE INTO `products` (`id`, `uuid`, `name`, `description`, `price`, `duration`, `level`, `max_instances`, `max_cpu`, `max_memory`, `max_disk`, `max_bandwidth`, `max_traffic`, `traffic_limited`, `status`, `type`, `is_featured`, `is_recommended`, `sort_order`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `traffic_limit`, `instance_limit`, `billing_cycle`, `is_enabled`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `period`, `allow_repeat`, `features`, `created_at`, `updated_at`) VALUES
-(1, 'product-1', '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0, 30, 1, 1, 1, 512, 10240, 100, 0, 0, 1, 'standard', 0, 1, 1, 1, 512, 10240, 100, 0, 1, 'monthly', 1, 1, 512, 10240, 100, 0, 30, 1, '{}', NOW(), NOW()),
-(2, 'product-2', '标准套餐', '适合小型团队的标准套餐，包含更多资源', 990, 30, 2, 3, 2, 1024, 20480, 200, 0, 0, 1, 'standard', 0, 0, 2, 2, 1024, 20480, 200, 0, 3, 'monthly', 1, 2, 1024, 20480, 200, 0, 30, 1, '{}', NOW(), NOW()),
-(3, 'product-3', '专业套餐', '适合中型团队的专业套餐，包含完整功能', 2990, 30, 3, 5, 4, 2048, 40960, 500, 0, 0, 1, 'standard', 1, 1, 3, 4, 2048, 40960, 500, 0, 5, 'monthly', 1, 4, 2048, 40960, 500, 0, 30, 1, '{}', NOW(), NOW()),
-(4, 'product-4', '企业套餐', '适合大型团队的企业套餐，包含无限资源', 9990, 30, 4, 10, 8, 4096, 102400, 1000, 0, 0, 1, 'standard', 1, 0, 4, 8, 4096, 102400, 1000, 0, 10, 'monthly', 1, 8, 4096, 102400, 1000, 0, 30, 1, '{}', NOW(), NOW());
+INSERT IGNORE INTO `products` (`id`, `name`, `description`, `level`, `price`, `period`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `max_instances`, `is_enabled`, `sort_order`, `features`, `allow_repeat`, `stock`, `sold_count`, `created_at`, `updated_at`) VALUES
+(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 1, 0, 30, 1, 512, 10240, 100, 0, 1, 1, 1, '{}', 1, -1, 0, NOW(), NOW()),
+(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 2, 990, 30, 2, 1024, 20480, 200, 0, 3, 1, 2, '{}', 1, -1, 0, NOW(), NOW()),
+(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 3, 2990, 30, 4, 2048, 40960, 500, 0, 5, 1, 3, '{}', 1, -1, 0, NOW(), NOW()),
+(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 4, 9990, 30, 8, 4096, 102400, 1000, 0, 10, 1, 4, '{}', 1, -1, 0, NOW(), NOW());
 
 -- 5. 导入系统配置
 INSERT IGNORE INTO `system_configs` (`id`, `key`, `value`, `description`, `created_at`, `updated_at`) VALUES
@@ -1008,6 +1006,11 @@ INSERT IGNORE INTO `system_images` (`id`, `uuid`, `name`, `description`, `type`,
 (2, 'image-2', 'CentOS 7', 'CentOS 7 稳定版本', 'container', 'active', 'docker', 'linux', '7', 0, 2, NOW(), NOW()),
 (3, 'image-3', 'Debian 11', 'Debian 11 稳定版本', 'container', 'active', 'docker', 'linux', '11', 0, 3, NOW(), NOW()),
 (4, 'image-4', 'Alpine 3.18', 'Alpine 3.18 轻量级版本', 'container', 'active', 'docker', 'linux', '3.18', 0, 4, NOW(), NOW());
+
+-- 14. 导入OAuth2提供商数据
+INSERT IGNORE INTO `o_auth2_providers` (`id`, `name`, `display_name`, `provider_type`, `client_id`, `client_secret`, `redirect_uri`, `auth_url`, `token_url`, `user_info_url`, `user_id_field`, `username_field`, `email_field`, `avatar_field`, `enabled`, `sort`, `created_at`, `updated_at`) VALUES
+(1, 'github', 'GitHub', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/github/callback', 'https://github.com/login/oauth/authorize', 'https://github.com/login/oauth/access_token', 'https://api.github.com/user', 'id', 'login', 'email', 'avatar_url', 0, 1, NOW(), NOW()),
+(2, 'google', 'Google', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/google/callback', 'https://accounts.google.com/o/oauth2/auth', 'https://oauth2.googleapis.com/token', 'https://www.googleapis.com/oauth2/v2/userinfo', 'id', 'email', 'email', 'picture', 0, 2, NOW(), NOW());
 
 -- 完成初始化
 SELECT '数据库初始化完成' AS message;
