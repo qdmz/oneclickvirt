@@ -38,7 +38,7 @@ jwt:
 mysql:
     auto-create: "true"
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: oneclickvirt_new
+    db-name: oneclickvirt
     engine: InnoDB
     log-mode: error
     log-zap: "false"
@@ -46,7 +46,7 @@ mysql:
     max-lifetime: "3600"
     max-open-conns: "100"
     password: ""
-    path: mysql
+    path: localhost
     port: "3306"
     prefix: ""
     singular: "false"

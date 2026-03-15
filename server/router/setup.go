@@ -6,7 +6,6 @@ import (
 	"oneclickvirt/api/v1/admin"
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/system"
-	"oneclickvirt/global"
 	"oneclickvirt/middleware"
 	authModel "oneclickvirt/model/auth"
 	"strings"
@@ -47,17 +46,7 @@ func SetupRouter() *gin.Engine {
 		ExposeHeaders:    []string{"Content-Length", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
-	}
-
-	// 优先使用CORS白名单，其次使用FrontendURL配置
-	if len(global.APP_CONFIG.Cors.Whitelist) > 0 {
-		corsConfig.AllowOrigins = global.APP_CONFIG.Cors.Whitelist
-	} else {
-		frontendURL := global.APP_CONFIG.System.FrontendURL
-		if frontendURL == "" {
-			frontendURL = "http://localhost:8080"
-		}
-		corsConfig.AllowOrigins = []string{frontendURL}
+		AllowAllOrigins:  true,
 	}
 
 	Router.Use(cors.New(corsConfig))

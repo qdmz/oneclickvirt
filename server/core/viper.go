@@ -27,6 +27,10 @@ func Viper(path ...string) *viper.Viper {
 	v.SetConfigFile(config)
 	v.SetConfigType("yaml")
 
+	// 支持从环境变量中读取配置
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	err := v.ReadInConfig()
 	if err != nil {
 		fmt.Printf("[VIPER] 配置文件读取错误: %s，使用默认配置\n", err)
@@ -61,6 +65,23 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("system.use-redis", false)
 	v.SetDefault("system.iplimit-count", 15000)
 	v.SetDefault("system.iplimit-time", 3600)
+
+	// 数据库默认配置
+	v.SetDefault("mysql.path", "127.0.0.1")
+	v.SetDefault("mysql.port", "3306")
+	v.SetDefault("mysql.config", "charset=utf8mb4&parseTime=True&loc=Local")
+	v.SetDefault("mysql.db-name", "oneclickvirt")
+	v.SetDefault("mysql.username", "root")
+	v.SetDefault("mysql.password", "root")
+	v.SetDefault("mysql.prefix", "")
+	v.SetDefault("mysql.singular", false)
+	v.SetDefault("mysql.engine", "InnoDB")
+	v.SetDefault("mysql.max-idle-conns", 10)
+	v.SetDefault("mysql.max-open-conns", 100)
+	v.SetDefault("mysql.log-mode", "info")
+	v.SetDefault("mysql.log-zap", false)
+	v.SetDefault("mysql.max-lifetime", 3600)
+	v.SetDefault("mysql.auto-create", true)
 
 	// 生成强制的安全JWT签名密钥
 	randomKey := generateSecureJWTKey()

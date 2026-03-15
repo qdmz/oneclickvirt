@@ -1016,9 +1016,9 @@ INSERT IGNORE INTO `system_images` (`id`, `uuid`, `name`, `description`, `type`,
 (4, 'image-4', 'Alpine 3.18', 'Alpine 3.18 轻量级版本', 'container', 'active', 'docker', 'linux', '3.18', 0, 4, NOW(), NOW());
 
 -- 14. 导入OAuth2提供商数据
-INSERT IGNORE INTO `oauth2_providers` (`id`, `name`, `display_name`, `provider_type`, `client_id`, `client_secret`, `redirect_url`, `auth_url`, `token_url`, `user_info_url`, `user_id_field`, `username_field`, `email_field`, `avatar_field`, `enabled`, `sort`, `created_at`, `updated_at`) VALUES
-(1, 'github', 'GitHub', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/github/callback', 'https://github.com/login/oauth/authorize', 'https://github.com/login/oauth/access_token', 'https://api.github.com/user', 'id', 'login', 'email', 'avatar_url', 0, 1, NOW(), NOW()),
-(2, 'google', 'Google', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/google/callback', 'https://accounts.google.com/o/oauth2/auth', 'https://oauth2.googleapis.com/token', 'https://www.googleapis.com/oauth2/v2/userinfo', 'id', 'email', 'email', 'picture', 0, 2, NOW(), NOW());
+INSERT IGNORE INTO `oauth2_providers` (`id`, `name`, `display_name`, `provider_type`, `client_id`, `client_secret`, `redirect_url`, `auth_url`, `token_url`, `user_info_url`, `user_id_field`, `username_field`, `email_field`, `avatar_field`, `enabled`, `created_at`, `updated_at`) VALUES
+(1, 'github', 'GitHub', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/github/callback', 'https://github.com/login/oauth/authorize', 'https://github.com/login/oauth/access_token', 'https://api.github.com/user', 'id', 'login', 'email', 'avatar_url', 0, NOW(), NOW()),
+(2, 'google', 'Google', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/google/callback', 'https://accounts.google.com/o/oauth2/auth', 'https://oauth2.googleapis.com/token', 'https://www.googleapis.com/oauth2/v2/userinfo', 'id', 'email', 'email', 'picture', 0, NOW(), NOW());
 
 -- 完成初始化
 SELECT '数据库初始化完成' AS message;

@@ -2,7 +2,7 @@
 set -e
 echo "Starting OneClickVirt..."
 
-export MYSQL_DATABASE=${MYSQL_DATABASE:-oneclickvirt_new}
+export MYSQL_DATABASE=${MYSQL_DATABASE:-oneclickvirt}
 
 # Configure SSL certificates if provided
 if [ ! -z "$SSL_CERT_PATH" ] && [ ! -z "$SSL_KEY_PATH" ]; then
@@ -25,10 +25,9 @@ if [ -f /app/config/config.yaml ]; then
     cp /app/config/config.yaml /app/config.yaml
 fi
 
-# Update config.yaml with FRONTEND_URL if provided
+# Update nginx server_name if FRONTEND_URL is provided
 if [ ! -z "$FRONTEND_URL" ]; then
     echo "Configuring frontend-url: $FRONTEND_URL"
-    sed -i "s|frontend-url:.*|frontend-url: \"$FRONTEND_URL\"|g" /app/config.yaml
     
     # Extract domain from FRONTEND_URL
     DOMAIN=$(echo "$FRONTEND_URL" | sed -e "s|^[^/]*//||" -e "s|/.*$||")
@@ -280,12 +279,13 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     level INT NOT NULL DEFAULT 1,
     status INT NOT NULL DEFAULT 1,
+    uuid VARCHAR(36) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-INSERT INTO users (id, username, email, password, level, status, created_at, updated_at) VALUES
-    (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, NOW(), NOW()),
-    (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, NOW(), NOW());
+INSERT INTO users (id, username, email, password, level, status, uuid, created_at, updated_at) VALUES
+    (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, "user-1", NOW(), NOW()),
+    (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, "user-2", NOW(), NOW());
 
 -- Import system image default data
 CREATE TABLE IF NOT EXISTS announcements (
@@ -355,9 +355,9 @@ SQLEND
                 echo "Users table exists but is empty, importing default admin and user data..."
                 mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
 USE ${MYSQL_DATABASE};
-INSERT INTO users (id, username, email, password, level, status, created_at, updated_at) VALUES
-    (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, NOW(), NOW()),
-    (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, NOW(), NOW());
+INSERT INTO users (id, username, email, password, level, status, uuid, created_at, updated_at) VALUES
+    (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, "user-1", NOW(), NOW()),
+    (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, "user-2", NOW(), NOW());
 
 -- Import system image default data if not exists
 INSERT IGNORE INTO announcements (id, created_at, updated_at, deleted_at, title, content, content_html, type, priority, status, is_sticky, start_time, end_time, created_by) VALUES
@@ -1067,11 +1067,11 @@ SQLEND
     else
         echo "Users already exist, checking system image data..."
         # Check if system image data exists, import if not
-        ANNOUNCEMENT_COUNT=$(mysql -h localhost -u root -e "USE oneclickvirt; SELECT COUNT(*) FROM announcements;" 2>/dev/null | tail -n 1 || echo 0)
+        ANNOUNCEMENT_COUNT=$(mysql -h localhost -u root -e "USE ${MYSQL_DATABASE}; SELECT COUNT(*) FROM announcements;" 2>/dev/null | tail -n 1 || echo 0)
         if [ "$ANNOUNCEMENT_COUNT" -eq 0 ]; then
             echo "Importing system image default data..."
             mysql -h localhost -u root <<SQLEND
-USE oneclickvirt;
+USE ${MYSQL_DATABASE};
 
 -- Create tables if they don't exist
 CREATE TABLE IF NOT EXISTS announcements (
