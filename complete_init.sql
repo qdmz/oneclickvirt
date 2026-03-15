@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `uuid` varchar(36) NOT NULL,
   `username` varchar(64) NOT NULL,
   `email` varchar(128) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `user_type` varchar(32) DEFAULT 'user',
+  `password` varchar(128) NOT NULL,
+  `user_type` varchar(16) DEFAULT 'user',
   `level` int DEFAULT '1',
   `status` int DEFAULT '1',
   `nickname` varchar(64) DEFAULT NULL,
@@ -147,11 +147,10 @@ CREATE TABLE IF NOT EXISTS `system_configs` (
 -- 7. 创建 site_configs 表
 CREATE TABLE IF NOT EXISTS `site_configs` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `key` varchar(128) NOT NULL,
-  `value` text,
-  `type` varchar(32) DEFAULT 'string',
-  `group` varchar(32) DEFAULT 'basic',
-  `description` text,
+  `key` varchar(100) NOT NULL COMMENT '配置键',
+  `value` text COMMENT '配置值',
+  `type` varchar(20) NOT NULL COMMENT '配置类型',
+  `description` varchar(255) COMMENT '配置说明',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -199,14 +198,23 @@ CREATE TABLE IF NOT EXISTS `domains` (
 CREATE TABLE IF NOT EXISTS `agents` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
+  `code` varchar(32) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `contact_name` varchar(64) DEFAULT NULL,
+  `contact_email` varchar(128) DEFAULT NULL,
+  `contact_phone` varchar(32) DEFAULT NULL,
   `commission_rate` decimal(5,2) DEFAULT '0.00',
-  `total_commission` decimal(10,2) DEFAULT '0.00',
-  `withdrawn_commission` decimal(10,2) DEFAULT '0.00',
-  `status` int DEFAULT '1',
+  `max_sub_users` int DEFAULT '0',
+  `max_domains_per_user` int DEFAULT '3',
+  `status` int DEFAULT '0',
+  `balance` bigint DEFAULT '0',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `user_id` (`user_id`)
+  UNIQUE KEY `user_id` (`user_id`),
+  UNIQUE KEY `code` (`code`),
+  KEY `status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 11. 创建 sub_user_relations 表
@@ -225,16 +233,18 @@ CREATE TABLE IF NOT EXISTS `sub_user_relations` (
 CREATE TABLE IF NOT EXISTS `commissions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `agent_id` int NOT NULL,
-  `user_id` int NOT NULL,
   `order_id` int DEFAULT NULL,
-  `amount` decimal(10,2) DEFAULT '0.00',
-  `status` int DEFAULT '1',
+  `sub_user_id` int DEFAULT NULL,
+  `amount` bigint DEFAULT '0',
+  `rate` decimal(5,2) DEFAULT '0.00',
+  `status` int DEFAULT '0',
+  `description` varchar(255) DEFAULT NULL,
   `created_at` datetime(3) DEFAULT NULL,
-  `updated_at` datetime(3) DEFAULT NULL,
+  `settled_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `agent_id` (`agent_id`),
-  KEY `user_id` (`user_id`),
   KEY `order_id` (`order_id`),
+  KEY `sub_user_id` (`sub_user_id`),
   KEY `status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -776,15 +786,15 @@ CREATE TABLE IF NOT EXISTS `traffic_monitor_tasks` (
   KEY `status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 36. 创建 o_auth2_providers 表
-CREATE TABLE IF NOT EXISTS `o_auth2_providers` (
+-- 36. 创建 oauth2_providers 表
+CREATE TABLE IF NOT EXISTS `oauth2_providers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   `display_name` varchar(128) NOT NULL,
   `provider_type` varchar(32) NOT NULL,
   `client_id` varchar(255) NOT NULL,
   `client_secret` varchar(255) NOT NULL,
-  `redirect_uri` varchar(512) NOT NULL,
+  `redirect_url` varchar(512) NOT NULL,
   `auth_url` varchar(512) NOT NULL,
   `token_url` varchar(512) NOT NULL,
   `user_info_url` varchar(512) NOT NULL,
@@ -798,8 +808,6 @@ CREATE TABLE IF NOT EXISTS `o_auth2_providers` (
   `current_registrations` int DEFAULT '0',
   `level_mapping` text,
   `default_level` int DEFAULT '1',
-  `total_users` int DEFAULT '0',
-  `sort` int DEFAULT '0',
   `enabled` tinyint(1) DEFAULT '0',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
@@ -964,13 +972,13 @@ INSERT IGNORE INTO `system_configs` (`id`, `key`, `value`, `description`, `creat
 (13, 'enable_agent', 'true', '是否开启代理商功能', NOW(), NOW());
 
 -- 6. 导入站点配置
-INSERT IGNORE INTO `site_configs` (`id`, `key`, `value`, `type`, `group`, `description`, `created_at`, `updated_at`) VALUES
-(1, 'site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
-(2, 'site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
-(3, 'site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
-(4, 'footer_text', '© 2025 OneClickVirt. All rights reserved.', 'string', 'basic', '页脚文字', NOW(), NOW()),
-(5, 'icp_number', '', 'string', 'basic', 'ICP备案号', NOW(), NOW()),
-(6, 'police_number', '', 'string', 'basic', '公安备案号', NOW(), NOW());
+INSERT IGNORE INTO `site_configs` (`id`, `key`, `value`, `type`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'site_name', 'OneClickVirt', 'string', '网站名称', NOW(), NOW()),
+(2, 'site_icon_url', '/favicon.ico', 'string', '网站图标URL', NOW(), NOW()),
+(3, 'site_logo_url', '/logo.png', 'string', '网站Logo URL', NOW(), NOW()),
+(4, 'site_footer', '© 2025 OneClickVirt. All rights reserved.', 'string', '页脚文字', NOW(), NOW()),
+(5, 'icp_number', '', 'string', 'ICP备案号', NOW(), NOW()),
+(6, 'contact_email', 'admin@example.com', 'string', '联系邮箱', NOW(), NOW());
 
 -- 7. 导入域名配置
 INSERT IGNORE INTO `domain_configs` (`id`, `max_domains_per_user`, `max_domains_per_agent_user`, `default_ttl`, `auto_ssl`, `allowed_suffixes`, `dns_type`, `dns_config_path`, `nginx_config_path`, `created_at`, `updated_at`) VALUES
@@ -1008,7 +1016,7 @@ INSERT IGNORE INTO `system_images` (`id`, `uuid`, `name`, `description`, `type`,
 (4, 'image-4', 'Alpine 3.18', 'Alpine 3.18 轻量级版本', 'container', 'active', 'docker', 'linux', '3.18', 0, 4, NOW(), NOW());
 
 -- 14. 导入OAuth2提供商数据
-INSERT IGNORE INTO `o_auth2_providers` (`id`, `name`, `display_name`, `provider_type`, `client_id`, `client_secret`, `redirect_uri`, `auth_url`, `token_url`, `user_info_url`, `user_id_field`, `username_field`, `email_field`, `avatar_field`, `enabled`, `sort`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `oauth2_providers` (`id`, `name`, `display_name`, `provider_type`, `client_id`, `client_secret`, `redirect_url`, `auth_url`, `token_url`, `user_info_url`, `user_id_field`, `username_field`, `email_field`, `avatar_field`, `enabled`, `sort`, `created_at`, `updated_at`) VALUES
 (1, 'github', 'GitHub', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/github/callback', 'https://github.com/login/oauth/authorize', 'https://github.com/login/oauth/access_token', 'https://api.github.com/user', 'id', 'login', 'email', 'avatar_url', 0, 1, NOW(), NOW()),
 (2, 'google', 'Google', 'preset', '', '', 'http://localhost:8080/api/v1/oauth2/google/callback', 'https://accounts.google.com/o/oauth2/auth', 'https://oauth2.googleapis.com/token', 'https://www.googleapis.com/oauth2/v2/userinfo', 'id', 'email', 'email', 'picture', 0, 2, NOW(), NOW());
 

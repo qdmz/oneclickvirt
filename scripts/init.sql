@@ -1,5 +1,5 @@
 -- OneClickVirt 数据库初始化脚本
--- 使用方法: mysql -uroot oneclickvirt < init.sql
+-- 使用方法: mysql -uroot oneclickvirt_new < init.sql
 
 -- 设置字符集
 SET NAMES utf8mb4;

@@ -182,6 +182,8 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 
 		// 域名管理
 		AdminGroup.GET("/domains", admin.AdminGetDomains)
+		AdminGroup.POST("/domains", admin.AdminCreateDomain)
+		AdminGroup.PUT("/domains/:id", admin.AdminUpdateDomain)
 		AdminGroup.DELETE("/domains/:id", admin.AdminDeleteDomain)
 		AdminGroup.GET("/domain-config", admin.GetDomainConfig)
 		AdminGroup.PUT("/domain-config", admin.UpdateDomainConfig)

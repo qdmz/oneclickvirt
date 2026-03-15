@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"regexp"
 
 	"oneclickvirt/global"
@@ -149,7 +150,13 @@ func HandleKYCCallback(c *gin.Context) {
 
 func getKYCService() (*kyc.KYCService, error) {
 	paymentCfg := global.APP_CONFIG.Payment
-	return kyc.NewKYCService(global.APP_DB, &kyc.PaymentConfig{
+	
+	// 检查支付宝配置是否完整
+	if paymentCfg.AlipayAppID == "" || paymentCfg.AlipayPrivateKey == "" || paymentCfg.AlipayPublicKey == "" || paymentCfg.AlipayGateway == "" {
+		return nil, fmt.Errorf("支付宝KYC配置不完整，请在系统设置中配置支付宝参数")
+	}
+	
+	svc, err := kyc.NewKYCService(global.APP_DB, &kyc.PaymentConfig{
 		EnableRealName:      paymentCfg.EnableRealName,
 		RequireRealName:     paymentCfg.RequireRealName,
 		AlipayAppID:         paymentCfg.AlipayAppID,
@@ -158,6 +165,12 @@ func getKYCService() (*kyc.KYCService, error) {
 		AlipayGateway:       paymentCfg.AlipayGateway,
 		RealNameCallbackURL: paymentCfg.RealNameCallbackURL,
 	})
+	
+	if err != nil {
+		return nil, fmt.Errorf("初始化KYC服务失败: %v", err)
+	}
+	
+	return svc, nil
 }
 
 func formatKYCRecord(r *kycModel.KYCRecord) gin.H {

@@ -14,7 +14,7 @@ old_db_config = {
 new_db_config = {
     'host': 'localhost',
     'user': 'root',
-    'database': 'oneclickvirt',
+    'database': 'oneclickvirt_new',
     'unix_socket': '/var/run/mysqld/mysqld.sock'
 }
 

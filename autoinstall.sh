@@ -2,7 +2,7 @@
 set -e
 echo "Starting OneClickVirt..."
 
-export MYSQL_DATABASE=${MYSQL_DATABASE:-oneclickvirt}
+export MYSQL_DATABASE=${MYSQL_DATABASE:-oneclickvirt_new}
 
 # Configure SSL certificates if provided
 if [ ! -z "$SSL_CERT_PATH" ] && [ ! -z "$SSL_KEY_PATH" ]; then
@@ -268,11 +268,11 @@ SQLEND
     # Import default admin and user data if no users exist
     echo "Checking if users exist..."
     # First, check if users table exists
-    TABLE_EXISTS=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE oneclickvirt; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
+    TABLE_EXISTS=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE ${MYSQL_DATABASE}; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
     if [ -z "$TABLE_EXISTS" ]; then
         echo "Users table does not exist, creating and importing default data..."
         mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-USE oneclickvirt;
+USE ${MYSQL_DATABASE};
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
@@ -349,12 +349,12 @@ INSERT INTO jwt_secrets VALUES (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d
 SQLEND
         echo "Default admin, user and system image data imported successfully"
     else
-        # Table exists, check if it has data
-        USER_COUNT=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE oneclickvirt; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
-        if [ "$USER_COUNT" -eq 0 ]; then
-            echo "Users table exists but is empty, importing default admin and user data..."
-            mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-USE oneclickvirt;
+            # Table exists, check if it has data
+            USER_COUNT=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE ${MYSQL_DATABASE}; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
+            if [ "$USER_COUNT" -eq 0 ]; then
+                echo "Users table exists but is empty, importing default admin and user data..."
+                mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
+USE ${MYSQL_DATABASE};
 INSERT INTO users (id, username, email, password, level, status, created_at, updated_at) VALUES
     (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, NOW(), NOW()),
     (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, NOW(), NOW());
@@ -537,11 +537,11 @@ SQLEND
         else
             echo "Users already exist, checking system image data..."
             # Check if system image data exists, import if not
-            ANNOUNCEMENT_COUNT=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE oneclickvirt; SELECT COUNT(*) FROM announcements;" 2>/dev/null | tail -n 1 || echo 0)
+            ANNOUNCEMENT_COUNT=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE ${MYSQL_DATABASE}; SELECT COUNT(*) FROM announcements;" 2>/dev/null | tail -n 1 || echo 0)
             if [ "$ANNOUNCEMENT_COUNT" -eq 0 ]; then
                 echo "Importing system image default data..."
                 mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-USE oneclickvirt;
+USE ${MYSQL_DATABASE};
 INSERT INTO announcements (id, created_at, updated_at, deleted_at, title, content, content_html, type, priority, status, is_sticky, start_time, end_time, created_by) VALUES
 (1, '2025-12-30 15:38:08.631', '2025-12-30 15:38:08.631', NULL, '欢迎使用虚拟化管理平台', '欢迎使用虚拟化管理平台，支持Docker、LXD、Incus、Proxmox VE等多种虚拟化技术。本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。', '<p>欢迎使用虚拟化管理平台，支持<strong>Docker</strong>、<strong>LXD</strong>、<strong>Incus</strong>、<strong>Proxmox VE</strong>等多种虚拟化技术。</p><p>本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。</p>', 'homepage', 10, 1, 1, NULL, NULL, NULL),
 (2, '2025-12-30 15:38:08.633', '2025-12-30 15:38:08.633', NULL, '系统维护通知', '为了提供更好的服务质量，我们会定期进行系统维护。维护期间可能会影响部分功能的使用，请您谅解。', '<p>为了提供更好的服务质量，我们会定期进行系统维护。</p>', 'topbar', 5, 1, 0, NULL, NULL, NULL),
@@ -777,7 +777,7 @@ autostart=true
 autorestart=true
 user=root
 priority=2
-environment=DB_HOST="127.0.0.1",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="oneclickvirt"
+environment=DB_HOST="127.0.0.1",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="${MYSQL_DATABASE}"
 startsecs=1
 
 [program:nginx]
@@ -816,12 +816,12 @@ for i in {1..60}; do
 done
 
 # First, check if users table exists
-TABLE_EXISTS=$(mysql -h "$DB_HOST" -u root -e "USE oneclickvirt; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
+TABLE_EXISTS=$(mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
 if [ -z "$TABLE_EXISTS" ]; then
     echo "Users table does not exist, skipping import"
 else
     # Table exists, check if it has data
-    USER_COUNT=$(mysql -h "$DB_HOST" -u root -e "USE oneclickvirt; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
+    USER_COUNT=$(mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
     if [ "$USER_COUNT" -eq 0 ]; then
         echo "Users table exists but is empty, importing default admin and user data..."
         # Generate UUIDs for users
@@ -830,12 +830,12 @@ else
         
         # Use simple password 'password' and let the system hash it later
         # For now, we'll use a placeholder and the system will handle the hashing
-        mysql -h "$DB_HOST" -u root -e "USE oneclickvirt; INSERT INTO users (id, uuid, username, password, email, level, user_type, status, created_at, updated_at, max_instances, max_cpu, max_memory, max_disk) VALUES (1, '${ADMIN_UUID}', 'admin', 'password', 'admin@example.com', 5, 'admin', 1, NOW(), NOW(), 10, 8, 8192, 102400), (2, '${USER_UUID}', 'user', 'password', 'user@example.com', 1, 'user', 1, NOW(), NOW(), 1, 1, 512, 10240);"
+        mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; INSERT INTO users (id, uuid, username, password, email, level, user_type, status, created_at, updated_at, max_instances, max_cpu, max_memory, max_disk) VALUES (1, '${ADMIN_UUID}', 'admin', 'password', 'admin@example.com', 5, 'admin', 1, NOW(), NOW(), 10, 8, 8192, 102400), (2, '${USER_UUID}', 'user', 'password', 'user@example.com', 1, 'user', 1, NOW(), NOW(), 1, 1, 512, 10240);"
         
         # Import system image default data
         echo "Importing system image default data..."
         mysql -h "$DB_HOST" -u root <<SQLEND
-USE oneclickvirt;
+USE ${MYSQL_DATABASE};
 
 -- Create tables if they don't exist
 CREATE TABLE IF NOT EXISTS announcements (

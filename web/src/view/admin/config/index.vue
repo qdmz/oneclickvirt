@@ -536,6 +536,38 @@
                 />
               </el-form-item>
             </el-card>
+
+            <!-- 实名认证配置 -->
+            <el-card
+              class="payment-card"
+              shadow="never"
+            >
+              <template #header>
+                <div class="payment-header">
+                  <span>实名认证配置</span>
+                  <el-switch v-model="config.payment.enableRealName" />
+                </div>
+              </template>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="是否强制实名认证">
+                    <el-switch v-model="config.payment.requireRealName" :disabled="!config.payment.enableRealName" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="回调URL">
+                    <el-input
+                      v-model="config.payment.realNameCallbackURL"
+                      placeholder="请输入回调URL"
+                      :disabled="!config.payment.enableRealName"
+                    />
+                    <div class="form-item-hint">
+                      例如: https://your-domain.com/api/v1/kyc/callback
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-card>
           </el-form>
         </el-tab-pane>
 
@@ -1067,7 +1099,11 @@ const config = ref({
     mapayID: '',
     mapayKey: '',
     mapayReturnURL: '',
-    mapayNotifyURL: ''
+    mapayNotifyURL: '',
+    // 实名认证配置
+    enableRealName: false,
+    requireRealName: false,
+    realNameCallbackURL: ''
   },
   other: {
     maxAvatarSize: 2, // MB
@@ -1309,7 +1345,11 @@ const saveConfig = async () => {
         'mapay-id': payment.mapayID,
         'mapay-key': payment.mapayKey,
         'mapay-return-url': payment.mapayReturnURL,
-        'mapay-notify-url': payment.mapayNotifyURL
+        'mapay-notify-url': payment.mapayNotifyURL,
+        // 实名认证配置
+        'enable-real-name': payment.enableRealName,
+        'require-real-name': payment.requireRealName,
+        'real-name-callback-url': payment.realNameCallbackURL
       }
     }
     

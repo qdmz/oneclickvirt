@@ -17,12 +17,12 @@ for i in {1..30}; do
 done
 
 # 创建数据库（如果不存在）
-mysql -h localhost -u root -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-echo "数据库 oneclickvirt 已准备就绪"
+mysql -h localhost -u root -e "CREATE DATABASE IF NOT EXISTS oneclickvirt_new CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+echo "数据库 oneclickvirt_new 已准备就绪"
 
 # 执行初始化脚本
 echo "执行数据库初始化脚本..."
-mysql -h localhost -u root oneclickvirt < /root/oneclickvirt-new/complete_init.sql
+mysql -h localhost -u root oneclickvirt_new < /root/oneclickvirt-new/complete_init.sql
 
 if [ $? -eq 0 ]; then
     echo "数据库初始化成功！"

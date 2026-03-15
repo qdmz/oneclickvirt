@@ -38,7 +38,7 @@ jwt:
 mysql:
     auto-create: "true"
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: oneclickvirt
+    db-name: oneclickvirt_new
     engine: InnoDB
     log-mode: error
     log-zap: "false"

@@ -55,6 +55,22 @@ export function adminDeleteDomain(id) {
   })
 }
 
+export function adminCreateDomain(data) {
+  return request({
+    url: '/v1/admin/domains',
+    method: 'post',
+    data
+  })
+}
+
+export function adminUpdateDomain(id, data) {
+  return request({
+    url: `/v1/admin/domains/${id}`,
+    method: 'put',
+    data
+  })
+}
+
 export function getDomainConfig() {
   return request({
     url: '/v1/admin/domain-config',

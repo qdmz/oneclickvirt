@@ -8,6 +8,7 @@ import (
 
 	"oneclickvirt/global"
 	"oneclickvirt/model/agent"
+	user "oneclickvirt/model/user"
 
 	"gorm.io/gorm"
 )
@@ -234,11 +235,39 @@ func (s *AgentService) ListAgents(page, pageSize int, keyword string, status *in
 }
 
 func (s *AgentService) ApproveAgent(agentID uint) error {
-	return s.DB.Model(&agent.Agent{}).Where("id = ? AND status = 0", agentID).Update("status", 1).Error
+	return s.DB.Transaction(func(tx *gorm.DB) error {
+		// 更新代理商状态
+		if err := tx.Model(&agent.Agent{}).Where("id = ? AND status = 0", agentID).Update("status", 1).Error; err != nil {
+			return err
+		}
+		
+		// 获取代理商信息
+		var a agent.Agent
+		if err := tx.First(&a, agentID).Error; err != nil {
+			return err
+		}
+		
+		// 更新用户类型为agent
+		return tx.Model(&user.User{}).Where("id = ?", a.UserID).Update("user_type", "agent").Error
+	})
 }
 
 func (s *AgentService) DisableAgent(agentID uint) error {
-	return s.DB.Model(&agent.Agent{}).Where("id = ?", agentID).Update("status", 2).Error
+	return s.DB.Transaction(func(tx *gorm.DB) error {
+		// 更新代理商状态
+		if err := tx.Model(&agent.Agent{}).Where("id = ?", agentID).Update("status", 2).Error; err != nil {
+			return err
+		}
+		
+		// 获取代理商信息
+		var a agent.Agent
+		if err := tx.First(&a, agentID).Error; err != nil {
+			return err
+		}
+		
+		// 更新用户类型为user
+		return tx.Model(&user.User{}).Where("id = ?", a.UserID).Update("user_type", "user").Error
+	})
 }
 
 func (s *AgentService) AdjustCommission(agentID uint, rate float64) error {
