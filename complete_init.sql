@@ -125,13 +125,6 @@ CREATE TABLE IF NOT EXISTS `products` (
   `allow_repeat` int DEFAULT '1' COMMENT '是否允许重复购买(1:允许, 0:不允许)',
   `stock` int DEFAULT '-1' COMMENT '库存量(-1表示无限)',
   `sold_count` int DEFAULT '0' COMMENT '已售数量',
-  `billing_cycle` varchar(20) DEFAULT 'monthly',
-  `cpu_limit` int DEFAULT '0',
-  `memory_limit` int DEFAULT '0',
-  `disk_limit` int DEFAULT '0',
-  `bandwidth_limit` int DEFAULT '0',
-  `instance_limit` int DEFAULT '0',
-  `status` int DEFAULT '1',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -948,11 +941,11 @@ INSERT IGNORE INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`, `upda
 (2, 2, 2, NOW(), NOW());
 
 -- 4. 导入产品数据
-INSERT IGNORE INTO `products` (`id`, `name`, `description`, `level`, `price`, `period`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `max_instances`, `is_enabled`, `sort_order`, `features`, `allow_repeat`, `stock`, `sold_count`, `billing_cycle`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `instance_limit`, `status`, `created_at`, `updated_at`) VALUES
-(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 1, 0, 30, 1, 512, 10240, 100, 0, 1, 1, 1, '{}', 1, -1, 0, 'monthly', 1, 512, 10240, 100, 1, 1, NOW(), NOW()),
-(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 2, 990, 30, 2, 1024, 20480, 200, 0, 3, 1, 2, '{}', 1, -1, 0, 'monthly', 2, 1024, 20480, 200, 3, 1, NOW(), NOW()),
-(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 3, 2990, 30, 4, 2048, 40960, 500, 0, 5, 1, 3, '{}', 1, -1, 0, 'monthly', 4, 2048, 40960, 500, 5, 1, NOW(), NOW()),
-(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 4, 9990, 30, 8, 4096, 102400, 1000, 0, 10, 1, 4, '{}', 1, -1, 0, 'monthly', 8, 4096, 102400, 1000, 10, 1, NOW(), NOW());
+INSERT IGNORE INTO `products` (`id`, `name`, `description`, `level`, `price`, `period`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `max_instances`, `is_enabled`, `sort_order`, `features`, `allow_repeat`, `stock`, `sold_count`, `created_at`, `updated_at`) VALUES
+(1, '入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 1, 0, 30, 1, 512, 10240, 100, 0, 1, 1, 1, '{}', 1, -1, 0, NOW(), NOW()),
+(2, '标准套餐', '适合小型团队的标准套餐，包含更多资源', 2, 990, 30, 2, 1024, 20480, 200, 0, 3, 1, 2, '{}', 1, -1, 0, NOW(), NOW()),
+(3, '专业套餐', '适合中型团队的专业套餐，包含完整功能', 3, 2990, 30, 4, 2048, 40960, 500, 0, 5, 1, 3, '{}', 1, -1, 0, NOW(), NOW()),
+(4, '企业套餐', '适合大型团队的企业套餐，包含无限资源', 4, 9990, 30, 8, 4096, 102400, 1000, 0, 10, 1, 4, '{}', 1, -1, 0, NOW(), NOW());
 
 -- 5. 导入系统配置
 INSERT IGNORE INTO `system_configs` (`id`, `key`, `value`, `description`, `created_at`, `updated_at`) VALUES
