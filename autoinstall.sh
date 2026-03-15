@@ -777,7 +777,7 @@ autostart=true
 autorestart=true
 user=root
 priority=2
-environment=DB_HOST="mysql",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="oneclickvirt"
+environment=DB_HOST="127.0.0.1",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="oneclickvirt"
 startsecs=1
 
 [program:nginx]
@@ -788,12 +788,7 @@ user=root
 priority=3
 SUPEREND2
 
-# 检测是否在Docker环境中运行
-if [ -f "/.dockerenv" ] || [ -n "$DOCKER_CONTAINER" ]; then
-    export DB_HOST="mysql"
-else
-    export DB_HOST="127.0.0.1"
-fi
+export DB_HOST="127.0.0.1"
 export DB_PORT="3306"
 export DB_NAME="$MYSQL_DATABASE"
 export DB_USER="root"
@@ -803,12 +798,7 @@ export DB_PASSWORD=""
 cat > /check_users.sh << 'EOF2'
 #!/bin/bash
 
-# 检测是否在Docker环境中运行
-if [ -f "/.dockerenv" ] || [ -n "$DOCKER_CONTAINER" ]; then
-    DB_HOST="mysql"
-else
-    DB_HOST="localhost"
-fi
+DB_HOST="localhost"
 
 # Wait for MySQL to start
 echo "Checking if users exist..."
