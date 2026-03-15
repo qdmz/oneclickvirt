@@ -777,7 +777,7 @@ autostart=true
 autorestart=true
 user=root
 priority=2
-environment=DB_HOST="127.0.0.1",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="oneclickvirt"
+environment=DB_HOST="mysql",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="oneclickvirt"
 startsecs=1
 
 [program:nginx]
@@ -788,7 +788,12 @@ user=root
 priority=3
 SUPEREND2
 
-export DB_HOST="127.0.0.1"
+# 检测是否在Docker环境中运行
+if [ -f "/.dockerenv" ] || [ -n "$DOCKER_CONTAINER" ]; then
+    export DB_HOST="mysql"
+else
+    export DB_HOST="127.0.0.1"
+fi
 export DB_PORT="3306"
 export DB_NAME="$MYSQL_DATABASE"
 export DB_USER="root"
@@ -798,10 +803,17 @@ export DB_PASSWORD=""
 cat > /check_users.sh << 'EOF2'
 #!/bin/bash
 
+# 检测是否在Docker环境中运行
+if [ -f "/.dockerenv" ] || [ -n "$DOCKER_CONTAINER" ]; then
+    DB_HOST="mysql"
+else
+    DB_HOST="localhost"
+fi
+
 # Wait for MySQL to start
 echo "Checking if users exist..."
 for i in {1..60}; do
-    if mysql -h localhost -u root -e "SELECT 1" >/dev/null 2>&1; then
+    if mysql -h "$DB_HOST" -u root -e "SELECT 1" >/dev/null 2>&1; then
         echo "MySQL started successfully"
         break
     fi
@@ -814,12 +826,12 @@ for i in {1..60}; do
 done
 
 # First, check if users table exists
-TABLE_EXISTS=$(mysql -h localhost -u root -e "USE oneclickvirt; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
+TABLE_EXISTS=$(mysql -h "$DB_HOST" -u root -e "USE oneclickvirt; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
 if [ -z "$TABLE_EXISTS" ]; then
     echo "Users table does not exist, skipping import"
 else
     # Table exists, check if it has data
-    USER_COUNT=$(mysql -h localhost -u root -e "USE oneclickvirt; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
+    USER_COUNT=$(mysql -h "$DB_HOST" -u root -e "USE oneclickvirt; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
     if [ "$USER_COUNT" -eq 0 ]; then
         echo "Users table exists but is empty, importing default admin and user data..."
         # Generate UUIDs for users
@@ -828,11 +840,11 @@ else
         
         # Use simple password 'password' and let the system hash it later
         # For now, we'll use a placeholder and the system will handle the hashing
-        mysql -h localhost -u root -e "USE oneclickvirt; INSERT INTO users (id, uuid, username, password, email, level, user_type, status, created_at, updated_at, max_instances, max_cpu, max_memory, max_disk) VALUES (1, '${ADMIN_UUID}', 'admin', 'password', 'admin@example.com', 5, 'admin', 1, NOW(), NOW(), 10, 8, 8192, 102400), (2, '${USER_UUID}', 'user', 'password', 'user@example.com', 1, 'user', 1, NOW(), NOW(), 1, 1, 512, 10240);"
+        mysql -h "$DB_HOST" -u root -e "USE oneclickvirt; INSERT INTO users (id, uuid, username, password, email, level, user_type, status, created_at, updated_at, max_instances, max_cpu, max_memory, max_disk) VALUES (1, '${ADMIN_UUID}', 'admin', 'password', 'admin@example.com', 5, 'admin', 1, NOW(), NOW(), 10, 8, 8192, 102400), (2, '${USER_UUID}', 'user', 'password', 'user@example.com', 1, 'user', 1, NOW(), NOW(), 1, 1, 512, 10240);"
         
         # Import system image default data
         echo "Importing system image default data..."
-        mysql -h localhost -u root <<SQLEND
+        mysql -h "$DB_HOST" -u root <<SQLEND
 USE oneclickvirt;
 
 -- Create tables if they don't exist
