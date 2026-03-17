@@ -282,6 +282,16 @@ if [ "$INIT_NEEDED" = "true" ]; then
         exit 1
     fi
     
+    # Set MySQL root user permissions to allow connections from all hosts
+    echo "Setting MySQL root user permissions..."
+    mysql -u root --skip-password -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '';"
+    mysql -u root --skip-password -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY '';"
+    mysql -u root --skip-password -e "CREATE USER IF NOT EXISTS 'root'@'mysql' IDENTIFIED BY '';"
+    mysql -u root --skip-password -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;"
+    mysql -u root --skip-password -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
+    mysql -u root --skip-password -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'mysql' WITH GRANT OPTION;"
+    mysql -u root --skip-password -e "FLUSH PRIVILEGES;"
+    
     # Import default data
     echo "Importing default data..."
     mysql -u root --skip-password -D ${MYSQL_DATABASE} < /app/complete_init.sql

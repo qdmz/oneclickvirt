@@ -4,7 +4,7 @@ auth:
     email-smtp-port: 25
     email-username: qdmzhost
     enable-email: true
-    enable-oauth2: false
+    enable-oauth2: true
     enable-public-registration: true
     enable-qq: false
     enable-telegram: false
@@ -55,52 +55,10 @@ quota:
     instance-type-permissions:
         min-level-for-container: 1
         min-level-for-delete-container: 1
-        min-level-for-delete-vm: 2
+        min-level-for-delete-vm: 1
         min-level-for-reset-container: 1
-        min-level-for-reset-vm: 2
-        min-level-for-vm: 2
-    level-limits:
-        "1":
-            max-instances: 1
-            max-resources:
-                bandwidth: 100
-                cpu: 1
-                disk: 2048
-                memory: 512
-            max-traffic: 102400
-        "2":
-            max-instances: 1
-            max-resources:
-                bandwidth: 200
-                cpu: 1
-                disk: 4096
-                memory: 1024
-            max-traffic: 204800
-        "3":
-            max-instances: 1
-            max-resources:
-                bandwidth: 500
-                cpu: 2
-                disk: 4096
-                memory: 2048
-            max-traffic: 307200
-        "4":
-            max-instances: 1
-            max-resources:
-                bandwidth: 1000
-                cpu: 4
-                disk: 5120
-                memory: 4096
-            max-traffic: 409600
-        "5":
-            max-instances: 20
-            max-resources:
-                bandwidth: 2000
-                cpu: 16
-                disk: 163840
-                memory: 8192
-            max-traffic: 512000
-    default-level: 1
+        min-level-for-reset-vm: 1
+        min-level-for-vm: 1
 redis:
     addr: ""
     db: 0
@@ -160,6 +118,7 @@ payment:
     enable-balance: true
     enable-epay: true
     enable-mapay: false
+    enable-real-name: true
     enable-wechat: false
     epay-api-url: https://pay.wanjuanxueyi.com/submit.php
     epay-key: 7o6IxRTgt67ntX9nIZRx2koiPX9X2ix2
@@ -171,6 +130,8 @@ payment:
     mapay-key: ${MAPAY_KEY}
     mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
     mapay-return-url: https://heyun.ypvps.com/user/wallet
+    real-name-callback-url: https://heyun.ypvps.com/api/v1/kyc/callback
+    require-real-name: true
     wechat-api-key: ${WECHAT_API_KEY}
     wechat-api-v3-key: ${WECHAT_API_V3_KEY}
     wechat-app-id: ${WECHAT_APP_ID}
