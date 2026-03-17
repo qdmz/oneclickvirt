@@ -149,6 +149,16 @@
           </el-icon>
           <span>{{ t('user.purchase.epay') }}</span>
         </el-radio>
+        <el-select
+          v-if="paymentMethod === 'epay'"
+          v-model="epayType"
+          placeholder="选择支付方式"
+          class="mt-10"
+        >
+          <el-option label="支付宝" value="alipay" />
+          <el-option label="微信" value="wechat" />
+          <el-option label="QQ钱包" value="qqpay" />
+        </el-select>
         <el-radio
           v-if="paymentConfig.enableBalance"
           value="balance"
@@ -210,7 +220,7 @@
           class="qr-code"
         />
         <p class="amount-text">
-          {{ t('user.purchase.paymentAmount', { amount: (currentOrder?.amount / 100).toFixed(2) }) }}
+          {{ t('user.purchase.paymentAmount', { amount: currentOrder?.amount.toFixed(2) }) }}
         </p>
         <p class="tip-text">
           {{ t('user.purchase.pleaseUse', { method: getPaymentMethodName(paymentMethod), action: paymentMethod === 'epay' || paymentMethod === 'mapay' ? t('user.purchase.completePayment') : t('user.purchase.scanQRCode') }) }}
@@ -249,6 +259,7 @@ const paymentDialogVisible = ref(false)
 const qrDialogVisible = ref(false)
 const selectedProduct = ref(null)
 const paymentMethod = ref('alipay')
+const epayType = ref('alipay')
 const qrCodeUrl = ref('')
 const currentOrder = ref(null)
 const pollTimer = ref(null)
@@ -469,7 +480,7 @@ const getQRCode = async () => {
     } else if (paymentMethod.value === 'wechat') {
       res = await getWechatQR(currentOrder.value.orderNo)
     } else if (paymentMethod.value === 'epay') {
-      res = await getPurchaseEpayQR(currentOrder.value.orderNo)
+      res = await getPurchaseEpayQR(currentOrder.value.orderNo, epayType.value)
     } else if (paymentMethod.value === 'mapay') {
       res = await getPurchaseMapayQR(currentOrder.value.orderNo)
     }

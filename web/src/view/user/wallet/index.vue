@@ -280,7 +280,7 @@
           class="qr-code"
         />
         <p class="amount-text">
-          支付金额: ¥{{ (currentOrder.amount / 100).toFixed(2) }}
+          支付金额: ¥{{ currentOrder.amount.toFixed(2) }}
         </p>
         <p class="tip-text">
           请使用{{ getPaymentMethodName(rechargeForm.paymentMethod) }}{{ rechargeForm.paymentMethod === 'epay' || rechargeForm.paymentMethod === 'mapay' ? '完成支付' : '扫描二维码' }}
