@@ -303,6 +303,47 @@ func getAdminConfig(cm *config.ConfigManager) map[string]interface{} {
 		"defaultLanguage": global.APP_CONFIG.Other.DefaultLanguage,
 	}
 
+	// 系统配置
+	result["system"] = map[string]interface{}{
+		"addr":                     global.APP_CONFIG.System.Addr,
+		"dbType":                   global.APP_CONFIG.System.DbType,
+		"env":                      global.APP_CONFIG.System.Env,
+		"frontendURL":              global.APP_CONFIG.System.FrontendURL,
+		"ipLimitCount":             global.APP_CONFIG.System.LimitCountIP,
+		"ipLimitTime":              global.APP_CONFIG.System.LimitTimeIP,
+		"oauth2StateTokenMinutes":  global.APP_CONFIG.System.OAuth2StateTokenMinutes,
+		"ossType":                  global.APP_CONFIG.System.OssType,
+		"providerInactiveHours":    global.APP_CONFIG.System.ProviderInactiveHours,
+		"useMultipoint":            global.APP_CONFIG.System.UseMultipoint,
+		"useRedis":                 global.APP_CONFIG.System.UseRedis,
+	}
+
+	// 验证码配置
+	result["captcha"] = map[string]interface{}{
+		"enabled":    global.APP_CONFIG.Captcha.Enabled,
+		"expireTime": global.APP_CONFIG.Captcha.ExpireTime,
+		"height":     global.APP_CONFIG.Captcha.Height,
+		"length":     global.APP_CONFIG.Captcha.Length,
+		"width":      global.APP_CONFIG.Captcha.Width,
+	}
+
+	// 任务配置
+	result["task"] = map[string]interface{}{
+		"deleteRetryCount": global.APP_CONFIG.Task.DeleteRetryCount,
+		"deleteRetryDelay": global.APP_CONFIG.Task.DeleteRetryDelay,
+	}
+
+	// 站点配置
+	result["site"] = map[string]interface{}{
+		"name":        "OneClickVirt",
+		"description": "虚拟化管理平台",
+		"keywords":    "虚拟化,Docker,LXD,Incus,Proxmox",
+	}
+
+	// 系统名称和描述
+	result["systemName"] = "虚拟化管理平台"
+	result["systemDescription"] = "支持多种虚拟化技术的管理平台"
+
 	// 支付接口配置
 	result["payment"] = map[string]interface{}{
 		"alipayAppId":       global.APP_CONFIG.Payment.AlipayAppID,
