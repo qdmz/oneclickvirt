@@ -963,13 +963,49 @@ func (s *AuthService) sendEmail(to, subject, body string) error {
 	}
 	auth := smtp.PlainAuth("", config.EmailUsername, config.EmailPassword, config.EmailSMTPHost)
 	msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", to, subject, body)
-	return smtp.SendMail(
-		fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort),
-		auth,
-		config.EmailUsername,
-		[]string{to},
-		[]byte(msg),
-	)
+
+	// 建立TLS连接
+	c, err := smtp.Dial(fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort))
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	// 启用TLS
+	if err = c.StartTLS(nil); err != nil {
+		return err
+	}
+
+	// 认证
+	if err = c.Auth(auth); err != nil {
+		return err
+	}
+
+	// 设置发件人
+	if err = c.Mail(config.EmailUsername); err != nil {
+		return err
+	}
+
+	// 设置收件人
+	if err = c.Rcpt(to); err != nil {
+		return err
+	}
+
+	// 发送邮件内容
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		return err
+	}
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+
+	return c.Quit()
 }
 
 func generateRandomCode() string {

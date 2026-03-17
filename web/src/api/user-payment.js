@@ -47,10 +47,13 @@ export const getWechatQR = (orderNo) => {
 }
 
 // 获取易支付二维码
-export const getEpayQR = (orderNo) => {
+export const getEpayQR = (orderNo, payType = 'alipay') => {
   return request({
     url: `/v1/user/recharge/epay-qr/${orderNo}`,
-    method: 'get'
+    method: 'get',
+    params: {
+      type: payType
+    }
   })
 }
 
@@ -63,10 +66,13 @@ export const getMapayQR = (orderNo) => {
 }
 
 // 获取产品购买易支付二维码
-export const getPurchaseEpayQR = (orderNo) => {
+export const getPurchaseEpayQR = (orderNo, payType = 'alipay') => {
   return request({
     url: `/v1/user/orders/epay-qr/${orderNo}`,
-    method: 'get'
+    method: 'get',
+    params: {
+      type: payType
+    }
   })
 }
 

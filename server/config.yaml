@@ -1,9 +1,10 @@
 auth:
-    email-password: ${EMAIL_PASSWORD}
-    email-smtp-host: smtp.gmail.com
-    email-smtp-port: 25
-    email-username: qdmzhost
+    email-password: fftmxpjehjcmbigf
+    email-smtp-host: smtp.qq.com
+    email-smtp-port: 587
+    email-username: qdmzhost@qq.com
     enable-email: true
+    enable-email-verification: true
     enable-oauth2: true
     enable-public-registration: true
     enable-qq: false
@@ -59,6 +60,48 @@ quota:
         min-level-for-reset-container: 1
         min-level-for-reset-vm: 1
         min-level-for-vm: 1
+    default-level: 1
+    level-limits:
+        "1":
+            max-instances: 1
+            max-resources:
+                bandwidth: 100
+                cpu: 1
+                disk: 1024
+                memory: 350
+            max-traffic: 102400
+        "2":
+            max-instances: 1
+            max-resources:
+                bandwidth: 200
+                cpu: 2
+                disk: 2048
+                memory: 1024
+            max-traffic: 204800
+        "3":
+            max-instances: 1
+            max-resources:
+                bandwidth: 500
+                cpu: 2
+                disk: 4096
+                memory: 2048
+            max-traffic: 307200
+        "4":
+            max-instances: 1
+            max-resources:
+                bandwidth: 1000
+                cpu: 4
+                disk: 8192
+                memory: 4096
+            max-traffic: 409600
+        "5":
+            max-instances: 10
+            max-resources:
+                bandwidth: 1000
+                cpu: 8
+                disk: 16384
+                memory: 8192
+            max-traffic: 5.12e+06
 redis:
     addr: ""
     db: 0
@@ -101,10 +144,10 @@ zap:
 max_avatar_size: 2
 default_language:
 signing_key_v1:
-    created_at: "2026-03-17T09:21:32.34708966+08:00"
-    expires_at: "2026-03-18T09:21:32.34708966+08:00"
+    created_at: "2026-03-17T10:07:39.55255608+08:00"
+    expires_at: "2026-03-18T10:07:39.55255608+08:00"
     is_active: false
-    key: 6b8215a1aaa8e5fe041923958389025ad12d3a1c3055e0fbec70dc5137e0f8a2
+    key: 5525cf79572a931d4c2eec755866967818c4de657c1d5b6b660c85c900011d5b
     version: 1
 active_version: 1
 payment:
@@ -130,7 +173,7 @@ payment:
     mapay-key: ${MAPAY_KEY}
     mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
     mapay-return-url: https://heyun.ypvps.com/user/wallet
-    real-name-callback-url: https://heyun.ypvps.com/api/v1/kyc/callback
+    real-name-callback-url: ' https://heyun.ypvps.com/api/v1/kyc/callback'
     require-real-name: true
     wechat-api-key: ${WECHAT_API_KEY}
     wechat-api-v3-key: ${WECHAT_API_V3_KEY}

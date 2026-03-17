@@ -713,6 +713,7 @@ func marshalProductData(product productModel.Product) string {
 // @Accept json
 // @Produce json
 // @Param orderNo path string true "订单号"
+// @Param type query string false "支付方式: alipay, wechat, qqpay"
 // @Success 200 {object} common.Response
 // @Router /v1/user/orders/epay-qr/{orderNo} [get]
 func GetPurchaseEpayQR(c *gin.Context) {
@@ -720,6 +721,13 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	if orderNo == "" {
 		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
 		return
+	}
+
+	// 获取支付方式，默认为alipay
+	payType := c.DefaultQuery("type", "alipay")
+	// 验证支付方式是否支持
+	if payType != "alipay" && payType != "wechat" && payType != "qqpay" {
+		payType = "alipay" // 默认使用支付宝
 	}
 
 	var order orderModel.Order
@@ -756,12 +764,12 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	// 构建易支付参数
 	params := url.Values{}
 	params.Set("pid", global.APP_CONFIG.Payment.EpayPID)
-	params.Set("type", "alipay")
+	params.Set("type", payType)
 	params.Set("out_trade_no", orderNo)
 	params.Set("notify_url", global.APP_CONFIG.Payment.EpayNotifyURL)
 	params.Set("return_url", global.APP_CONFIG.Payment.EpayReturnURL)
 	params.Set("name", "产品购买")
-	params.Set("money", fmt.Sprintf("%.2f", float64(order.Amount)/100))
+	params.Set("money", fmt.Sprintf("%.2f", order.Amount))
 
 	// 生成签名
 	sign := generatePurchaseEpaySign(params, global.APP_CONFIG.Payment.EpayKey)

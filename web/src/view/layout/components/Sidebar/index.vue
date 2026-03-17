@@ -234,7 +234,7 @@ const userRoutes = computed(() => {
           path: '/user/wallet',
           name: 'UserWallet',
           meta: {
-            title: '佣金管理',
+            title: '资金管理',
             icon: 'Wallet'
           }
         },
