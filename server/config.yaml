@@ -144,10 +144,10 @@ zap:
 max_avatar_size: 2
 default_language:
 signing_key_v1:
-    created_at: "2026-03-17T10:07:39.55255608+08:00"
-    expires_at: "2026-03-18T10:07:39.55255608+08:00"
+    created_at: "2026-03-17T14:11:54.753776012+08:00"
+    expires_at: "2026-03-18T14:11:54.753776012+08:00"
     is_active: false
-    key: 5525cf79572a931d4c2eec755866967818c4de657c1d5b6b660c85c900011d5b
+    key: 96bc8880936407426ee39ac465759d7a1d1112bfd45c5c90cd9fb77271c98c63
     version: 1
 active_version: 1
 payment:
