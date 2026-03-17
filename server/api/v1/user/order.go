@@ -729,6 +729,10 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	if payType != "alipay" && payType != "wechat" && payType != "qqpay" {
 		payType = "alipay" // 默认使用支付宝
 	}
+	// 转换支付方式类型以符合易支付要求
+	if payType == "wechat" {
+		payType = "wxpay"
+	}
 
 	var order orderModel.Order
 	if err := global.APP_DB.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
