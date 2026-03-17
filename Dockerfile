@@ -26,23 +26,23 @@ FROM debian:12-slim
 ARG TARGETARCH
 
 # Install database and other services based on architecture
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN apt-get update --allow-insecure-repositories && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated \
         gnupg2 wget lsb-release procps nginx supervisor ca-certificates openssl python3 python3-venv python3-pip && \
     if [ "$TARGETARCH" = "amd64" ]; then \
         echo "Installing MySQL for AMD64..." && \
         gpg --keyserver keyserver.ubuntu.com --recv-keys B7B3B788A8D3785C && \
         gpg --export B7B3B788A8D3785C > /usr/share/keyrings/mysql.gpg && \
         echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/debian bookworm mysql-8.0" > /etc/apt/sources.list.d/mysql.list && \
-        apt-get update && \
-        DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server mysql-client; \
+        apt-get update --allow-insecure-repositories && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated mysql-server mysql-client; \
     else \
         echo "Installing MariaDB for ARM64..." && \
-        DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server mariadb-client; \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated mariadb-server mariadb-client; \
     fi && \
     # Install Certbot for SSL certificate management
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y certbot python3-certbot-nginx && \
+    apt-get update --allow-insecure-repositories && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated certbot python3-certbot-nginx && \
     apt-get clean
 
 ENV TZ=Asia/Shanghai
@@ -68,6 +68,7 @@ COPY --from=frontend-builder /app/web/dist /var/www/html
 # Copy initialization scripts
 COPY scripts/init.sql /app/scripts/init.sql
 COPY scripts/init.sh /app/scripts/init.sh
+COPY complete_init.sql /app/complete_init.sql
 RUN chmod +x /app/scripts/init.sh
 
 RUN mkdir -p /var/run/mysqld && \

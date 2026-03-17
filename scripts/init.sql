@@ -183,6 +183,25 @@ CREATE TABLE IF NOT EXISTS `kyc_verifications` (
   INDEX `deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 创建产品购买记录相关表
+CREATE TABLE IF NOT EXISTS `product_purchases` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `product_id` bigint unsigned NOT NULL,
+  `order_id` bigint unsigned DEFAULT NULL,
+  `level` int NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_product_purchases_order_id` (`order_id`),
+  KEY `idx_product_purchases_user_id` (`user_id`),
+  KEY `idx_product_purchases_product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================
 -- 1. 创建默认角色
 -- ============================================
@@ -284,4 +303,5 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   wallets          - 钱包表
 --   wallet_transactions - 钱包交易记录表
 --   kyc_verifications - 实名认证记录表
+--   product_purchases - 产品购买记录表
 -- ============================================

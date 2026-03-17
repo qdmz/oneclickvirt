@@ -167,14 +167,7 @@ const userRoutes = computed(() => {
             icon: 'List'
           }
         },
-        {
-          path: '/user/wallet',
-          name: 'UserWallet',
-          meta: {
-            title: t('sidebar.wallet'),
-            icon: 'Wallet'
-          }
-        },
+
         {  path: '/user/domains',
           name: 'UserDomains',
           meta: {
@@ -238,10 +231,10 @@ const userRoutes = computed(() => {
           }
         },
         {
-          path: '/agent/wallet',
-          name: 'AgentWallet',
+          path: '/user/wallet',
+          name: 'UserWallet',
           meta: {
-            title: t('sidebar.wallet'),
+            title: '佣金管理',
             icon: 'Wallet'
           }
         },

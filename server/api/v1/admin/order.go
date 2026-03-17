@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 // GetOrders 获取所有订单列表
@@ -18,7 +17,7 @@ import (
 // @Produce json
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(20)
-// @Param status query string false "订单状态"
+// @Param status query int false "订单状态"
 // @Param orderNo query string false "订单号"
 // @Param username query string false "用户名"
 // @Success 200 {object} common.Response
@@ -45,7 +44,9 @@ func GetOrders(c *gin.Context) {
 
 	// 状态筛选
 	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+		if statusInt, err := strconv.Atoi(status); err == nil {
+			query = query.Where("status = ?", statusInt)
+		}
 	}
 
 	// 订单号筛选
@@ -81,10 +82,34 @@ func GetOrders(c *gin.Context) {
 	var ordersWithUser []OrderWithUser
 	offset := (page - 1) * pageSize
 
+	// 构建查询条件
+	whereClause := "1=1"
+	args := []interface{}{}
+
+	// 状态筛选
+	if status := c.Query("status"); status != "" {
+		if statusInt, err := strconv.Atoi(status); err == nil {
+			whereClause += " AND orders.status = ?"
+			args = append(args, statusInt)
+		}
+	}
+
+	// 订单号筛选
+	if orderNo := c.Query("orderNo"); orderNo != "" {
+		whereClause += " AND orders.order_no = ?"
+		args = append(args, orderNo)
+	}
+
+	// 用户名筛选
+	if username := c.Query("username"); username != "" {
+		whereClause += " AND users.username LIKE ?"
+		args = append(args, "%"+username+"%")
+	}
+
 	// 使用JOIN查询获取订单和关联的用户名
 	if err := global.APP_DB.Table("orders").Select("orders.*, users.username").
 		Joins("LEFT JOIN users ON orders.user_id = users.id").
-		Where(query.Session(&gorm.Session{})).
+		Where(whereClause, args...).
 		Order("orders.created_at DESC").
 		Limit(pageSize).
 		Offset(offset).
@@ -99,7 +124,7 @@ func GetOrders(c *gin.Context) {
 		zap.Int64("total", total))
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
 		"data": gin.H{
 			"list":  ordersWithUser,
@@ -142,9 +167,9 @@ func GetOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
-		"data": orderWithUser,
+		"data":    orderWithUser,
 	})
 }
 
@@ -171,7 +196,7 @@ func DeleteOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "删除成功",
 	})
 }
@@ -202,7 +227,7 @@ func CancelOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "订单已取消",
 	})
 }
@@ -251,7 +276,7 @@ func RefundOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "退款成功",
 	})
 }

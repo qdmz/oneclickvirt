@@ -269,50 +269,36 @@ CREATE TABLE IF NOT EXISTS `kyc_records` (
 -- 14. 创建 orders 表
 CREATE TABLE IF NOT EXISTS `orders` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(36) NOT NULL,
+  `order_no` varchar(50) NOT NULL,
   `user_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `order_no` varchar(64) NOT NULL,
+  `product_id` int DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT '0.00',
-  `status` varchar(32) DEFAULT 'pending',
-  `payment_method` varchar(32) DEFAULT NULL,
+  `status` int DEFAULT '0',
+  `payment_method` varchar(20) DEFAULT NULL,
+  `payment_transaction_id` varchar(100) DEFAULT NULL,
   `payment_time` datetime(3) DEFAULT NULL,
-  `refund_time` datetime(3) DEFAULT NULL,
-  `refund_reason` text,
-  `refund_amount` decimal(10,2) DEFAULT '0.00',
-  `expires_at` datetime(3) DEFAULT NULL,
-  `auto_renew` int DEFAULT '0',
-  `renewal_price` decimal(10,2) DEFAULT '0.00',
-  `renewal_discount` decimal(5,2) DEFAULT '0.00',
-  `original_order_id` int DEFAULT NULL,
-  `affiliate_id` int DEFAULT NULL,
-  `commission_amount` decimal(10,2) DEFAULT '0.00',
-  `coupon_code` varchar(64) DEFAULT NULL,
-  `discount_amount` decimal(10,2) DEFAULT '0.00',
-  `actual_amount` decimal(10,2) DEFAULT '0.00',
-  `billing_cycle` varchar(32) DEFAULT 'monthly',
-  `setup_fee` decimal(10,2) DEFAULT '0.00',
-  `recurring_fee` decimal(10,2) DEFAULT '0.00',
-  `trial_used` int DEFAULT '0',
-  `trial_end_at` datetime(3) DEFAULT NULL,
-  `metadata` text,
+  `paid_amount` decimal(10,2) DEFAULT '0.00',
+  `product_data` json DEFAULT NULL,
+  `remark` varchar(255) DEFAULT NULL,
+  `expire_at` datetime(3) DEFAULT NULL,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   `deleted_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uuid` (`uuid`),
   UNIQUE KEY `order_no` (`order_no`),
-  KEY `user_id` (`user_id`),
+  KEY `idx_user_order` (`user_id`),
   KEY `product_id` (`product_id`),
-  KEY `status` (`status`),
-  KEY `payment_method` (`payment_method`)
+  KEY `status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 15. 创建 user_wallets 表
 CREATE TABLE IF NOT EXISTS `user_wallets` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
-  `balance` decimal(10,2) DEFAULT '0.00',
+  `balance` bigint DEFAULT '0',
+  `frozen` bigint DEFAULT '0',
+  `total_recharge` bigint DEFAULT '0',
+  `total_expense` bigint DEFAULT '0',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -324,19 +310,39 @@ CREATE TABLE IF NOT EXISTS `wallet_transactions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `type` varchar(32) DEFAULT NULL,
-  `amount` decimal(10,2) DEFAULT '0.00',
-  `balance` decimal(10,2) DEFAULT '0.00',
+  `amount` bigint DEFAULT '0',
+  `balance` bigint DEFAULT '0',
   `description` text,
   `order_id` int DEFAULT NULL,
+  `related_id` int DEFAULT NULL,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `type` (`type`),
-  KEY `order_id` (`order_id`)
+  KEY `order_id` (`order_id`),
+  KEY `related_id` (`related_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 17. 创建 providers 表
+-- 17. 创建 payment_records 表
+CREATE TABLE IF NOT EXISTS `payment_records` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `transaction_id` varchar(64) DEFAULT NULL,
+  `amount` bigint NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `notify_data` text,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `transaction_id` (`transaction_id`),
+  KEY `idx_order_payment` (`order_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 18. 创建 providers 表
 CREATE TABLE IF NOT EXISTS `providers` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uuid` varchar(36) NOT NULL,
@@ -456,7 +462,12 @@ CREATE TABLE IF NOT EXISTS `providers` (
   KEY `region` (`region`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 18. 创建 instances 表
+-- 18. 插入默认节点数据
+INSERT INTO `providers` (`uuid`, `name`, `type`, `endpoint`, `region`, `country`, `status`, `container_enabled`, `virtual_machine_enabled`, `total_quota`, `used_quota`, `node_cpu_cores`, `node_memory_total`, `node_disk_total`, `created_at`, `updated_at`)
+VALUES
+('00000000-0000-0000-0000-000000000001', '默认节点', 'docker', '127.0.0.1', '默认地区', '中国', 'active', 1, 0, 100, 0, 4, 8192, 102400, NOW(), NOW());
+
+-- 19. 创建 instances 表
 CREATE TABLE IF NOT EXISTS `instances` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uuid` varchar(36) NOT NULL,
@@ -999,9 +1010,9 @@ INSERT IGNORE INTO `jwt_secrets` (`id`, `secret_key`, `created_at`, `updated_at`
 (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', NOW(), NOW());
 
 -- 11. 导入用户钱包数据
-INSERT IGNORE INTO `user_wallets` (`id`, `user_id`, `balance`, `created_at`, `updated_at`) VALUES
-(1, 1, 0.00, NOW(), NOW()),
-(2, 2, 0.00, NOW(), NOW());
+INSERT IGNORE INTO `user_wallets` (`id`, `user_id`, `balance`, `frozen`, `total_recharge`, `total_expense`, `created_at`, `updated_at`) VALUES
+(1, 1, 0, 0, 0, 0, NOW(), NOW()),
+(2, 2, 0, 0, 0, 0, NOW(), NOW());
 
 -- 12. 导入用户权限数据
 INSERT IGNORE INTO `user_permissions` (`id`, `user_id`, `user_types`, `level`, `is_active`, `created_at`, `updated_at`) VALUES

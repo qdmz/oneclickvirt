@@ -13,7 +13,6 @@ import (
 
 	"oneclickvirt/config"
 	"oneclickvirt/global"
-	adminModel "oneclickvirt/model/admin"
 	"oneclickvirt/model/auth"
 	"oneclickvirt/model/common"
 	"oneclickvirt/model/system"
@@ -1362,9 +1361,6 @@ func (s *AuthService) VerifyResetToken(token string) error {
 // isEmailConfigured 检查邮箱配置是否可用
 func (s *AuthService) isEmailConfigured() bool {
 	// 检查系统配置中是否配置了邮箱服务
-	var emailConfig adminModel.SystemConfig
-	if err := global.APP_DB.Where("key = ?", "email_enabled").First(&emailConfig).Error; err != nil {
-		return false
-	}
-	return emailConfig.Value == "true"
+	config := global.APP_CONFIG.Auth
+	return config.EmailSMTPHost != "" && config.EmailUsername != "" && config.EmailPassword != ""
 }

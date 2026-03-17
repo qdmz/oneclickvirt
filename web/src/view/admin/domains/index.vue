@@ -81,20 +81,28 @@
     <!-- 添加/编辑域名对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
       <el-form :model="domainForm" :rules="domainRules" ref="domainFormRef" label-width="100px">
-        <el-form-item label="用户ID" prop="userId">
-          <el-input-number v-model="domainForm.userId" :min="1" />
+        <el-form-item label="用户" prop="userId">
+          <el-select v-model="domainForm.userId" placeholder="请选择用户" @change="handleUserChange">
+            <el-option v-for="user in userList" :key="user.id" :label="`${user.id} - ${user.username}`" :value="user.id" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="实例ID" prop="instanceId">
-          <el-input-number v-model="domainForm.instanceId" :min="1" />
+        <el-form-item label="实例" prop="instanceId">
+          <el-select v-model="domainForm.instanceId" placeholder="请选择实例" @change="handleInstanceChange">
+            <el-option v-for="instance in instanceList" :key="instance.id" :label="`${instance.id} - ${instance.name}`" :value="instance.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="内部IP" prop="internalIp">
+          <el-select v-model="domainForm.internalIp" placeholder="请选择内部IP">
+            <el-option v-for="ip in instanceIps" :key="ip" :label="ip" :value="ip" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="内部端口" prop="internalPort">
+          <el-select v-model="domainForm.internalPort" placeholder="请选择内部端口">
+            <el-option v-for="port in instancePorts" :key="port" :label="port" :value="port" />
+          </el-select>
         </el-form-item>
         <el-form-item label="域名" prop="domain">
           <el-input v-model="domainForm.domain" placeholder="请输入域名" />
-        </el-form-item>
-        <el-form-item label="内部IP" prop="internalIp">
-          <el-input v-model="domainForm.internalIp" placeholder="请输入内部IP" />
-        </el-form-item>
-        <el-form-item label="内部端口" prop="internalPort">
-          <el-input-number v-model="domainForm.internalPort" :min="1" :max="65535" />
         </el-form-item>
         <el-form-item label="协议" prop="protocol">
           <el-select v-model="domainForm.protocol" placeholder="请选择协议">
@@ -121,9 +129,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminGetDomains, adminDeleteDomain, adminCreateDomain, adminUpdateDomain, syncDNS } from '@/api/domain'
+import { getUserList, getAllInstances } from '@/api/admin'
+import { getUserInstancePorts } from '@/api/user'
 
 const loading = ref(false)
 const syncing = ref(false)
@@ -150,13 +160,19 @@ const domainForm = reactive({
   status: 0
 })
 
+// 下拉选项数据
+const userList = ref([])
+const instanceList = ref([])
+const instanceIps = ref([])
+const instancePorts = ref([])
+
 // 表单验证规则
 const domainRules = {
-  userId: [{ required: true, message: '请输入用户ID', trigger: 'blur' }],
-  instanceId: [{ required: true, message: '请输入实例ID', trigger: 'blur' }],
+  userId: [{ required: true, message: '请选择用户', trigger: 'blur' }],
+  instanceId: [{ required: true, message: '请选择实例', trigger: 'blur' }],
   domain: [{ required: true, message: '请输入域名', trigger: 'blur' }],
-  internalIp: [{ required: true, message: '请输入内部IP', trigger: 'blur' }],
-  internalPort: [{ required: true, message: '请输入内部端口', trigger: 'blur' }],
+  internalIp: [{ required: true, message: '请选择内部IP', trigger: 'blur' }],
+  internalPort: [{ required: true, message: '请选择内部端口', trigger: 'blur' }],
   protocol: [{ required: true, message: '请选择协议', trigger: 'change' }]
 }
 
@@ -167,6 +183,79 @@ const statusType = (s) => statusMap[s]?.[1] || 'info'
 function formatDate(d) {
   if (!d) return ''
   return new Date(d).toLocaleString('zh-CN')
+}
+
+// 获取用户列表
+async function fetchUsers() {
+  try {
+    const res = await getUserList({ page: 1, pageSize: 100 })
+    if (res.code === 0) {
+      userList.value = res.data?.list || []
+    }
+  } catch (e) {
+    console.error('获取用户列表失败', e)
+  }
+}
+
+// 获取实例列表
+async function fetchInstances(userId) {
+  try {
+    const res = await getAllInstances({ userId, page: 1, pageSize: 100 })
+    if (res.code === 0) {
+      instanceList.value = res.data?.list || []
+    }
+  } catch (e) {
+    console.error('获取实例列表失败', e)
+  }
+}
+
+// 获取实例的IP和端口
+async function fetchInstanceDetails(instanceId) {
+  if (!instanceId) {
+    instanceIps.value = []
+    instancePorts.value = []
+    return
+  }
+  
+  try {
+    // 获取实例详情
+    const res = await getUserInstancePorts(instanceId)
+    if (res.code === 0) {
+      // 提取IP和端口
+      const ports = res.data || []
+      instancePorts.value = ports.map(p => p.internal_port).filter((value, index, self) => self.indexOf(value) === index)
+      
+      // 从实例列表中获取IP
+      const instance = instanceList.value.find(i => i.id === instanceId)
+      if (instance) {
+        instanceIps.value = [instance.internal_ip]
+        if (instance.internal_ipv6) {
+          instanceIps.value.push(instance.internal_ipv6)
+        }
+      }
+    }
+  } catch (e) {
+    console.error('获取实例详情失败', e)
+  }
+}
+
+// 用户选择变化时
+async function handleUserChange(userId) {
+  if (userId) {
+    await fetchInstances(userId)
+  }
+  domainForm.instanceId = ''
+  instanceIps.value = []
+  instancePorts.value = []
+}
+
+// 实例选择变化时
+async function handleInstanceChange(instanceId) {
+  if (instanceId) {
+    await fetchInstanceDetails(instanceId)
+  }
+  domainForm.internalIp = ''
+  domainForm.internalPort = ''
 }
 
 async function fetchDomains() {
@@ -221,11 +310,14 @@ function handleAddDomain() {
     protocol: 'http',
     status: 0
   })
+  instanceList.value = []
+  instanceIps.value = []
+  instancePorts.value = []
   dialogVisible.value = true
 }
 
 // 编辑域名
-function handleEditDomain(row) {
+async function handleEditDomain(row) {
   editingDomain.value = row
   dialogTitle.value = '编辑域名'
   Object.assign(domainForm, {
@@ -237,6 +329,12 @@ function handleEditDomain(row) {
     protocol: row.protocol,
     status: row.status
   })
+  
+  // 加载实例列表
+  await fetchInstances(row.userId)
+  // 加载实例详情
+  await fetchInstanceDetails(row.instanceId)
+  
   dialogVisible.value = true
 }
 
@@ -264,7 +362,10 @@ async function handleSubmit() {
   }
 }
 
-onMounted(fetchDomains)
+onMounted(async () => {
+  await fetchUsers()
+  await fetchDomains()
+})
 </script>
 
 <style scoped>

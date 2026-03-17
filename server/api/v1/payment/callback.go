@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"oneclickvirt/global"
 	orderModel "oneclickvirt/model/order"
+	productModel "oneclickvirt/model/product"
 	instanceModel "oneclickvirt/model/provider"
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
@@ -140,7 +141,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		UserID:        order.UserID,
 		Type:          paymentMethod,
 		TransactionID: orderNo, // 这里简化处理,实际应该是第三方交易号
-		Amount:        order.Amount,
+		Amount:        int64(order.Amount * 100),
 		Status:        orderModel.PaymentStatusSuccess,
 		NotifyData:    notifyDataStr,
 	}
@@ -151,7 +152,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	}
 
 	// 处理订单类型
-	if order.ProductID != nil {
+	if order.ProductID > 0 {
 		// 产品购买:提升用户等级
 		var user userModel.User
 		if err := tx.First(&user, order.UserID).Error; err != nil {
@@ -231,6 +232,21 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 					return err
 				}
 
+				// 创建产品购买记录，用于记录用户购买的产品
+				productPurchase := productModel.ProductPurchase{
+					UserID:    order.UserID,
+					ProductID: order.ProductID,
+					Level:     newLevel,
+					StartDate: now,
+					EndDate:   user.LevelExpireAt,
+					IsActive:  true,
+				}
+				if err := tx.Create(&productPurchase).Error; err != nil {
+					global.APP_LOG.Error("创建产品购买记录失败", zap.Error(err))
+					tx.Rollback()
+					return err
+				}
+
 				// 清除用户Dashboard缓存，确保用户下次访问个人中心时能看到最新的用户信息
 				cacheService := cache.GetUserCacheService()
 				cacheService.InvalidateUserCache(order.UserID)
@@ -261,8 +277,9 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		}
 
 		// 增加余额
-		wallet.Balance += order.Amount
-		wallet.TotalRecharge += order.Amount
+		rechargeAmount := int64(order.Amount * 100)
+		wallet.Balance += rechargeAmount
+		wallet.TotalRecharge += rechargeAmount
 		if err := tx.Save(&wallet).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -272,7 +289,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		transaction := walletModel.WalletTransaction{
 			UserID:      order.UserID,
 			Type:        walletModel.TransactionTypeRecharge,
-			Amount:      order.Amount,
+			Amount:      rechargeAmount,
 			Balance:     wallet.Balance,
 			Description: "在线充值",
 			OrderID:     &order.ID,
@@ -290,7 +307,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	global.APP_LOG.Info("订单支付成功",
 		zap.String("orderNo", orderNo),
 		zap.Uint("userId", order.UserID),
-		zap.Int64("amount", order.Amount),
+		zap.Int64("amount", int64(order.Amount*100)),
 	)
 
 	return nil

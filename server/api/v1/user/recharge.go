@@ -70,7 +70,7 @@ func CreateRechargeOrder(c *gin.Context) {
 	order := orderModel.Order{
 		OrderNo:       orderNo,
 		UserID:        userID.(uint),
-		Amount:        params.Amount,
+		Amount:        float64(params.Amount) / 100,
 		Status:        orderModel.OrderStatusPending,
 		PaymentMethod: params.PaymentMethod,
 		PaidAmount:    0,

@@ -46,7 +46,7 @@ mysql:
     max-lifetime: "3600"
     max-open-conns: "100"
     password: ""
-    path: localhost
+    path: 127.0.0.1
     port: "3306"
     prefix: ""
     singular: "false"
@@ -109,7 +109,7 @@ system:
     addr: 8890
     db-type: mysql
     env: development
-    frontend-url: "http://localhost:8080"
+    frontend-url: "https://heyun.ypvps.com"
     iplimit-count: 15000
     iplimit-time: 3600
     oauth2-state-token-minutes: 15
@@ -143,10 +143,10 @@ zap:
 max_avatar_size: 2
 default_language:
 signing_key_v1:
-    created_at: "2026-03-13T17:31:11.874135305Z"
-    expires_at: "2026-03-14T17:31:11.874135305Z"
+    created_at: "2026-03-17T09:21:32.34708966+08:00"
+    expires_at: "2026-03-18T09:21:32.34708966+08:00"
     is_active: false
-    key: fa05f116668833b1745cf02dfe448a0c5c4177dfd6c839e402948738213606c0
+    key: 6b8215a1aaa8e5fe041923958389025ad12d3a1c3055e0fbec70dc5137e0f8a2
     version: 1
 active_version: 1
 payment:
