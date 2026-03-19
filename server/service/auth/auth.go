@@ -99,6 +99,7 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 				global.APP_LOG.Info("自动更新用户密码为哈希值", zap.String("username", user.Username))
 			} else {
 				global.APP_LOG.Error("密码哈希化失败", zap.Error(hashErr))
+				return nil, "", common.NewError(common.CodeInvalidCredentials)
 			}
 		} else {
 			// 密码已经是哈希值但验证失败，直接返回错误

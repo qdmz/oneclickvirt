@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -911,80 +912,57 @@ func (cm *ConfigManager) prepareConfigForDB(key string, value interface{}) (Syst
 	// 判断该配置是否为公开配置
 	isPublic := publicConfigKeys[key]
 
+	// 提取分类（从key的第一部分获取）
+	category := "other"
+	if parts := strings.Split(key, "."); len(parts) > 0 {
+		category = parts[0]
+	}
+
+	// 确定配置类型
+	configType := "string"
+	switch value.(type) {
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		configType = "number"
+	case bool:
+		configType = "boolean"
+	case map[string]interface{}, []interface{}, []string, []int, []map[string]interface{}:
+		configType = "json"
+	}
+
 	cm.logger.Debug("准备配置数据",
 		zap.String("key", key),
 		zap.String("value", valueStr),
+		zap.String("category", category),
+		zap.String("type", configType),
 		zap.Bool("isPublic", isPublic))
 
 	return SystemConfig{
+		Category: category,
 		Key:      key,
 		Value:    valueStr,
+		Type:     configType,
 		IsPublic: isPublic,
 	}, nil
 }
 
 // saveConfigToDBWithTx 使用事务保存配置到数据库
 func (cm *ConfigManager) saveConfigToDBWithTx(tx *gorm.DB, key string, value interface{}) error {
-	// 将value转换为字符串，处理nil值
-	var valueStr string
-	if value == nil {
-		// 对于nil值，保存为空字符串，表示键存在但值为空
-		valueStr = ""
-		cm.logger.Debug("保存nil配置值为空字符串", zap.String("key", key))
-	} else {
-		// 对于非nil值，根据类型进行序列化
-		switch v := value.(type) {
-		case string:
-			valueStr = v
-		case int, int8, int16, int32, int64:
-			valueStr = fmt.Sprintf("%d", v)
-		case uint, uint8, uint16, uint32, uint64:
-			valueStr = fmt.Sprintf("%d", v)
-		case float32, float64:
-			valueStr = fmt.Sprintf("%v", v)
-		case bool:
-			valueStr = fmt.Sprintf("%t", v)
-		case map[string]interface{}, []interface{}, []string, []int, []map[string]interface{}:
-			// 对于复杂类型（map、slice等），使用JSON序列化
-			jsonBytes, err := json.Marshal(v)
-			if err != nil {
-				cm.logger.Error("序列化配置值失败", zap.String("key", key), zap.Error(err))
-				return fmt.Errorf("failed to marshal value for key %s: %w", key, err)
-			}
-			valueStr = string(jsonBytes)
-		default:
-			// 对于其他复杂类型，尝试JSON序列化
-			jsonBytes, err := json.Marshal(v)
-			if err != nil {
-				// 如果JSON序列化失败，记录警告并使用fmt.Sprintf作为降级方案
-				cm.logger.Warn("无法JSON序列化配置值，使用字符串表示",
-					zap.String("key", key),
-					zap.String("type", fmt.Sprintf("%T", v)),
-					zap.Error(err))
-				valueStr = fmt.Sprintf("%v", v)
-			} else {
-				valueStr = string(jsonBytes)
-			}
-		}
+	// 使用 prepareConfigForDB 函数准备配置数据，确保所有必需字段都被设置
+	config, err := cm.prepareConfigForDB(key, value)
+	if err != nil {
+		return fmt.Errorf("准备配置数据失败: %v", err)
 	}
-
-	// 判断该配置是否为公开配置
-	isPublic := publicConfigKeys[key]
 
 	cm.logger.Info("保存配置到数据库",
 		zap.String("key", key),
-		zap.String("value", valueStr),
-		zap.Bool("isPublic", isPublic))
-
-	config := SystemConfig{
-		Key:      key,
-		Value:    valueStr,
-		IsPublic: isPublic,
-	}
+		zap.String("value", config.Value),
+		zap.Bool("isPublic", config.IsPublic),
+		zap.String("category", config.Category),
+		zap.String("type", config.Type))
 
 	// 先尝试查找已存在的配置
 	var existingConfig SystemConfig
-	err := tx.Where("`key` = ?", key).First(&existingConfig).Error
+	err = tx.Where("`key` = ?", key).First(&existingConfig).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// 记录不存在，创建新记录
@@ -993,10 +971,12 @@ func (cm *ConfigManager) saveConfigToDBWithTx(tx *gorm.DB, key string, value int
 		return err
 	}
 
-	// 记录已存在，更新所有字段（包括 is_public）
+	// 记录已存在，更新所有字段
 	return tx.Model(&existingConfig).Updates(map[string]interface{}{
-		"value":     valueStr,
-		"is_public": isPublic,
+		"value":     config.Value,
+		"is_public": config.IsPublic,
+		"category":  config.Category,
+		"type":      config.Type,
 	}).Error
 }
 
