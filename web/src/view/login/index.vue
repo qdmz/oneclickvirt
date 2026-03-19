@@ -265,6 +265,8 @@ const handleLogin = async () => {
         // 根据用户类型跳转到相应的仪表盘
         if (userStore.userType === 'admin') {
           router.push('/admin/dashboard')
+        } else if (userStore.userType === 'agent') {
+          router.push('/agent/dashboard')
         } else {
           router.push('/user/dashboard')
         }

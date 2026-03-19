@@ -7,9 +7,9 @@ type ClaimResourceRequest struct {
 	InstanceType string `json:"instanceType" binding:"required"`
 	Name         string `json:"name" binding:"required"`
 	Image        string `json:"image" binding:"required"`
-	CPU          int    `json:"cpu"`
-	Memory       int64  `json:"memory"`
-	Disk         int64  `json:"disk"`
+	CPU          int    `json:"cpu" binding:"required,min=1"`
+	Memory       int64  `json:"memory" binding:"required,min=1"`
+	Disk         int64  `json:"disk" binding:"required,min=1"`
 }
 
 type InstanceActionRequest struct {

@@ -252,6 +252,8 @@ export function setupRouterGuards(router) {
             next('/admin/dashboard')
           } else if (userRole === 'user') {
             next('/user/dashboard')
+          } else if (userRole === 'agent') {
+            next('/agent/dashboard')
           } else {
             next('/home')
           }
@@ -268,6 +270,10 @@ export function setupRouterGuards(router) {
       // 只有管理员可以访问管理员界面
       if (userType === 'admin' && viewMode === 'admin') {
         next('/admin/dashboard')
+        return
+      } else if (userType === 'agent') {
+        // 代理商跳转到代理商仪表板
+        next('/agent/dashboard')
         return
       } else {
         // 普通用户或管理员切换到用户视图时，进入用户界面

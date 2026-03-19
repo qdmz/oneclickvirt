@@ -5,6 +5,7 @@ import (
 	"net/smtp"
 
 	"oneclickvirt/global"
+	"go.uber.org/zap"
 )
 
 // EmailService 邮件服务
@@ -29,7 +30,7 @@ func (s *EmailService) sendEmail(to, subject, htmlBody string) error {
 		"\r\n" +
 		htmlBody
 
-	// 建立TLS连接
+	// 建立连接
 	c, err := smtp.Dial(fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort))
 	if err != nil {
 		return err
@@ -38,7 +39,15 @@ func (s *EmailService) sendEmail(to, subject, htmlBody string) error {
 	
 	// 启用TLS
 	if err = c.StartTLS(nil); err != nil {
-		return err
+		// 如果TLS失败，尝试不使用TLS
+		global.APP_LOG.Warn("TLS连接失败，尝试不使用TLS", zap.Error(err))
+		// 重新建立连接
+		c.Close()
+		c, err = smtp.Dial(fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort))
+		if err != nil {
+			return err
+		}
+		defer c.Close()
 	}
 	
 	// 认证
