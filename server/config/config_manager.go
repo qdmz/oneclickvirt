@@ -92,12 +92,12 @@ var publicConfigKeys = map[string]bool{
 // SystemConfig 系统配置模型（避免循环导入）
 type SystemConfig struct {
 	ID          uint           `json:"id" gorm:"primarykey"`
-	Category    string         `json:"category" gorm:"size:50;not null;index"`
+	Category    string         `json:"category" gorm:"size:50;index"`
 	Key         string         `json:"key" gorm:"size:100;not null;index"`
 	Value       string         `json:"value" gorm:"type:text"`
 	Description string         `json:"description" gorm:"size:255"`
-	Type        string         `json:"type" gorm:"size:20;not null;default:string"`
-	IsPublic    bool           `json:"isPublic" gorm:"not null;default:false"`
+	Type        string         `json:"type" gorm:"size:20;default:string"`
+	IsPublic    bool           `json:"isPublic" gorm:"default:false"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `json:"deletedAt" gorm:"index"`

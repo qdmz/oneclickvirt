@@ -1662,8 +1662,47 @@ const saveConfig = async () => {
     const newLanguage = config.value.other.defaultLanguage
     const languageChanged = oldLanguage !== newLanguage
     
-    // 转换 levelLimits 为 kebab-case 格式（外层字段），max-resources 内部保持 camelCase
+    // 转换配置为 kebab-case 格式
     const configToSave = JSON.parse(JSON.stringify(config.value))
+    
+    // 转换 auth 配置为 kebab-case 格式
+    if (configToSave.auth) {
+      const auth = configToSave.auth
+      configToSave.auth = {
+        'enable-email': auth.enableEmail,
+        'enable-telegram': auth.enableTelegram,
+        'enable-qq': auth.enableQQ,
+        'enable-oauth2': auth.enableOAuth2,
+        'enable-public-registration': auth.enablePublicRegistration,
+        'email-smtp-host': auth.emailSMTPHost,
+        'email-smtp-port': auth.emailSMTPPort,
+        'email-username': auth.emailUsername,
+        'email-password': auth.emailPassword,
+        'telegram-bot-token': auth.telegramBotToken,
+        'qq-app-id': auth.qqAppID,
+        'qq-app-key': auth.qqAppKey
+      }
+    }
+    
+    // 转换 inviteCode 配置为 kebab-case 格式
+    if (configToSave.inviteCode) {
+      const inviteCode = configToSave.inviteCode
+      configToSave.inviteCode = {
+        'enabled': inviteCode.enabled,
+        'required': inviteCode.required
+      }
+    }
+    
+    // 转换 other 配置为 kebab-case 格式
+    if (configToSave.other) {
+      const other = configToSave.other
+      configToSave.other = {
+        'max-avatar-size': other.maxAvatarSize,
+        'default-language': other.defaultLanguage
+      }
+    }
+    
+    // 转换 levelLimits 为 kebab-case 格式（外层字段），max-resources 内部保持 camelCase
     if (configToSave.quota && configToSave.quota.levelLimits) {
       const convertedLimits = {}
       Object.keys(configToSave.quota.levelLimits).forEach(level => {
@@ -1725,23 +1764,8 @@ const saveConfig = async () => {
       }
     }
     
-    // 转换系统配置为 kebab-case 格式
-    if (configToSave.system) {
-      const system = configToSave.system
-      configToSave.system = {
-        'addr': system.addr,
-        'db-type': system.dbType,
-        'env': system.env,
-        'frontend-url': system.frontendURL,
-        'iplimit-count': system.ipLimitCount,
-        'iplimit-time': system.ipLimitTime,
-        'oauth2-state-token-minutes': system.oauth2StateTokenMinutes,
-        'oss-type': system.ossType,
-        'provider-inactive-hours': system.providerInactiveHours,
-        'use-multipoint': system.useMultipoint,
-        'use-redis': system.useRedis
-      }
-    }
+    // 完全移除系统配置，因为所有 system.* 都是系统级配置，不允许通过API修改
+    delete configToSave.system
     
     // 转换验证码配置为 kebab-case 格式
     if (configToSave.captcha) {

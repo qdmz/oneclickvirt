@@ -135,13 +135,19 @@ CREATE TABLE IF NOT EXISTS `products` (
 -- 6. 创建 system_configs 表
 CREATE TABLE IF NOT EXISTS `system_configs` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `category` varchar(50) DEFAULT 'other',
   `key` varchar(128) NOT NULL,
   `value` text,
   `description` text,
+  `type` varchar(20) DEFAULT 'string',
+  `is_public` tinyint(1) DEFAULT '0',
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `key` (`key`)
+  UNIQUE KEY `key` (`key`),
+  KEY `idx_category` (`category`),
+  KEY `idx_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 7. 创建 site_configs 表

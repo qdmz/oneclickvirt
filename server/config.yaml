@@ -4,16 +4,15 @@ auth:
     email-smtp-port: 587
     email-username: qdmzhost@qq.com
     enable-email: true
-    enable-email-verification: true
     enable-oauth2: true
     enable-public-registration: true
     enable-qq: false
     enable-telegram: false
-    qq-app-id: ${QQ_APP_ID}
-    qq-app-key: ${QQ_APP_KEY}
-    telegram-bot-token: ${TELEGRAM_BOT_TOKEN}
+    qq-app-id: ""
+    qq-app-key: ""
+    telegram-bot-token: ""
 captcha:
-    enabled: false
+    enabled: true
     expire-time: 300
     height: 40
     length: 4
@@ -29,7 +28,7 @@ cors:
     mode: ""
     whitelist: []
 invite-code:
-    enabled: false
+    enabled: true
     required: false
 jwt:
     buffer-time: 1d
@@ -60,48 +59,6 @@ quota:
         min-level-for-reset-container: 1
         min-level-for-reset-vm: 1
         min-level-for-vm: 1
-    default-level: 1
-    level-limits:
-        "1":
-            max-instances: 1
-            max-resources:
-                bandwidth: 100
-                cpu: 1
-                disk: 1024
-                memory: 350
-            max-traffic: 102400
-        "2":
-            max-instances: 1
-            max-resources:
-                bandwidth: 200
-                cpu: 2
-                disk: 2048
-                memory: 1024
-            max-traffic: 204800
-        "3":
-            max-instances: 1
-            max-resources:
-                bandwidth: 500
-                cpu: 2
-                disk: 4096
-                memory: 2048
-            max-traffic: 307200
-        "4":
-            max-instances: 1
-            max-resources:
-                bandwidth: 1000
-                cpu: 4
-                disk: 8192
-                memory: 4096
-            max-traffic: 409600
-        "5":
-            max-instances: 10
-            max-resources:
-                bandwidth: 1000
-                cpu: 8
-                disk: 16384
-                memory: 8192
-            max-traffic: 5.12e+06
 redis:
     addr: ""
     db: 0
@@ -144,10 +101,10 @@ zap:
 max_avatar_size: 2
 default_language:
 signing_key_v1:
-    created_at: "2026-03-17T14:11:54.753776012+08:00"
-    expires_at: "2026-03-18T14:11:54.753776012+08:00"
+    created_at: "2026-03-19T10:38:31.071420366+08:00"
+    expires_at: "2026-03-20T10:38:31.071420366+08:00"
     is_active: false
-    key: 96bc8880936407426ee39ac465759d7a1d1112bfd45c5c90cd9fb77271c98c63
+    key: 4eb44b1dc2d3ae6f67d79cd89f2b6eea2dadfd0527814b131f553a1efa2cfd89
     version: 1
 active_version: 1
 payment:
@@ -155,7 +112,7 @@ payment:
     alipay-gateway: https://openapi.alipay.com/gateway.do
     alipay-private-key: ${ALIPAY_PRIVATE_KEY}
     alipay-public-key: ${ALIPAY_PUBLIC_KEY}
-    balance-daily-limit: 10000
+    balance-daily-limit: 500
     balance-min-amount: 0
     enable-alipay: false
     enable-balance: true
@@ -173,8 +130,8 @@ payment:
     mapay-key: ${MAPAY_KEY}
     mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
     mapay-return-url: https://heyun.ypvps.com/user/wallet
-    real-name-callback-url: ' https://heyun.ypvps.com/api/v1/kyc/callback'
-    require-real-name: true
+    real-name-callback-url: https://heyun.ypvps.com/api/v1/kyc/callback
+    require-real-name: false
     wechat-api-key: ${WECHAT_API_KEY}
     wechat-api-v3-key: ${WECHAT_API_V3_KEY}
     wechat-app-id: ${WECHAT_APP_ID}
@@ -214,3 +171,9 @@ email_activation_expire_hours: 24
 enable_real_name: false
 require_real_name: false
 enable_agent: true
+system-name: 和云虚拟化管理平台
+system-description: 和云支持多种虚拟化技术的管理平台
+site:
+    description: 和云虚拟化管理平台
+    keywords: 和云虚拟化,Docker,LXD,Incus,Proxmox
+    name: 和云

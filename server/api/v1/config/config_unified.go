@@ -468,18 +468,85 @@ func filterConfigByScope(config map[string]interface{}, scope string, authCtx *a
 			}
 		}
 	case "admin":
-		// 管理员可以更新所有配置
+		// 管理员可以更新所有非系统级配置
 		hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
 		if hasAdminPermission {
-			filtered = config
+			for key, value := range config {
+				// 过滤掉系统级配置
+				if !isSystemLevelConfig(key) {
+					filtered[key] = value
+				}
+			}
 		}
 	case "global":
-		// 全局配置，只有管理员可以更新
+		// 全局配置，只有管理员可以更新，且排除系统级配置
 		hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
 		if hasAdminPermission {
-			filtered = config
+			for key, value := range config {
+				// 过滤掉系统级配置
+				if !isSystemLevelConfig(key) {
+					filtered[key] = value
+				}
+			}
 		}
 	}
 
 	return filtered
+}
+
+// isSystemLevelConfig 检查是否为系统级配置（启动必需，必须来自YAML）
+func isSystemLevelConfig(key string) bool {
+	systemLevelConfigKeys := map[string]bool{
+		// System 配置（所有 system.* 都是系统级配置）
+		"system.addr":                       true,
+		"system.db-type":                    true,
+		"system.env":                        true,
+		"system.frontend-url":               true,
+		"system.iplimit-count":              true,
+		"system.iplimit-time":               true,
+		"system.oauth2-state-token-minutes": true,
+		"system.oss-type":                   true,
+		"system.provider-inactive-hours":    true,
+		"system.use-multipoint":             true,
+		"system.use-redis":                  true,
+
+		// MySQL 配置（数据库连接信息，必须在连接数据库前读取）
+		"mysql.path":           true,
+		"mysql.port":           true,
+		"mysql.config":         true,
+		"mysql.db-name":        true,
+		"mysql.username":       true,
+		"mysql.password":       true,
+		"mysql.prefix":         true,
+		"mysql.singular":       true,
+		"mysql.engine":         true,
+		"mysql.max-idle-conns": true,
+		"mysql.max-open-conns": true,
+		"mysql.max-lifetime":   true,
+		"mysql.log-mode":       true,
+		"mysql.log-zap":        true,
+		"mysql.auto-create":    true,
+
+		// Redis 配置（如果启用Redis，也是启动必需）
+		"redis.addr":     true,
+		"redis.password": true,
+		"redis.db":       true,
+
+		// Zap 日志配置（日志系统启动必需）
+		"zap.level":              true,
+		"zap.format":             true,
+		"zap.prefix":             true,
+		"zap.director":           true,
+		"zap.encode-level":       true,
+		"zap.stacktrace-key":     true,
+		"zap.max-file-size":      true,
+		"zap.max-backups":        true,
+		"zap.max-log-length":     true,
+		"zap.retention-day":      true,
+		"zap.show-line":          true,
+		"zap.log-in-console":     true,
+		"zap.max-string-length":  true,
+		"zap.max-array-elements": true,
+	}
+	return systemLevelConfigKeys[key]
 }
