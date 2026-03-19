@@ -1,6 +1,15 @@
 import request from '@/utils/request'
 import { healthCheckRequest, createLongTimeoutRequest } from '@/utils/longTimeoutRequest'
 
+// 测试邮件发送
+export const testEmail = (data) => {
+  return request({
+    url: '/v1/admin/config/test-email',
+    method: 'post',
+    data
+  })
+}
+
 // 创建实例专用请求实例（120秒超时）
 const instanceOperationRequest = createLongTimeoutRequest(120000, {
   requestPrefix: 'instance'

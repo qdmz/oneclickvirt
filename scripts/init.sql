@@ -211,10 +211,10 @@ INSERT INTO `roles` (`name`, `code`, `description`, `status`, `created_at`, `upd
 
 -- ============================================
 -- 2. 创建默认管理员账户
--- 默认密码: admin123456
+-- 默认密码: TestPass12!#
 -- ============================================
 INSERT INTO `users` (`uuid`, `username`, `password`, `nickname`, `email`, `phone`, `status`, `level`, `level_expire_at`, `user_type`, `created_at`, `updated_at`) VALUES
-('admin-uuid-001', 'admin', '$2a$10$AKvQPFPqSVBQWv6J0hCCeujsogZRK2dZReuye1ZZXJFEzWgL61IZK', '管理员', 'admin@example.com', '13800138000', 1, 5, '2099-12-31 23:59:59', 'admin', NOW(), NOW());
+('admin-uuid-001', 'admin', 'TestPass12!#', '管理员', 'admin@example.com', '13800138000', 1, 5, '2099-12-31 23:59:59', 'admin', NOW(), NOW());
 
 -- 创建用户角色关联
 INSERT INTO `user_roles` (`user_id`, `role_id`, `created_at`, `updated_at`) VALUES
@@ -290,7 +290,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 初始化完成
 -- 默认管理员账户:
 --   用户名: admin
---   密码: admin123456
+--   密码: TestPass12!#
 --
 -- 所有必要的表都已创建:
 --   domains          - 域名绑定表

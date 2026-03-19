@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"oneclickvirt/service/auth"
+	"oneclickvirt/service/email"
 	"strings"
 
 	"oneclickvirt/config"
@@ -549,4 +550,71 @@ func isSystemLevelConfig(key string) bool {
 		"zap.max-array-elements": true,
 	}
 	return systemLevelConfigKeys[key]
+}
+
+// TestEmailSend 测试邮件发送接口
+// @Summary 测试邮件发送
+// @Description 测试SMTP配置是否能正确发送邮件
+// @Tags 配置管理
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body map[string]string true "测试邮件请求" schema:{"recipient":"test@example.com"}
+// @Success 200 {object} common.Response "发送成功"
+// @Failure 400 {object} common.Response "参数错误"
+// @Failure 401 {object} common.Response "认证失败"
+// @Failure 403 {object} common.Response "权限不足"
+// @Failure 500 {object} common.Response "发送失败"
+// @Router /admin/config/test-email [post]
+func TestEmailSend(c *gin.Context) {
+	authCtx, exists := middleware.GetAuthContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, common.Response{
+			Code: 401,
+			Msg:  "用户未认证",
+		})
+		return
+	}
+
+	// 验证权限
+	permissionService := auth.PermissionService{}
+	hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
+	if !hasAdminPermission {
+		c.JSON(http.StatusForbidden, common.Response{
+			Code: 403,
+			Msg:  "权限不足",
+		})
+		return
+	}
+
+	// 解析请求体
+	var req struct {
+		Recipient string `json:"recipient" binding:"required,email"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		common.ResponseWithError(c, common.NewError(common.CodeValidationError, "参数错误: 请输入有效的邮箱地址"))
+		return
+	}
+
+	// 检查邮箱配置
+	config := global.APP_CONFIG.Auth
+	if !config.EnableEmail {
+		common.ResponseWithError(c, common.NewError(common.CodeConfigError, "邮箱功能未启用"))
+		return
+	}
+
+	if config.EmailSMTPHost == "" || config.EmailSMTPPort == 0 || config.EmailUsername == "" || config.EmailPassword == "" {
+		common.ResponseWithError(c, common.NewError(common.CodeConfigError, "SMTP配置不完整"))
+		return
+	}
+
+	// 发送测试邮件
+	emailService := email.NewEmailService()
+	err := emailService.SendWelcomeEmail(req.Recipient, "测试用户")
+	if err != nil {
+		common.ResponseWithError(c, common.NewError(common.CodeConfigError, fmt.Sprintf("邮件发送失败: %v", err)))
+		return
+	}
+
+	common.ResponseSuccess(c, nil, "测试邮件发送成功，请查收")
 }

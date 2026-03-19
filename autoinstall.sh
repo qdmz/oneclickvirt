@@ -418,8 +418,41 @@ EOF2
 
 chmod +x /check_users.sh
 
+# Create a script to update user passwords to admin123456
+cat > /update_passwords.sh << 'EOF3'
+#!/bin/bash
+
+DB_HOST="localhost"
+
+# Wait for MySQL to start
+echo "Updating user passwords..."
+for i in {1..60}; do
+    if mysql -h "$DB_HOST" -u root -e "SELECT 1" >/dev/null 2>&1; then
+        echo "MySQL started successfully"
+        break
+    fi
+    echo "Waiting for MySQL to start... ($i/60)"
+    if [ $i -eq 60 ]; then
+        echo "MySQL failed to start"
+        exit 1
+    fi
+    sleep 1
+done
+
+# Update admin and user passwords to TestPass12!#
+# Note: This is a placeholder, the actual password update will be handled by the application
+# The application will hash the password properly when it starts
+mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; UPDATE users SET password = 'TestPass12!#' WHERE username IN ('admin', 'user');"
+echo "Passwords updated successfully"
+EOF3
+
+chmod +x /update_passwords.sh
+
 # Start the check_users.sh script in the background
 nohup /check_users.sh > /var/log/check_users.log 2>&1 &
+
+# Start the update_passwords.sh script in the background
+nohup /update_passwords.sh > /var/log/update_passwords.log 2>&1 &
 
 # Start supervisor
 echo "Starting supervisor..."

@@ -144,6 +144,30 @@
                 </el-form-item>
               </el-col>
             </el-row>
+            
+            <!-- 测试邮件发送 -->
+            <el-divider content-position="left">
+              {{ $t('admin.config.emailTest') || '测试邮件发送' }}
+            </el-divider>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item :label="$t('admin.config.emailTestRecipient') || '收信人邮箱'">
+                  <el-input
+                    v-model="testEmailRecipient"
+                    placeholder="请输入测试邮箱地址"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" style="display: flex; align-items: flex-end; padding-bottom: 24px;">
+                <el-button
+                  type="primary"
+                  @click="testEmailSend"
+                  :loading="testEmailLoading"
+                >
+                  {{ $t('admin.config.emailTestSend') || '发送测试邮件' }}
+                </el-button>
+              </el-col>
+            </el-row>
           </el-form>
         </el-tab-pane>
 
@@ -1329,7 +1353,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { getAdminConfig, updateAdminConfig } from '@/api/config'
-import { getInstanceTypePermissions, updateInstanceTypePermissions } from '@/api/admin'
+import { getInstanceTypePermissions, updateInstanceTypePermissions, testEmail } from '@/api/admin'
 import { useLanguageStore } from '@/pinia/modules/language'
 
 const { t, locale } = useI18n()
@@ -1449,6 +1473,10 @@ const instanceTypePermissions = ref({
 })
 
 const loading = ref(false)
+
+// 测试邮件相关变量
+const testEmailRecipient = ref('')
+const testEmailLoading = ref(false)
 
 // 记录系统配置的语言，用于判断是否修改
 const systemConfigLanguage = ref('')
@@ -1848,6 +1876,65 @@ const resetConfig = async () => {
   await loadConfig()
   await loadInstanceTypePermissions()
   ElMessage.success(t('admin.config.configReset'))
+}
+
+// 测试邮件发送
+const testEmailSend = async () => {
+  if (!testEmailRecipient.value) {
+    ElMessage.error('请输入收信人邮箱地址')
+    return
+  }
+  
+  if (!config.value.auth.enableEmail) {
+    ElMessage.error('请先启用邮箱功能')
+    return
+  }
+  
+  if (!config.value.auth.emailSMTPHost || !config.value.auth.emailSMTPPort || !config.value.auth.emailUsername || !config.value.auth.emailPassword) {
+    ElMessage.error('请完整填写SMTP配置')
+    return
+  }
+  
+  testEmailLoading.value = true
+  try {
+    // 先保存当前配置，确保测试使用最新配置
+    const configToSave = JSON.parse(JSON.stringify(config.value))
+    
+    // 转换 auth 配置为 kebab-case 格式
+    if (configToSave.auth) {
+      const auth = configToSave.auth
+      configToSave.auth = {
+        'enable-email': auth.enableEmail,
+        'enable-telegram': auth.enableTelegram,
+        'enable-qq': auth.enableQQ,
+        'enable-oauth2': auth.enableOAuth2,
+        'enable-public-registration': auth.enablePublicRegistration,
+        'email-smtp-host': auth.emailSMTPHost,
+        'email-smtp-port': auth.emailSMTPPort,
+        'email-username': auth.emailUsername,
+        'email-password': auth.emailPassword,
+        'telegram-bot-token': auth.telegramBotToken,
+        'qq-app-id': auth.qqAppID,
+        'qq-app-key': auth.qqAppKey
+      }
+    }
+    
+    // 保存配置
+    await updateAdminConfig(configToSave)
+    
+    // 发送测试邮件
+    const response = await testEmail({ recipient: testEmailRecipient.value })
+    if (response.code === 0) {
+      ElMessage.success('测试邮件发送成功，请查收')
+    } else {
+      ElMessage.error('测试邮件发送失败: ' + (response.message || '未知错误'))
+    }
+  } catch (error) {
+    console.error('测试邮件发送失败:', error)
+    ElMessage.error('测试邮件发送失败: ' + (error.message || '未知错误'))
+  } finally {
+    testEmailLoading.value = false
+  }
 }
 
 onMounted(() => {

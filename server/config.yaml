@@ -3,8 +3,8 @@ auth:
     email-smtp-host: smtp.qq.com
     email-smtp-port: 587
     email-username: qdmzhost@qq.com
-    enable-email: true
-    enable-oauth2: true
+    enable-email: false
+    enable-oauth2: false
     enable-public-registration: true
     enable-qq: false
     enable-telegram: false
@@ -28,7 +28,7 @@ cors:
     mode: ""
     whitelist: []
 invite-code:
-    enabled: true
+    enabled: false
     required: false
 jwt:
     buffer-time: 1d
@@ -101,10 +101,10 @@ zap:
 max_avatar_size: 2
 default_language:
 signing_key_v1:
-    created_at: "2026-03-19T10:38:31.071420366+08:00"
-    expires_at: "2026-03-20T10:38:31.071420366+08:00"
+    created_at: "2026-03-19T12:01:03.545103213+08:00"
+    expires_at: "2026-03-20T12:01:03.545103213+08:00"
     is_active: false
-    key: 4eb44b1dc2d3ae6f67d79cd89f2b6eea2dadfd0527814b131f553a1efa2cfd89
+    key: 4bb2a98448af083ad749eb1513dbe994a2a56c1923cf8c469474afbf695d819a
     version: 1
 active_version: 1
 payment:
@@ -171,9 +171,9 @@ email_activation_expire_hours: 24
 enable_real_name: false
 require_real_name: false
 enable_agent: true
-system-name: 和云虚拟化管理平台
-system-description: 和云支持多种虚拟化技术的管理平台
+system-name: 虚拟化管理平台
+system-description: 支持多种虚拟化技术的管理平台
 site:
-    description: 和云虚拟化管理平台
-    keywords: 和云虚拟化,Docker,LXD,Incus,Proxmox
-    name: 和云
+    description: 虚拟化管理平台
+    keywords: 虚拟化,Docker,LXD,Incus,Proxmox
+    name: OneClickVirt

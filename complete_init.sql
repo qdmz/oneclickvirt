@@ -955,10 +955,10 @@ INSERT IGNORE INTO `roles` (`id`, `name`, `code`, `description`, `status`, `crea
 (1, '管理员', 'admin', '系统管理员角色', 1, NOW(), NOW()),
 (2, '普通用户', 'user', '普通用户角色', 1, NOW(), NOW());
 
--- 2. 导入用户数据（密码：password）
+-- 2. 导入用户数据（密码：TestPass12!#）
 INSERT IGNORE INTO `users` (`id`, `uuid`, `username`, `email`, `password`, `user_type`, `level`, `status`, `nickname`, `created_at`, `updated_at`, `max_instances`, `max_cpu`, `max_memory`, `max_disk`) VALUES
-(1, 'user-1', 'admin', 'admin@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin', 5, 1, '管理员', NOW(), NOW(), 10, 8, 8192, 102400),
-(2, 'user-2', 'user', 'user@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'user', 1, 1, '测试用户', NOW(), NOW(), 1, 1, 512, 10240);
+(1, 'user-1', 'admin', 'admin@example.com', 'TestPass12!#', 'admin', 5, 1, '管理员', NOW(), NOW(), 10, 8, 8192, 102400),
+(2, 'user-2', 'user', 'user@example.com', 'TestPass12!#', 'user', 1, 1, '测试用户', NOW(), NOW(), 1, 1, 512, 10240);
 
 -- 3. 导入用户角色关联
 INSERT IGNORE INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`, `updated_at`) VALUES
