@@ -40,7 +40,7 @@ func (s *PermissionService) GetUserEffectivePermission(userID uint) (*UserEffect
 	}
 
 	// 验证用户基础权限类型的合法性
-	validTypes := map[string]bool{"user": true, "admin": true}
+	validTypes := map[string]bool{"user": true, "admin": true, "agent": true}
 	if !validTypes[user.UserType] {
 		global.APP_LOG.Error("用户基础权限类型无效",
 			zap.Uint("userID", userID),

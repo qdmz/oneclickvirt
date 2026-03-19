@@ -351,6 +351,8 @@ const getUserTypeText = () => {
       return t('common.admin')
     case 'user':
       return t('common.normalUser')
+    case 'agent':
+      return '代理商'
     default:
       return t('common.unknown')
   }

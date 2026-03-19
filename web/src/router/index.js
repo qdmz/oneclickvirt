@@ -425,38 +425,38 @@ const routes = [
     redirect: '/agent/dashboard',
     meta: {
       requiresAuth: true,
-      roles: ['user', 'admin']
+      roles: ['user', 'admin', 'agent']
     },
     children: [
       {
         path: 'dashboard',
         name: 'AgentDashboard',
         component: () => import('@/view/agent/dashboard/index.vue'),
-        meta: { title: '代理商仪表盘', requiresAuth: true, roles: ['user', 'admin'] }
+        meta: { title: '代理商仪表盘', requiresAuth: true, roles: ['user', 'admin', 'agent'] }
       },
       {
         path: 'sub-users',
         name: 'AgentSubUsers',
         component: () => import('@/view/agent/sub-users/index.vue'),
-        meta: { title: '子用户管理', requiresAuth: true, roles: ['user', 'admin'] }
+        meta: { title: '子用户管理', requiresAuth: true, roles: ['user', 'admin', 'agent'] }
       },
       {
         path: 'commissions',
         name: 'AgentCommissions',
         component: () => import('@/view/agent/commissions/index.vue'),
-        meta: { title: '佣金记录', requiresAuth: true, roles: ['user', 'admin'] }
+        meta: { title: '佣金记录', requiresAuth: true, roles: ['user', 'admin', 'agent'] }
       },
       {
         path: 'profile',
         name: 'AgentProfile',
         component: () => import('@/view/agent/profile/index.vue'),
-        meta: { title: '代理商资料', requiresAuth: true, roles: ['user', 'admin'] }
+        meta: { title: '代理商资料', requiresAuth: true, roles: ['user', 'admin', 'agent'] }
       },
       {
         path: 'wallet',
         name: 'AgentWallet',
         component: () => import('@/view/agent/wallet/index.vue'),
-        meta: { title: '钱包管理', requiresAuth: true, roles: ['user', 'admin'] }
+        meta: { title: '钱包管理', requiresAuth: true, roles: ['user', 'admin', 'agent'] }
       }
     ]
   },

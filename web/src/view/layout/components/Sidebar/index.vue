@@ -191,13 +191,33 @@ const userRoutes = computed(() => {
             icon: 'ShoppingCart'
           }
         },
-        {  path: '/user/kyc',
+        {
+          path: '/user/kyc',
           name: 'UserKYC',
           meta: {
             title: t('sidebar.kycManagement'),
             icon: 'User'
           }
         },
+        {
+          path: '/user/wallet',
+          name: 'UserWallet',
+          meta: {
+            title: '资金管理',
+            icon: 'Wallet'
+          }
+        },
+        {
+          path: '/user/profile',
+          name: 'UserProfile',
+          meta: {
+            title: t('sidebar.personalCenter'),
+            icon: 'User'
+          }
+        }
+      ],
+      // 代理商路由
+      agent: [
         {
           path: '/agent/dashboard',
           name: 'AgentDashboard',
@@ -231,11 +251,27 @@ const userRoutes = computed(() => {
           }
         },
         {
-          path: '/user/wallet',
-          name: 'UserWallet',
+          path: '/user/instances',
+          name: 'UserInstances',
           meta: {
-            title: '资金管理',
-            icon: 'Wallet'
+            title: t('sidebar.myInstances'),
+            icon: 'Box'
+          }
+        },
+        {
+          path: '/user/apply',
+          name: 'UserApply',
+          meta: {
+            title: t('sidebar.apply'),
+            icon: 'Plus'
+          }
+        },
+        {
+          path: '/user/tasks',
+          name: 'UserTasks',
+          meta: {
+            title: t('sidebar.taskList'),
+            icon: 'List'
           }
         },
         {

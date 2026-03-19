@@ -243,7 +243,7 @@ func getUserAuthInfo(userID uint) (*auth.AuthContext, error) {
 	}
 
 	// 确保有效权限类型是合法的
-	validTypes := map[string]bool{"user": true, "admin": true}
+	validTypes := map[string]bool{"user": true, "admin": true, "agent": true}
 	if !validTypes[effectivePermission.EffectiveType] {
 		global.APP_LOG.Error("权限服务返回无效的权限类型，拒绝访问",
 			zap.Uint("userID", userID),

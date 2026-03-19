@@ -104,6 +104,31 @@ func syncAuthConfig(authConfig map[string]interface{}) {
 	if v, ok := authConfig["enable-oauth2"].(bool); ok {
 		global.APP_CONFIG.Auth.EnableOAuth2 = v
 	}
+	// 同步SMTP配置
+	if v, ok := authConfig["email-smtp-host"].(string); ok {
+		global.APP_CONFIG.Auth.EmailSMTPHost = v
+	}
+	if v, ok := authConfig["email-smtp-port"].(float64); ok {
+		global.APP_CONFIG.Auth.EmailSMTPPort = int(v)
+	} else if v, ok := authConfig["email-smtp-port"].(int); ok {
+		global.APP_CONFIG.Auth.EmailSMTPPort = v
+	}
+	if v, ok := authConfig["email-username"].(string); ok {
+		global.APP_CONFIG.Auth.EmailUsername = v
+	}
+	if v, ok := authConfig["email-password"].(string); ok {
+		global.APP_CONFIG.Auth.EmailPassword = v
+	}
+	// 同步其他认证配置
+	if v, ok := authConfig["telegram-bot-token"].(string); ok {
+		global.APP_CONFIG.Auth.TelegramBotToken = v
+	}
+	if v, ok := authConfig["qq-app-id"].(string); ok {
+		global.APP_CONFIG.Auth.QQAppID = v
+	}
+	if v, ok := authConfig["qq-app-key"].(string); ok {
+		global.APP_CONFIG.Auth.QQAppKey = v
+	}
 }
 
 // syncInviteCodeConfig 同步邀请码配置

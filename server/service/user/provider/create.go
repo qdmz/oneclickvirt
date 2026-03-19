@@ -306,12 +306,36 @@ func (s *Service) createInstanceWithMinimalTransaction(userID uint, req *userMod
 			PreallocatedDisk:      diskSpec.SizeMB,
 			PreallocatedBandwidth: bandwidthSpec.SpeedMbps,
 		}
+		
+		// 添加type字段，解决数据库错误：Field 'type' doesn't have a default value
+		newTaskMap := make(map[string]interface{})
+		newTaskMap["user_id"] = newTask.UserID
+		newTaskMap["provider_id"] = newTask.ProviderID
+		newTaskMap["task_type"] = newTask.TaskType
+		newTaskMap["type"] = "create" // 添加type字段
+		newTaskMap["task_data"] = newTask.TaskData
+		newTaskMap["status"] = newTask.Status
+		newTaskMap["timeout_duration"] = newTask.TimeoutDuration
+		newTaskMap["is_force_stoppable"] = newTask.IsForceStoppable
+		newTaskMap["estimated_duration"] = newTask.EstimatedDuration
+		newTaskMap["preallocated_cpu"] = newTask.PreallocatedCPU
+		newTaskMap["preallocated_memory"] = newTask.PreallocatedMemory
+		newTaskMap["preallocated_disk"] = newTask.PreallocatedDisk
+		newTaskMap["preallocated_bandwidth"] = newTask.PreallocatedBandwidth
+		
+		// 使用map创建任务，避免字段名不匹配的问题
 
-		if err := tx.Create(newTask).Error; err != nil {
+		if err := tx.Table("tasks").Create(newTaskMap).Error; err != nil {
 			return fmt.Errorf("创建任务失败: %v", err)
 		}
-
-		task = newTask
+		
+		// 重新查询创建的任务，获取完整信息
+		var createdTask adminModel.Task
+		if err := tx.Where("user_id = ? AND task_type = ? AND status = ?", userID, "create", "pending").Order("created_at DESC").First(&createdTask).Error; err != nil {
+			return fmt.Errorf("查询创建的任务失败: %v", err)
+		}
+		
+		task = &createdTask
 		return nil
 	})
 

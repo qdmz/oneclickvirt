@@ -1050,7 +1050,8 @@ const submitApplication = async () => {
           router.push('/user/tasks')
         }, 3000)
       } else {
-        ElMessage.error(t('user.apply.submitFailed'))
+        // 显示后端返回的具体错误信息
+        ElMessage.error(error.message || t('user.apply.submitFailed'))
         // 提交失败时重置提交状态
         submitting.value = false
       }
