@@ -174,8 +174,8 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 
 		// 兑换码管理
 		AdminGroup.GET("/redemption-codes", admin.GetRedemptionCodes)
-		AdminGroup.POST("/redemption-codes", admin.CreateRedemptionCode)
-		AdminGroup.POST("/redemption-codes/generate", admin.GenerateRedemptionCodes)
+		AdminGroup.POST("/redemption-codes", admin.CreateRedemptionCodeFixed)
+		AdminGroup.POST("/redemption-codes/generate", admin.GenerateRedemptionCodesFixed)
 		AdminGroup.DELETE("/redemption-codes/:id", admin.DeleteRedemptionCode)
 		AdminGroup.GET("/redemption-codes/:id/usages", admin.GetRedemptionCodeUsages)
 		AdminGroup.PUT("/redemption-codes/:id/toggle", admin.ToggleRedemptionCode)
@@ -193,6 +193,7 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.DELETE("/orders/:id", admin.DeleteOrder)
 		AdminGroup.POST("/orders/:id/cancel", admin.CancelOrder)
 		AdminGroup.POST("/orders/:id/refund", admin.RefundOrder)
+		AdminGroup.POST("/orders/batch-delete", admin.BatchDeleteUnpaidOrders)
 
 		// 代理商管理
 		AdminGroup.GET("/agents", admin.GetAgentList)

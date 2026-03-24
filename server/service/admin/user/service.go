@@ -127,17 +127,19 @@ func (s *Service) CreateUser(req admin.CreateUserRequest) error {
 	}
 
 	user := userModel.User{
-		Username:   req.Username,
-		Password:   string(hashedPassword),
-		Nickname:   req.Nickname,
-		Email:      req.Email,
-		Phone:      req.Phone,
-		Telegram:   req.Telegram,
-		QQ:         req.QQ,
-		UserType:   req.UserType,
-		Level:      req.Level,
-		TotalQuota: req.TotalQuota,
-		Status:     req.Status,
+		Username:      req.Username,
+		Password:      string(hashedPassword),
+		Nickname:      req.Nickname,
+		Email:         req.Email,
+		Phone:         req.Phone,
+		Telegram:      req.Telegram,
+		QQ:            req.QQ,
+		UserType:      req.UserType,
+		Level:         req.Level,
+		AgentLevel:    req.AgentLevel,
+		EmailVerified: req.EmailVerified,
+		TotalQuota:    req.TotalQuota,
+		Status:        req.Status,
 	}
 
 	// 使用数据库抽象层创建
@@ -242,6 +244,14 @@ func (s *Service) UpdateUser(req admin.UpdateUserRequest, currentUserID uint) er
 	}
 	if req.Status >= 0 {
 		user.Status = req.Status
+	}
+	// 更新代理商级别
+	if req.AgentLevel >= 0 {
+		user.AgentLevel = req.AgentLevel
+	}
+	// 更新邮箱激活状态
+	if req.EmailVerified != nil {
+		user.EmailVerified = *req.EmailVerified
 	}
 
 	// 处理角色相关的用户类型更新

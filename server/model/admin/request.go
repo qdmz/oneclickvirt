@@ -3,34 +3,38 @@ package admin
 import "oneclickvirt/model/common"
 
 type CreateUserRequest struct {
-	Username   string `json:"username" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-	Nickname   string `json:"nickname"`
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
-	Telegram   string `json:"telegram"`
-	QQ         string `json:"qq"`
-	UserType   string `json:"userType" binding:"required"`
-	Level      int    `json:"level"`
-	TotalQuota int    `json:"totalQuota"`
-	Status     int    `json:"status"`
-	RoleID     uint   `json:"roleId"`
+	Username      string `json:"username" binding:"required"`
+	Password      string `json:"password" binding:"required"`
+	Nickname      string `json:"nickname"`
+	Email         string `json:"email"`
+	Phone         string `json:"phone"`
+	Telegram      string `json:"telegram"`
+	QQ            string `json:"qq"`
+	UserType      string `json:"userType" binding:"required"`
+	Level         int    `json:"level"`
+	AgentLevel    int    `json:"agentLevel"`
+	EmailVerified bool   `json:"emailVerified"`
+	TotalQuota    int    `json:"totalQuota"`
+	Status        int    `json:"status"`
+	RoleID        uint   `json:"roleId"`
 }
 
 type UpdateUserRequest struct {
-	ID         uint   `json:"id" binding:"required"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	Nickname   string `json:"nickname"`
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
-	Telegram   string `json:"telegram"`
-	QQ         string `json:"qq"`
-	UserType   string `json:"userType"`
-	Level      int    `json:"level"`
-	TotalQuota int    `json:"totalQuota"`
-	Status     int    `json:"status"`
-	RoleID     uint   `json:"roleId"`
+	ID            uint   `json:"id" binding:"required"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	Nickname      string `json:"nickname"`
+	Email         string `json:"email"`
+	Phone         string `json:"phone"`
+	Telegram      string `json:"telegram"`
+	QQ            string `json:"qq"`
+	UserType      string `json:"userType"`
+	Level         int    `json:"level"`
+	AgentLevel    int    `json:"agentLevel"`
+	EmailVerified *bool  `json:"emailVerified"`
+	TotalQuota    int    `json:"totalQuota"`
+	Status        int    `json:"status"`
+	RoleID        uint   `json:"roleId"`
 }
 
 type UserListRequest struct {

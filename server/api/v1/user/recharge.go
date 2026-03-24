@@ -53,6 +53,12 @@ func CreateRechargeOrder(c *gin.Context) {
 		return
 	}
 
+	// 前端已经将金额转换为分，不需要再转换
+	global.APP_LOG.Info("收到充值金额",
+		zap.Int64("userId", userID.(uint)),
+		zap.Int64("amount", params.Amount),
+	)
+
 	// 验证支付方式
 	if params.PaymentMethod != orderModel.PaymentMethodAlipay &&
 		params.PaymentMethod != orderModel.PaymentMethodWechat &&

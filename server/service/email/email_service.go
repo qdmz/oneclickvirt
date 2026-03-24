@@ -1,10 +1,13 @@
 package email
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/smtp"
+	"net"
 
 	"oneclickvirt/global"
+	"go.uber.org/zap"
 )
 
 // EmailService 邮件服务
@@ -22,20 +25,91 @@ func (s *EmailService) sendEmail(to, subject, htmlBody string) error {
 		return fmt.Errorf("邮件服务未配置")
 	}
 
+	if config.EmailUsername == "" || config.EmailPassword == "" {
+		return fmt.Errorf("邮件服务用户名或密码未配置")
+	}
+
 	auth := smtp.PlainAuth("", config.EmailUsername, config.EmailPassword, config.EmailSMTPHost)
 	msg := "To: " + to + "\r\n" +
+		"From: " + config.EmailUsername + "\r\n" +
 		"Subject: " + subject + "\r\n" +
 		"Content-Type: text/html; charset=UTF-8\r\n" +
+		"MIME-Version: 1.0\r\n" +
 		"\r\n" +
 		htmlBody
 
-	return smtp.SendMail(
-		fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort),
-		auth,
-		config.EmailUsername,
-		[]string{to},
-		[]byte(msg),
-	)
+	// 处理安全连接
+	addr := fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort)
+	
+	// 建立连接
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		global.APP_LOG.Error("连接邮件服务器失败", zap.Error(err), zap.String("addr", addr))
+		return fmt.Errorf("连接邮件服务器失败: %v", err)
+	}
+	defer conn.Close()
+
+	// 创建SMTP客户端
+	client, err := smtp.NewClient(conn, config.EmailSMTPHost)
+	if err != nil {
+		global.APP_LOG.Error("创建SMTP客户端失败", zap.Error(err), zap.String("host", config.EmailSMTPHost))
+		return fmt.Errorf("创建SMTP客户端失败: %v", err)
+	}
+	defer client.Close()
+
+	// 启用TLS
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         config.EmailSMTPHost,
+	}
+	if err := client.StartTLS(tlsConfig); err != nil {
+		global.APP_LOG.Error("启用TLS失败", zap.Error(err))
+		return fmt.Errorf("启用TLS失败: %v", err)
+	}
+
+	// 认证
+	if err := client.Auth(auth); err != nil {
+		global.APP_LOG.Error("邮件服务器认证失败", zap.Error(err), zap.String("username", config.EmailUsername))
+		return fmt.Errorf("邮件服务器认证失败: %v", err)
+	}
+
+	// 设置发件人
+	if err := client.Mail(config.EmailUsername); err != nil {
+		global.APP_LOG.Error("设置发件人失败", zap.Error(err), zap.String("from", config.EmailUsername))
+		return fmt.Errorf("设置发件人失败: %v", err)
+	}
+
+	// 设置收件人
+	if err := client.Rcpt(to); err != nil {
+		global.APP_LOG.Error("设置收件人失败", zap.Error(err), zap.String("to", to))
+		return fmt.Errorf("设置收件人失败: %v", err)
+	}
+
+	// 发送邮件内容
+	w, err := client.Data()
+	if err != nil {
+		global.APP_LOG.Error("准备发送数据失败", zap.Error(err))
+		return fmt.Errorf("准备发送数据失败: %v", err)
+	}
+
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		global.APP_LOG.Error("写入邮件数据失败", zap.Error(err))
+		return fmt.Errorf("写入邮件数据失败: %v", err)
+	}
+
+	if err := w.Close(); err != nil {
+		global.APP_LOG.Error("关闭写入流失败", zap.Error(err))
+		return fmt.Errorf("关闭写入流失败: %v", err)
+	}
+
+	if err := client.Quit(); err != nil {
+		global.APP_LOG.Error("关闭SMTP连接失败", zap.Error(err))
+		return fmt.Errorf("关闭SMTP连接失败: %v", err)
+	}
+
+	global.APP_LOG.Info("邮件发送成功", zap.String("to", to), zap.String("subject", subject))
+	return nil
 }
 
 // SendVerificationCode 发送注册验证码

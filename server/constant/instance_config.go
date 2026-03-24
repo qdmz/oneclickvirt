@@ -3,6 +3,8 @@ package constant
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"strconv"
 )
 
 // 硬编码的实例配置选项，确保安全性
@@ -358,40 +360,111 @@ func initBandwidthSpecs() {
 
 // GetCPUSpecByID 根据ID获取CPU规格配置
 func GetCPUSpecByID(id string) (*CPUSpec, error) {
+	// 首先尝试直接匹配完整ID
 	for _, config := range PredefinedCPUSpecs {
 		if config.ID == id {
 			return &config, nil
 		}
 	}
+	
+	// 尝试从数字ID转换（处理可能的不同格式）
+	if strings.HasPrefix(id, "cpu-") {
+		// 提取数字部分
+		coreStr := strings.TrimPrefix(id, "cpu-")
+		cores, err := strconv.Atoi(coreStr)
+		if err == nil {
+			// 查找匹配的CPU规格
+			for _, config := range PredefinedCPUSpecs {
+				if config.Cores == cores {
+					return &config, nil
+				}
+			}
+		}
+	}
+	
 	return nil, errors.New("CPU规格配置未找到")
 }
 
 // GetMemorySpecByID 根据ID获取内存规格配置
 func GetMemorySpecByID(id string) (*MemorySpec, error) {
+	// 首先尝试直接匹配完整ID
 	for _, config := range PredefinedMemorySpecs {
 		if config.ID == id {
 			return &config, nil
 		}
 	}
+	
+	// 尝试从数字ID转换（处理可能的不同格式）
+	if strings.HasPrefix(id, "mem-") {
+		// 提取数字部分
+		sizeStr := strings.TrimPrefix(id, "mem-")
+		sizeStr = strings.TrimSuffix(sizeStr, "mb")
+		sizeMB, err := strconv.Atoi(sizeStr)
+		if err == nil {
+			// 查找匹配的内存规格
+			for _, config := range PredefinedMemorySpecs {
+				if config.SizeMB == sizeMB {
+					return &config, nil
+				}
+			}
+		}
+	}
+	
 	return nil, errors.New("内存规格配置未找到")
 }
 
 // GetDiskSpecByID 根据ID获取磁盘规格配置
 func GetDiskSpecByID(id string) (*DiskSpec, error) {
+	// 首先尝试直接匹配完整ID
 	for _, config := range PredefinedDiskSpecs {
 		if config.ID == id {
 			return &config, nil
 		}
 	}
+	
+	// 尝试从数字ID转换（处理可能的不同格式）
+	if strings.HasPrefix(id, "disk-") {
+		// 提取数字部分
+		sizeStr := strings.TrimPrefix(id, "disk-")
+		sizeStr = strings.TrimSuffix(sizeStr, "mb")
+		sizeMB, err := strconv.Atoi(sizeStr)
+		if err == nil {
+			// 查找匹配的磁盘规格
+			for _, config := range PredefinedDiskSpecs {
+				if config.SizeMB == sizeMB {
+					return &config, nil
+				}
+			}
+		}
+	}
+	
 	return nil, errors.New("磁盘规格配置未找到")
 }
 
 // GetBandwidthSpecByID 根据ID获取带宽规格配置
 func GetBandwidthSpecByID(id string) (*BandwidthSpec, error) {
+	// 首先尝试直接匹配完整ID
 	for _, config := range PredefinedBandwidthSpecs {
 		if config.ID == id {
 			return &config, nil
 		}
 	}
+	
+	// 尝试从数字ID转换（处理可能的不同格式）
+	if strings.HasPrefix(id, "bw-") {
+		// 提取数字部分
+		speedStr := strings.TrimPrefix(id, "bw-")
+		speedStr = strings.TrimSuffix(speedStr, "mbps")
+		speedMbps, err := strconv.Atoi(speedStr)
+		if err == nil {
+			// 查找匹配的带宽规格
+			for _, config := range PredefinedBandwidthSpecs {
+				if config.SpeedMbps == speedMbps {
+					return &config, nil
+				}
+			}
+		}
+	}
+	
 	return nil, errors.New("带宽规格配置未找到")
 }

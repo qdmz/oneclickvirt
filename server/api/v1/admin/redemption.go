@@ -63,9 +63,19 @@ func GetRedemptionCodes(c *gin.Context) {
 func CreateRedemptionCode(c *gin.Context) {
 	var code redemptionModel.RedemptionCode
 	if err := c.ShouldBindJSON(&code); err != nil {
-		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
+		global.APP_LOG.Error("解析兑换码参数失败", zap.Error(err))
+		c.JSON(400, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
 		return
 	}
+
+	// 记录接收到的参数（用于调试）
+	global.APP_LOG.Info("创建兑换码参数",
+		zap.String("code", code.Code),
+		zap.String("type", code.Type),
+		zap.Int64("amount", code.Amount),
+		zap.Any("productId", code.ProductID),
+		zap.Int("maxUses", code.MaxUses),
+	)
 
 	// 生成兑换码(如果为空)
 	if code.Code == "" {
@@ -78,9 +88,15 @@ func CreateRedemptionCode(c *gin.Context) {
 		return
 	}
 
+	// 如果是产品类型，必须有产品ID
+	if code.Type == redemptionModel.RedemptionTypeProduct && code.ProductID == nil {
+		c.JSON(400, gin.H{"code": 400, "message": "产品类型必须指定产品ID"})
+		return
+	}
+
 	if err := global.APP_DB.Create(&code).Error; err != nil {
 		global.APP_LOG.Error("创建兑换码失败", zap.Error(err))
-		c.JSON(500, gin.H{"code": 500, "message": "创建兑换码失败"})
+		c.JSON(500, gin.H{"code": 500, "message": "创建兑换码失败: " + err.Error()})
 		return
 	}
 
@@ -111,25 +127,35 @@ func GenerateRedemptionCodes(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&params); err != nil {
-		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
+		global.APP_LOG.Error("解析批量生成参数失败", zap.Error(err))
+		c.JSON(400, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
 		return
 	}
+
+	global.APP_LOG.Info("批量生成兑换码参数",
+		zap.Int("count", params.Count),
+		zap.String("type", params.Type),
+		zap.Int64("amount", params.Amount),
+		zap.Int("maxUses", params.MaxUses),
+	)
 
 	if params.Count <= 0 || params.Count > 1000 {
 		c.JSON(400, gin.H{"code": 400, "message": "生成数量必须在1-1000之间"})
 		return
 	}
 
+
+
 	// 生成兑换码
 	codes := make([]redemptionModel.RedemptionCode, params.Count)
 	for i := 0; i < params.Count; i++ {
 		codes[i] = redemptionModel.RedemptionCode{
-			Code:     generateRedemptionCode(),
-			Type:     params.Type,
-			Amount:   params.Amount,
-			MaxUses:  params.MaxUses,
-			ExpireAt: params.ExpireAt,
-			Remark:   params.Remark,
+			Code:      generateRedemptionCode(),
+			Type:      params.Type,
+			Amount:    params.Amount,
+			MaxUses:   params.MaxUses,
+			ExpireAt:  params.ExpireAt,
+			Remark:    params.Remark,
 			IsEnabled: true,
 		}
 		if params.MaxUses == 0 {
@@ -137,9 +163,11 @@ func GenerateRedemptionCodes(c *gin.Context) {
 		}
 	}
 
+	global.APP_LOG.Info("开始批量创建兑换码", zap.Int("count", params.Count))
+
 	if err := global.APP_DB.CreateInBatches(&codes, 100).Error; err != nil {
 		global.APP_LOG.Error("批量生成兑换码失败", zap.Error(err))
-		c.JSON(500, gin.H{"code": 500, "message": "批量生成兑换码失败"})
+		c.JSON(500, gin.H{"code": 500, "message": "批量生成兑换码失败: " + err.Error()})
 		return
 	}
 

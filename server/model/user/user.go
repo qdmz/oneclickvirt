@@ -28,9 +28,10 @@ type User struct {
 
 	// 状态和权限
 	Status        int       `json:"status" gorm:"default:1;index:idx_status"` // 用户状态：0=禁用（不可登录），1=正常
-	Level         int        `json:"level" gorm:"default:1;index:idx_level"`   // 用户等级，用于权限控制
+	Level         int       `json:"level" gorm:"default:1;index:idx_level"`   // 用户等级，用于权限控制
 	LevelExpireAt *time.Time `json:"levelExpireAt"`                        // 用户等级过期时间
 	UserType      string     `json:"userType" gorm:"default:user;size:16"`     // 用户类型：user, admin, super_admin等
+	AgentLevel    int        `json:"agentLevel" gorm:"default:0;comment:代理商级别: 0-普通用户, 1-一级代理商, 2-二级代理商, 3-三级代理商"` // 代理商级别
 
 	// 配额管理（传统系统兼容字段）
 	UsedQuota  int `json:"usedQuota" gorm:"default:0"`  // 已使用配额
