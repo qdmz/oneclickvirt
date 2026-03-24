@@ -537,7 +537,7 @@ const submitAddServer = async (formData) => {
     const serverData = {
       name: formData.name,
       type: formData.type,
-      endpoint: formData.host,
+      endpoint: formData.host.split(':')[0],
       portIP: formData.portIP,
       sshPort: formData.port,
       username: formData.username,

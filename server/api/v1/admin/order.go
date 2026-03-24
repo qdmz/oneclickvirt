@@ -4,6 +4,7 @@ import (
 	"oneclickvirt/global"
 	orderModel "oneclickvirt/model/order"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -255,3 +256,54 @@ func RefundOrder(c *gin.Context) {
 		"message": "退款成功",
 	})
 }
+
+// BatchDeleteUnpaidOrders 批量删除未支付订单
+// @Summary 批量删除未支付订单
+// @Description 管理员批量删除未支付订单
+// @Tags 管理员/订单管理
+// @Accept json
+// @Produce json
+// @Param request body object true "删除参数"
+// @Success 200 {object} common.Response
+// @Router /v1/admin/orders/batch-delete [post]
+func BatchDeleteUnpaidOrders(c *gin.Context) {
+	var req struct {
+		Days int `json:"days"` // 删除多少天前的未支付订单
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	if req.Days <= 0 {
+		req.Days = 30 // 默认30天
+	}
+
+	// 计算截止日期
+	cutoffDate := time.Now().AddDate(0, 0, -req.Days)
+
+	// 删除未支付且已过期的订单
+	result := global.APP_DB.Where("status = ?", orderModel.OrderStatusPending).
+		Where("expire_at < ?", cutoffDate).
+		Delete(&orderModel.Order{})
+
+	if result.Error != nil {
+		global.APP_LOG.Error("批量删除未支付订单失败", zap.Error(result.Error))
+		c.JSON(500, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+
+	global.APP_LOG.Info("批量删除未支付订单成功",
+		zap.Int64("count", result.RowsAffected),
+		zap.Int("days", req.Days),
+	)
+
+	c.JSON(200, gin.H{
+		"code": 200,
+		"message": "删除成功",
+		"data": gin.H{
+			"count": result.RowsAffected,
+		},
+	})
+}
+

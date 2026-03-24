@@ -466,6 +466,49 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="代理商级别"
+              prop="agentLevel"
+            >
+              <el-select
+                v-model="addUserForm.agentLevel"
+                style="width: 100%"
+              >
+                <el-option
+                  label="普通用户"
+                  :value="0"
+                />
+                <el-option
+                  label="一级代理商"
+                  :value="1"
+                />
+                <el-option
+                  label="二级代理商"
+                  :value="2"
+                />
+                <el-option
+                  label="三级代理商"
+                  :value="3"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="邮箱激活状态"
+              prop="emailVerified"
+            >
+              <el-switch
+                v-model="addUserForm.emailVerified"
+                active-text="已激活"
+                inactive-text="未激活"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       
@@ -652,6 +695,8 @@ const addUserForm = reactive({
   phone: '',
   userType: 'user',
   level: 1,
+  agentLevel: 0,
+  emailVerified: false,
   totalQuota: 0,
   status: 1
 })
@@ -932,6 +977,8 @@ const editUser = (user) => {
     phone: user.phone || '',
     userType: user.userType || 'user',
     level: user.level || 1,
+    agentLevel: user.agentLevel || 0,
+    emailVerified: user.emailVerified || false,
     totalQuota: user.totalQuota || 0,
     status: user.status,
     password: '',
@@ -956,6 +1003,8 @@ const cancelAddUser = () => {
     phone: '',
     userType: 'user',
     level: 1,
+    agentLevel: 0,
+    emailVerified: false,
     totalQuota: 0,
     status: 1
   })

@@ -5,6 +5,12 @@
         <div class="card-header">
           <span>订单管理</span>
           <div class="header-actions">
+            <el-button
+              type="danger"
+              @click="handleBatchDeleteUnpaid"
+            >
+              批量删除未支付订单
+            </el-button>
             <el-select
               v-model="searchForm.status"
               placeholder="订单状态"
@@ -302,7 +308,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getOrders, getOrder, deleteOrder, cancelOrder, refundOrder } from '@/api/admin'
+import { getOrders, getOrder, deleteOrder, cancelOrder, refundOrder, batchDeleteUnpaidOrders } from '@/api/admin'
 
 const loading = ref(false)
 const page = ref(1)
@@ -535,6 +541,28 @@ const handleSizeChange = (val) => {
 const handleCurrentChange = (val) => {
   page.value = val
   loadOrders()
+}
+
+// 批量删除未支付订单
+const handleBatchDeleteUnpaid = () => {
+  ElMessageBox.confirm('确定要批量删除未支付订单吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      const res = await batchDeleteUnpaidOrders({ days: 30 })
+      if (res.code === 200) {
+        ElMessage.success(`成功删除${res.data.count}个未支付订单`)
+        loadOrders()
+      } else {
+        ElMessage.error(res.message || '删除失败')
+      }
+    } catch (error) {
+      console.error('批量删除未支付订单失败:', error)
+      ElMessage.error('删除失败')
+    }
+  })
 }
 
 onMounted(() => {

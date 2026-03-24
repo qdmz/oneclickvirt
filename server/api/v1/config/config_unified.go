@@ -334,6 +334,10 @@ func getAdminConfig(cm *config.ConfigManager) map[string]interface{} {
 		"mapayKey":       global.APP_CONFIG.Payment.MapayKey,
 		"mapayReturnURL": global.APP_CONFIG.Payment.MapayReturnURL,
 		"mapayNotifyURL": global.APP_CONFIG.Payment.MapayNotifyURL,
+		// 实名认证配置
+		"enableRealName":      global.APP_CONFIG.Payment.EnableRealName,
+		"requireRealName":     global.APP_CONFIG.Payment.RequireRealName,
+		"realNameCallbackURL": global.APP_CONFIG.Payment.RealNameCallbackURL,
 	}
 
 	return result
