@@ -119,7 +119,7 @@ export const useUserStore = defineStore('user', {
           console.log('API返回的数据结构:', response.data)
           
           // 从 response.data.user 中获取用户类型，如果不存在则使用当前类型
-          const userType = response.data.user?.userType || response.data.userType || currentUserType
+          const userType = response.data.user?.userType || currentUserType
           console.log('解析到的用户类型:', userType)
           
           // 合并用户信息，确保包含 userType
@@ -164,7 +164,7 @@ export const useUserStore = defineStore('user', {
         const response = await getUserInfo()
         if (response.code === 0 || response.code === 200) {
           // 检查用户状态是否发生变化
-          const newUserType = response.data.user?.userType || response.data.userType || 'user'
+          const newUserType = response.data.user?.userType || 'user'
           if (newUserType !== this.userType) {
             console.log('用户权限发生变化:', this.userType, '->', newUserType)
             this.setUser({ ...response.data.user, userType: newUserType })

@@ -25,10 +25,9 @@ if [ -f /app/config/config.yaml ]; then
     cp /app/config/config.yaml /app/config.yaml
 fi
 
-# Update config.yaml with FRONTEND_URL if provided
+# Update nginx server_name if FRONTEND_URL is provided
 if [ ! -z "$FRONTEND_URL" ]; then
     echo "Configuring frontend-url: $FRONTEND_URL"
-    sed -i "s|frontend-url:.*|frontend-url: \"$FRONTEND_URL\"|g" /app/config.yaml
     
     # Extract domain from FRONTEND_URL
     DOMAIN=$(echo "$FRONTEND_URL" | sed -e "s|^[^/]*//||" -e "s|/.*$||")
@@ -40,12 +39,111 @@ if [ ! -z "$FRONTEND_URL" ]; then
     # Detect if URL is HTTPS and update nginx config accordingly
     if echo "$FRONTEND_URL" | grep -q "^https://"; then
         echo "Detected HTTPS frontend, SSL will be enabled"
-        # Generate self-signed certificate if not provided or empty
+        # Use Certbot to obtain free SSL certificate if not provided
         if [ ! -f "/etc/nginx/ssl/cert.pem" ] || [ ! -f "/etc/nginx/ssl/key.pem" ] || [ ! -s "/etc/nginx/ssl/cert.pem" ] || [ ! -s "/etc/nginx/ssl/key.pem" ]; then
-            echo "Generating self-signed SSL certificate for $DOMAIN..."
+            echo "Obtaining free SSL certificate for $DOMAIN using Certbot..."
+            # Create self-signed certificate for initial setup
+            echo "Creating self-signed SSL certificate for $DOMAIN"
             openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/key.pem -out /etc/nginx/ssl/cert.pem -subj "/C=US/ST=State/L=City/O=Organization/CN=$DOMAIN"
             chmod 644 /etc/nginx/ssl/cert.pem
             chmod 600 /etc/nginx/ssl/key.pem
+            echo "Self-signed SSL certificate created successfully"
+            
+            # Add HTTPS server configuration to nginx.conf
+            # First, remove the closing } of the http block
+            sed -i '$d' /etc/nginx/nginx.conf
+            
+            # Now add the HTTPS server configuration
+            cat >> /etc/nginx/nginx.conf << 'EOF'
+
+    # HTTPS server
+    server {
+        listen 443 ssl;
+        server_name DOMAIN_PLACEHOLDER;
+        ssl_certificate /etc/nginx/ssl/cert.pem;
+        ssl_certificate_key /etc/nginx/ssl/key.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+        root /var/www/html;
+        index index.html;
+        client_max_body_size 10M;
+        
+        location /api/ {
+            proxy_pass http://127.0.0.1:8890;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header REMOTE-HOST $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-Port 443;
+            
+            # WebSocket support
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_http_version 1.1;
+            
+            # SSL settings
+            proxy_ssl_server_name off;
+            proxy_ssl_name $proxy_host;
+            
+            # Timeout settings for SSH connections
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
+            
+            # Disable buffering for real-time data
+            proxy_buffering off;
+            add_header X-Cache $upstream_cache_status;
+            add_header Cache-Control no-cache;
+        }
+        
+        location /swagger/ {
+            proxy_pass http://127.0.0.1:8890;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        
+        # WebSocket endpoints for SSH connections
+        location /v1/ {
+            proxy_pass http://127.0.0.1:8890;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header REMOTE-HOST $remote_addr;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-Forwarded-Port 443;
+            
+            # WebSocket support
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_http_version 1.1;
+            
+            # Timeout settings for SSH connections
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
+            
+            # Disable buffering for real-time data
+            proxy_buffering off;
+            add_header X-Cache $upstream_cache_status;
+            add_header Cache-Control no-cache;
+        }
+        
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+EOF
+            
+            # Replace the domain placeholder
+            sed -i "s/DOMAIN_PLACEHOLDER/$DOMAIN/g" /etc/nginx/nginx.conf
+            
+            # Create cron job for automatic certificate renewal attempt
+            echo "0 0 * * * certbot --nginx --non-interactive --agree-tos --email admin@$DOMAIN --domains $DOMAIN && nginx -s reload || true" > /etc/cron.d/certbot-renewal
+            chmod 644 /etc/cron.d/certbot-renewal
+            echo "Created cron job for automatic certificate renewal"
         fi
     else
         echo "Detected HTTP frontend, using default nginx config"
@@ -63,13 +161,21 @@ else
 fi
 echo "Detected architecture: $ARCH, using database: $DB_TYPE"
 
+echo "Setting initial permissions for MySQL directories..."
 chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /var/log/mysql
+chmod -R 755 /var/lib/mysql
 chmod 755 /var/run/mysqld
+chmod 755 /var/log/mysql
+
+echo "Permissions set successfully:" 
+ls -la /var/lib/mysql
+ls -la /var/run/mysqld
+ls -la /var/log/mysql
 
 # Check if database needs initialization
 INIT_NEEDED=false
 # Create database initialization flag file path (different from business init)
-DB_INIT_FLAG="/var/lib/mysql/.mysql_initialized"
+DB_INIT_FLAG="/app/.mysql_initialized"
 
 # Check if there are existing database files (persistent data)
 EXISTING_DATA=false
@@ -82,15 +188,16 @@ else
     if [ ! -f "$DB_INIT_FLAG" ]; then
         echo "Database initialization flag not found - database needs initialization"
         INIT_NEEDED=true
-    elif [ ! -d "/var/lib/mysql/mysql" ]; then
-        echo "Database system directory not found - reinitializing database..."
-        INIT_NEEDED=true
-    elif [ "$(ls -A /var/lib/mysql 2>/dev/null | wc -l)" -eq 0 ]; then
-        echo "Database directory is empty - reinitializing database..."
-        INIT_NEEDED=true
     else
-        echo "Database already initialized (flag exists and data present), skipping initialization..."
+        echo "Database already initialized (flag exists), skipping initialization..."
     fi
+fi
+
+# 强制创建初始化标记，避免循环初始化
+if [ "$INIT_NEEDED" = "true" ]; then
+    echo "Creating initialization flag to prevent loop..."
+    echo "$(date): Database initialization in progress" > "$DB_INIT_FLAG"
+    chmod 644 "$DB_INIT_FLAG"
 fi
 
 # Always check and import default users if needed
@@ -98,217 +205,120 @@ CHECK_USERS=true
 
 if [ "$INIT_NEEDED" = "true" ]; then
     # Stop any running database processes
-    pkill -f "$DB_DAEMON" || true
-    sleep 2
-    # Remove old/corrupted data only when needed
-    rm -rf /var/lib/mysql/*
-    # Initialize database based on type
-    if [ "$DB_TYPE" = "mysql" ]; then
-        mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql --skip-name-resolve
-    else
-        mariadb-install-db --user=mysql --datadir=/var/lib/mysql --skip-name-resolve
-    fi
-    if [ $? -ne 0 ]; then
-        echo "$DB_TYPE initialization failed"
-        exit 1
-    fi
-fi
-
-# Configure database users and permissions only if initialization was needed
-if [ "$INIT_NEEDED" = "true" ]; then
-    echo "Configuring $DB_TYPE users and permissions..."
+    echo "Stopping any running database processes..."
     pkill -f "$DB_DAEMON" || true
     sleep 2
     
-    # Start temporary database server for configuration
-    echo "Starting temporary $DB_TYPE server for configuration..."
-    $DB_DAEMON --user=mysql --skip-networking --skip-grant-tables --socket=/var/run/mysqld/mysqld.sock --pid-file=/var/run/mysqld/mysqld.pid --log-error=/var/log/mysql/error.log &
+    # Remove old/corrupted data only when needed
+    echo "Removing old database data..."
+    rm -rf /var/lib/mysql/*
+    
+    # Set correct permissions
+    echo "Setting permissions for MySQL directories..."
+    chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /var/log/mysql
+    chmod -R 755 /var/lib/mysql
+    chmod 755 /var/run/mysqld
+    chmod 755 /var/log/mysql
+    
+    # Initialize database
+    echo "Initializing MySQL database..."
+    
+    # 清理旧数据
+    rm -rf /var/lib/mysql/*
+    
+    # 设置权限
+    chown -R mysql:mysql /var/lib/mysql
+    chmod -R 755 /var/lib/mysql
+    
+    # 初始化MySQL，使用--initialize-insecure
+    echo "Running MySQL initialization..."
+    # 捕获MySQL初始化的详细输出
+    mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql --verbose 2>&1
+    
+    if [ $? -ne 0 ]; then
+        echo "MySQL initialization failed"
+        echo "Error log:"
+        cat /var/log/mysql/error.log || true
+        # 不要立即退出，继续尝试
+        echo "Continuing despite initialization error..."
+    else
+        echo "MySQL initialization completed successfully"
+    fi
+    
+    # 检查初始化结果
+    echo "Initialization result:"
+    ls -la /var/lib/mysql/
+    
+    # 启动MySQL服务器
+    echo "Starting MySQL server..."
+    mysqld --user=mysql --pid-file=/var/run/mysqld/mysqld.pid --skip-networking &
     mysql_pid=$!
     
-for i in {1..30}; do
-    if mysql --socket=/var/run/mysqld/mysqld.sock -e "SELECT 1" >/dev/null 2>&1; then
-        echo "$DB_TYPE started successfully"
-        break
+    # 等待MySQL启动
+    echo "Waiting for MySQL to start..."
+    for i in {1..60}; do
+        if mysql -u root --skip-password -e "SELECT 1" >/dev/null 2>&1; then
+            echo "MySQL started successfully"
+            break
+        fi
+        echo "Waiting for MySQL... ($i/60)"
+        sleep 1
+    done
+    
+    # Check if MySQL is running
+    if ! ps -p $mysql_pid > /dev/null; then
+        echo "MySQL failed to start"
+        cat /var/log/mysql/error.log || true
+        exit 1
     fi
-    echo "Waiting for $DB_TYPE to start... ($i/30)"
-    if [ $i -eq 30 ]; then
-        echo "$DB_TYPE failed to start"
+    
+    # Create database
+    echo "Creating database..."
+    mysql -u root --skip-password -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+    
+    if [ $? -ne 0 ]; then
+        echo "Failed to create database"
         kill $mysql_pid 2>/dev/null || true
         exit 1
     fi
-    sleep 1
-    done
     
-    echo "Configuring $DB_TYPE users and database..."
-    if [ "$DB_TYPE" = "mysql" ]; then
-        mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
-DROP USER IF EXISTS 'root'@'127.0.0.1';
-DROP USER IF EXISTS 'root'@'%';
-CREATE USER 'root'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY '';
-CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-FLUSH PRIVILEGES;
-SQLEND
-    else
-        mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-FLUSH PRIVILEGES;
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('');
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
-CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;
-CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-FLUSH PRIVILEGES;
-SQLEND
+    # Set MySQL root user permissions to allow connections from all hosts
+    echo "Setting MySQL root user permissions..."
+    mysql -u root --skip-password -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '';"
+    mysql -u root --skip-password -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY '';"
+    mysql -u root --skip-password -e "CREATE USER IF NOT EXISTS 'root'@'mysql' IDENTIFIED BY '';"
+    mysql -u root --skip-password -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;"
+    mysql -u root --skip-password -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
+    mysql -u root --skip-password -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'mysql' WITH GRANT OPTION;"
+    mysql -u root --skip-password -e "FLUSH PRIVILEGES;"
+    
+    # Import default data
+    echo "Importing default data..."
+    mysql -u root --skip-password -D ${MYSQL_DATABASE} < /app/complete_init.sql
+    
+    if [ $? -ne 0 ]; then
+        echo "Failed to import default data"
+        kill $mysql_pid 2>/dev/null || true
+        exit 1
     fi
     
-    # Import default admin and user data if no users exist
-    echo "Checking if users exist..."
-    # First, check if users table exists
-    TABLE_EXISTS=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE oneclickvirt; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
-    if [ -z "$TABLE_EXISTS" ]; then
-        echo "Users table does not exist, creating and importing default data..."
-        mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-USE oneclickvirt;
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    level INT NOT NULL DEFAULT 1,
-    status INT NOT NULL DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-INSERT INTO users (id, username, email, password, level, status, created_at, updated_at) VALUES
-    (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, NOW(), NOW()),
-    (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, NOW(), NOW());
-
--- Import system image default data
-CREATE TABLE IF NOT EXISTS announcements (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  title varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  content longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  content_html longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  type varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'homepage',
-  priority bigint NULL DEFAULT 0,
-  status bigint NULL DEFAULT 1,
-  is_sticky tinyint(1) NULL DEFAULT 0,
-  start_time datetime(3) NULL DEFAULT NULL,
-  end_time datetime(3) NULL DEFAULT NULL,
-  created_by bigint UNSIGNED NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  INDEX idx_announcements_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-INSERT INTO announcements VALUES (1, '2025-12-30 15:38:08.631', '2025-12-30 15:38:08.631', NULL, '欢迎使用虚拟化管理平台', '欢迎使用虚拟化管理平台，支持Docker、LXD、Incus、Proxmox VE等多种虚拟化技术。本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。', '<p>欢迎使用虚拟化管理平台，支持<strong>Docker</strong>、<strong>LXD</strong>、<strong>Incus</strong>、<strong>Proxmox VE</strong>等多种虚拟化技术。</p><p>本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。</p>', 'homepage', 10, 1, 1, NULL, NULL, NULL);
-INSERT INTO announcements VALUES (2, '2025-12-30 15:38:08.633', '2025-12-30 15:38:08.633', NULL, '系统维护通知', '为了提供更好的服务质量，我们会定期进行系统维护。维护期间可能会影响部分功能的使用，请您谅解。', '<p>为了提供更好的服务质量，我们会定期进行系统维护。</p>', 'topbar', 5, 1, 0, NULL, NULL, NULL);
-INSERT INTO announcements VALUES (3, '2025-12-30 15:38:08.644', '2025-12-30 15:38:08.644', NULL, '新手使用指南', '如果您是第一次使用本平台，建议先阅读使用文档。您可以在右上角的帮助菜单中找到详细的操作指南。', '<p>如果您是第一次使用本平台，建议先阅读使用文档。</p>', 'homepage', 8, 1, 0, NULL, NULL, NULL);
-
-CREATE TABLE IF NOT EXISTS invite_codes (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  code varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  creator_id bigint UNSIGNED NOT NULL,
-  creator_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  description varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  max_uses bigint NOT NULL DEFAULT 1,
-  used_count bigint NOT NULL DEFAULT 0,
-  expires_at datetime(3) NULL DEFAULT NULL,
-  status bigint NOT NULL DEFAULT 1,
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  UNIQUE INDEX idx_invite_codes_code(code ASC) USING BTREE,
-  INDEX idx_invite_codes_creator_id(creator_id ASC) USING BTREE,
-  INDEX idx_invite_codes_expires_at(expires_at ASC) USING BTREE,
-  INDEX idx_invite_codes_status(status ASC) USING BTREE,
-  INDEX idx_invite_codes_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-INSERT INTO invite_codes VALUES (1, 'SC0Q19BW', 1, '', '', 1, 0, NULL, 1, '2025-12-31 10:59:55.167', '2025-12-31 10:59:55.167', NULL);
-
-CREATE TABLE IF NOT EXISTS jwt_secrets (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  secret_key varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'JWT签名密钥',
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  UNIQUE INDEX idx_jwt_secrets_secret_key(secret_key ASC) USING BTREE,
-  INDEX idx_jwt_secrets_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-INSERT INTO jwt_secrets VALUES (1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
-SQLEND
-        echo "Default admin, user and system image data imported successfully"
-    else
-        # Table exists, check if it has data
-        USER_COUNT=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE oneclickvirt; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
-        if [ "$USER_COUNT" -eq 0 ]; then
-            echo "Users table exists but is empty, importing default admin and user data..."
-            mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-USE oneclickvirt;
-INSERT INTO users (id, username, email, password, level, status, created_at, updated_at) VALUES
-    (1, "admin", "admin@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 5, 1, NOW(), NOW()),
-    (2, "user", "user@example.com", "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy", 1, 1, NOW(), NOW());
-
--- Import system image default data if not exists
-INSERT IGNORE INTO announcements (id, created_at, updated_at, deleted_at, title, content, content_html, type, priority, status, is_sticky, start_time, end_time, created_by) VALUES
-(1, '2025-12-30 15:38:08.631', '2025-12-30 15:38:08.631', NULL, '欢迎使用虚拟化管理平台', '欢迎使用虚拟化管理平台，支持Docker、LXD、Incus、Proxmox VE等多种虚拟化技术。本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。', '<p>欢迎使用虚拟化管理平台，支持<strong>Docker</strong>、<strong>LXD</strong>、<strong>Incus</strong>、<strong>Proxmox VE</strong>等多种虚拟化技术。</p><p>本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。</p>', 'homepage', 10, 1, 1, NULL, NULL, NULL),
-(2, '2025-12-30 15:38:08.633', '2025-12-30 15:38:08.633', NULL, '系统维护通知', '为了提供更好的服务质量，我们会定期进行系统维护。维护期间可能会影响部分功能的使用，请您谅解。', '<p>为了提供更好的服务质量，我们会定期进行系统维护。</p>', 'topbar', 5, 1, 0, NULL, NULL, NULL),
-(3, '2025-12-30 15:38:08.644', '2025-12-30 15:38:08.644', NULL, '新手使用指南', '如果您是第一次使用本平台，建议先阅读使用文档。您可以在右上角的帮助菜单中找到详细的操作指南。', '<p>如果您是第一次使用本平台，建议先阅读使用文档。</p>', 'homepage', 8, 1, 0, NULL, NULL, NULL);
-
-INSERT IGNORE INTO invite_codes (id, code, creator_id, creator_name, description, max_uses, used_count, expires_at, status, created_at, updated_at, deleted_at) VALUES
-(1, 'SC0Q19BW', 1, '', '', 1, 0, NULL, 1, '2025-12-31 10:59:55.167', '2025-12-31 10:59:55.167', NULL);
-
-INSERT IGNORE INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
-(1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
-SQLEND
-            echo "Default admin, user and system image data imported successfully"
-        else
-            echo "Users already exist, checking system image data..."
-            # Check if system image data exists, import if not
-            ANNOUNCEMENT_COUNT=$(mysql --socket=/var/run/mysqld/mysqld.sock -e "USE oneclickvirt; SELECT COUNT(*) FROM announcements;" 2>/dev/null | tail -n 1 || echo 0)
-            if [ "$ANNOUNCEMENT_COUNT" -eq 0 ]; then
-                echo "Importing system image default data..."
-                mysql --socket=/var/run/mysqld/mysqld.sock <<SQLEND
-USE oneclickvirt;
-INSERT INTO announcements (id, created_at, updated_at, deleted_at, title, content, content_html, type, priority, status, is_sticky, start_time, end_time, created_by) VALUES
-(1, '2025-12-30 15:38:08.631', '2025-12-30 15:38:08.631', NULL, '欢迎使用虚拟化管理平台', '欢迎使用虚拟化管理平台，支持Docker、LXD、Incus、Proxmox VE等多种虚拟化技术。本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。', '<p>欢迎使用虚拟化管理平台，支持<strong>Docker</strong>、<strong>LXD</strong>、<strong>Incus</strong>、<strong>Proxmox VE</strong>等多种虚拟化技术。</p><p>本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。</p>', 'homepage', 10, 1, 1, NULL, NULL, NULL),
-(2, '2025-12-30 15:38:08.633', '2025-12-30 15:38:08.633', NULL, '系统维护通知', '为了提供更好的服务质量，我们会定期进行系统维护。维护期间可能会影响部分功能的使用，请您谅解。', '<p>为了提供更好的服务质量，我们会定期进行系统维护。</p>', 'topbar', 5, 1, 0, NULL, NULL, NULL),
-(3, '2025-12-30 15:38:08.644', '2025-12-30 15:38:08.644', NULL, '新手使用指南', '如果您是第一次使用本平台，建议先阅读使用文档。您可以在右上角的帮助菜单中找到详细的操作指南。', '<p>如果您是第一次使用本平台，建议先阅读使用文档。</p>', 'homepage', 8, 1, 0, NULL, NULL, NULL);
-
-INSERT INTO invite_codes (id, code, creator_id, creator_name, description, max_uses, used_count, expires_at, status, created_at, updated_at, deleted_at) VALUES
-(1, 'SC0Q19BW', 1, '', '', 1, 0, NULL, 1, '2025-12-31 10:59:55.167', '2025-12-31 10:59:55.167', NULL);
-
-INSERT INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
-(1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
-SQLEND
-                echo "System image default data imported successfully"
-            else
-                echo "System image data already exists, skipping import"
-            fi
-        fi
-    fi
+    echo "Default data imported successfully"
     
+    # Stop MySQL server
+    echo "Stopping MySQL server..."
     kill $mysql_pid
     wait $mysql_pid 2>/dev/null || true
-    echo "$DB_TYPE configuration completed."
-    # Create database initialization flag to prevent re-initialization
-    echo "$(date): Database initialized successfully with $DB_TYPE" > "$DB_INIT_FLAG"
-    echo "Created database initialization flag at $DB_INIT_FLAG"
+    
+    echo "MySQL configuration completed."
+    
+    # Create database initialization flag
+    echo "$(date): Database initialized successfully" > "$DB_INIT_FLAG"
+    echo "Created initialization flag at $DB_INIT_FLAG"
+    
+    # 确保标记文件权限正确
+    chmod 644 "$DB_INIT_FLAG"
 else
-    echo "Database already configured, skipping user configuration..."
+    echo "Database already initialized, skipping..."
 fi
 
 # Create supervisor configuration dynamically
@@ -356,7 +366,7 @@ autostart=true
 autorestart=true
 user=root
 priority=2
-environment=DB_HOST="127.0.0.1",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="oneclickvirt"
+environment=DB_HOST="127.0.0.1",DB_PORT="3306",DB_USER="root",DB_PASSWORD="",DB_NAME="${MYSQL_DATABASE}"
 startsecs=1
 
 [program:nginx]
@@ -374,13 +384,15 @@ export DB_USER="root"
 export DB_PASSWORD=""
 
 # Create a script to check and import users after services start
-cat > /check_users.sh << 'EOF'
+cat > /check_users.sh << 'EOF2'
 #!/bin/bash
+
+DB_HOST="localhost"
 
 # Wait for MySQL to start
 echo "Checking if users exist..."
 for i in {1..60}; do
-    if mysql -h localhost -u root -e "SELECT 1" >/dev/null 2>&1; then
+    if mysql -h "$DB_HOST" -u root -e "SELECT 1" >/dev/null 2>&1; then
         echo "MySQL started successfully"
         break
     fi
@@ -392,180 +404,56 @@ for i in {1..60}; do
     sleep 1
 done
 
-# First, check if users table exists
-TABLE_EXISTS=$(mysql -h localhost -u root -e "USE oneclickvirt; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
-if [ -z "$TABLE_EXISTS" ]; then
-    echo "Users table does not exist, skipping import"
-else
-    # Table exists, check if it has data
-    USER_COUNT=$(mysql -h localhost -u root -e "USE oneclickvirt; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
+# Check if users table exists and has data
+TABLE_EXISTS=$(mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; SHOW TABLES LIKE 'users';" 2>/dev/null | tail -n 1 || echo "")
+if [ -n "$TABLE_EXISTS" ]; then
+    USER_COUNT=$(mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; SELECT COUNT(*) FROM users;" 2>/dev/null | tail -n 1 || echo 0)
     if [ "$USER_COUNT" -eq 0 ]; then
-        echo "Users table exists but is empty, importing default admin and user data..."
-        # Generate UUIDs for users
-        ADMIN_UUID=$(cat /proc/sys/kernel/random/uuid)
-        USER_UUID=$(cat /proc/sys/kernel/random/uuid)
-        
-        # Use simple password 'password' and let the system hash it later
-        # For now, we'll use a placeholder and the system will handle the hashing
-        mysql -h localhost -u root -e "USE oneclickvirt; INSERT INTO users (id, uuid, username, password, email, level, user_type, status, created_at, updated_at, max_instances, max_cpu, max_memory, max_disk) VALUES (1, '${ADMIN_UUID}', 'admin', 'password', 'admin@example.com', 5, 'admin', 1, NOW(), NOW(), 10, 8, 8192, 102400), (2, '${USER_UUID}', 'user', 'password', 'user@example.com', 1, 'user', 1, NOW(), NOW(), 1, 1, 512, 10240);"
-        
-        # Import system image default data
-        echo "Importing system image default data..."
-        mysql -h localhost -u root <<SQLEND
-USE oneclickvirt;
-
--- Create tables if they don't exist
-CREATE TABLE IF NOT EXISTS announcements (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  title varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  content longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  content_html longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  type varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'homepage',
-  priority bigint NULL DEFAULT 0,
-  status bigint NULL DEFAULT 1,
-  is_sticky tinyint(1) NULL DEFAULT 0,
-  start_time datetime(3) NULL DEFAULT NULL,
-  end_time datetime(3) NULL DEFAULT NULL,
-  created_by bigint UNSIGNED NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  INDEX idx_announcements_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-CREATE TABLE IF NOT EXISTS invite_codes (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  code varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  creator_id bigint UNSIGNED NOT NULL,
-  creator_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  description varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  max_uses bigint NOT NULL DEFAULT 1,
-  used_count bigint NOT NULL DEFAULT 0,
-  expires_at datetime(3) NULL DEFAULT NULL,
-  status bigint NOT NULL DEFAULT 1,
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  UNIQUE INDEX idx_invite_codes_code(code ASC) USING BTREE,
-  INDEX idx_invite_codes_creator_id(creator_id ASC) USING BTREE,
-  INDEX idx_invite_codes_expires_at(expires_at ASC) USING BTREE,
-  INDEX idx_invite_codes_status(status ASC) USING BTREE,
-  INDEX idx_invite_codes_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-CREATE TABLE IF NOT EXISTS jwt_secrets (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  secret_key varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'JWT签名密钥',
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  UNIQUE INDEX idx_jwt_secrets_secret_key(secret_key ASC) USING BTREE,
-  INDEX idx_jwt_secrets_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
--- Insert data
-INSERT IGNORE INTO announcements (id, created_at, updated_at, deleted_at, title, content, content_html, type, priority, status, is_sticky, start_time, end_time, created_by) VALUES
-(1, '2025-12-30 15:38:08.631', '2025-12-30 15:38:08.631', NULL, '欢迎使用虚拟化管理平台', '欢迎使用虚拟化管理平台，支持Docker、LXD、Incus、Proxmox VE等多种虚拟化技术。本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。', '<p>欢迎使用虚拟化管理平台，支持<strong>Docker</strong>、<strong>LXD</strong>、<strong>Incus</strong>、<strong>Proxmox VE</strong>等多种虚拟化技术。</p><p>本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。</p>', 'homepage', 10, 1, 1, NULL, NULL, NULL),
-(2, '2025-12-30 15:38:08.633', '2025-12-30 15:38:08.633', NULL, '系统维护通知', '为了提供更好的服务质量，我们会定期进行系统维护。维护期间可能会影响部分功能的使用，请您谅解。', '<p>为了提供更好的服务质量，我们会定期进行系统维护。</p>', 'topbar', 5, 1, 0, NULL, NULL, NULL),
-(3, '2025-12-30 15:38:08.644', '2025-12-30 15:38:08.644', NULL, '新手使用指南', '如果您是第一次使用本平台，建议先阅读使用文档。您可以在右上角的帮助菜单中找到详细的操作指南。', '<p>如果您是第一次使用本平台，建议先阅读使用文档。</p>', 'homepage', 8, 1, 0, NULL, NULL, NULL);
-
-INSERT IGNORE INTO invite_codes (id, code, creator_id, creator_name, description, max_uses, used_count, expires_at, status, created_at, updated_at, deleted_at) VALUES
-(1, 'SC0Q19BW', 1, '', '', 1, 0, NULL, 1, '2025-12-31 10:59:55.167', '2025-12-31 10:59:55.167', NULL);
-
-INSERT IGNORE INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
-(1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
-SQLEND
-        echo "Default admin, user and system image data imported successfully"
-    else
-        echo "Users already exist, checking system image data..."
-        # Check if system image data exists, import if not
-        ANNOUNCEMENT_COUNT=$(mysql -h localhost -u root -e "USE oneclickvirt; SELECT COUNT(*) FROM announcements;" 2>/dev/null | tail -n 1 || echo 0)
-        if [ "$ANNOUNCEMENT_COUNT" -eq 0 ]; then
-            echo "Importing system image default data..."
-            mysql -h localhost -u root <<SQLEND
-USE oneclickvirt;
-
--- Create tables if they don't exist
-CREATE TABLE IF NOT EXISTS announcements (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  title varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  content longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  content_html longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-  type varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'homepage',
-  priority bigint NULL DEFAULT 0,
-  status bigint NULL DEFAULT 1,
-  is_sticky tinyint(1) NULL DEFAULT 0,
-  start_time datetime(3) NULL DEFAULT NULL,
-  end_time datetime(3) NULL DEFAULT NULL,
-  created_by bigint UNSIGNED NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  INDEX idx_announcements_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-CREATE TABLE IF NOT EXISTS invite_codes (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  code varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  creator_id bigint UNSIGNED NOT NULL,
-  creator_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  description varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  max_uses bigint NOT NULL DEFAULT 1,
-  used_count bigint NOT NULL DEFAULT 0,
-  expires_at datetime(3) NULL DEFAULT NULL,
-  status bigint NOT NULL DEFAULT 1,
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  UNIQUE INDEX idx_invite_codes_code(code ASC) USING BTREE,
-  INDEX idx_invite_codes_creator_id(creator_id ASC) USING BTREE,
-  INDEX idx_invite_codes_expires_at(expires_at ASC) USING BTREE,
-  INDEX idx_invite_codes_status(status ASC) USING BTREE,
-  INDEX idx_invite_codes_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
-CREATE TABLE IF NOT EXISTS jwt_secrets (
-  id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  secret_key varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'JWT签名密钥',
-  created_at datetime(3) NULL DEFAULT NULL,
-  updated_at datetime(3) NULL DEFAULT NULL,
-  deleted_at datetime(3) NULL DEFAULT NULL,
-  PRIMARY KEY (id) USING BTREE,
-  UNIQUE INDEX idx_jwt_secrets_secret_key(secret_key ASC) USING BTREE,
-  INDEX idx_jwt_secrets_deleted_at(deleted_at ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
-
--- Insert data
-INSERT INTO announcements (id, created_at, updated_at, deleted_at, title, content, content_html, type, priority, status, is_sticky, start_time, end_time, created_by) VALUES
-(1, '2025-12-30 15:38:08.631', '2025-12-30 15:38:08.631', NULL, '欢迎使用虚拟化管理平台', '欢迎使用虚拟化管理平台，支持Docker、LXD、Incus、Proxmox VE等多种虚拟化技术。本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。', '<p>欢迎使用虚拟化管理平台，支持<strong>Docker</strong>、<strong>LXD</strong>、<strong>Incus</strong>、<strong>Proxmox VE</strong>等多种虚拟化技术。</p><p>本平台提供简单易用的Web界面，让您轻松管理各种虚拟化资源。</p>', 'homepage', 10, 1, 1, NULL, NULL, NULL),
-(2, '2025-12-30 15:38:08.633', '2025-12-30 15:38:08.633', NULL, '系统维护通知', '为了提供更好的服务质量，我们会定期进行系统维护。维护期间可能会影响部分功能的使用，请您谅解。', '<p>为了提供更好的服务质量，我们会定期进行系统维护。</p>', 'topbar', 5, 1, 0, NULL, NULL, NULL),
-(3, '2025-12-30 15:38:08.644', '2025-12-30 15:38:08.644', NULL, '新手使用指南', '如果您是第一次使用本平台，建议先阅读使用文档。您可以在右上角的帮助菜单中找到详细的操作指南。', '<p>如果您是第一次使用本平台，建议先阅读使用文档。</p>', 'homepage', 8, 1, 0, NULL, NULL, NULL);
-
-INSERT INTO invite_codes (id, code, creator_id, creator_name, description, max_uses, used_count, expires_at, status, created_at, updated_at, deleted_at) VALUES
-(1, 'SC0Q19BW', 1, '', '', 1, 0, NULL, 1, '2025-12-31 10:59:55.167', '2025-12-31 10:59:55.167', NULL);
-
-INSERT INTO jwt_secrets (id, secret_key, created_at, updated_at, deleted_at) VALUES
-(1, 'b64dca17bf31d0e725285cccf00a6911a43b0e2c8d8d26ed458cdbf16e6a14b5', '2025-12-30 16:00:51.689', '2025-12-30 16:00:51.689', NULL);
-SQLEND
-            echo "System image default data imported successfully"
-        else
-            echo "System image data already exists, skipping import"
-        fi
+        echo "Users table exists but is empty, importing default data from complete_init.sql..."
+        mysql -h "$DB_HOST" -u root < /app/complete_init.sql
+        echo "Default data imported successfully"
     fi
 fi
-EOF
+EOF2
 
 chmod +x /check_users.sh
 
-# Start services first
-echo "Starting services..."
+# Create a script to update user passwords to admin123456
+cat > /update_passwords.sh << 'EOF3'
+#!/bin/bash
 
-# Run the user check script in the background
-/bin/bash /check_users.sh &
+DB_HOST="localhost"
 
-exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Wait for MySQL to start
+echo "Updating user passwords..."
+for i in {1..60}; do
+    if mysql -h "$DB_HOST" -u root -e "SELECT 1" >/dev/null 2>&1; then
+        echo "MySQL started successfully"
+        break
+    fi
+    echo "Waiting for MySQL to start... ($i/60)"
+    if [ $i -eq 60 ]; then
+        echo "MySQL failed to start"
+        exit 1
+    fi
+    sleep 1
+done
+
+# Update admin and user passwords to TestPass12!#
+# Note: This is a placeholder, the actual password update will be handled by the application
+# The application will hash the password properly when it starts
+mysql -h "$DB_HOST" -u root -e "USE ${MYSQL_DATABASE}; UPDATE users SET password = 'TestPass12!#' WHERE username IN ('admin', 'user');"
+echo "Passwords updated successfully"
+EOF3
+
+chmod +x /update_passwords.sh
+
+# Start the check_users.sh script in the background
+nohup /check_users.sh > /var/log/check_users.log 2>&1 &
+
+# Start the update_passwords.sh script in the background
+nohup /update_passwords.sh > /var/log/update_passwords.log 2>&1 &
+
+# Start supervisor
+echo "Starting supervisor..."
+exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf

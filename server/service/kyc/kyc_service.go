@@ -72,6 +72,11 @@ func (s *KYCService) SubmitCertification(userID uint, realName, idCardNumber str
 		return nil, "", fmt.Errorf("this ID card has already been verified")
 	}
 
+	// Check if alipay KYC is initialized
+	if s.alipayKYC == nil {
+		return nil, "", fmt.Errorf("KYC service not initialized")
+	}
+
 	// Call alipay
 	certifyID, certifyURL, err := s.alipayKYC.InitializeCertify(realName, idCardNumber, "IDENTITY_CARD")
 	if err != nil {

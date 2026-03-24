@@ -8,20 +8,22 @@ import (
 
 // Order 订单表
 type Order struct {
-	ID           uint         `json:"id" gorm:"primaryKey"`
-	OrderNo      string       `json:"orderNo" gorm:"type:varchar(32);uniqueIndex;not null;comment:订单号"`
-	UserID       uint         `json:"userId" gorm:"index:idx_user_order;not null;comment:用户ID"`
-	ProductID    *uint        `json:"productId" gorm:"index;comment:产品ID"`
-	Amount       int64        `json:"amount" gorm:"not null;comment:订单金额(分)"`
-	Status       string       `json:"status" gorm:"type:varchar(20);not null;index;comment:订单状态"`
-	PaymentMethod string       `json:"paymentMethod" gorm:"type:varchar(20);comment:支付方式"`
-	PaymentTime  *time.Time   `json:"paymentTime" gorm:"comment:支付时间"`
-	PaidAmount   int64        `json:"paidAmount" gorm:"default:0;comment:实付金额"`
-	ProductData  string       `json:"productData" gorm:"type:json;comment:产品快照"`
-	Remark       string       `json:"remark" gorm:"type:varchar(255);comment:备注"`
-	ExpireAt     time.Time    `json:"expireAt" gorm:"comment:订单过期时间"`
-	CreatedAt    time.Time    `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt    time.Time    `json:"updatedAt" gorm:"autoUpdateTime"`
+	ID                    uint         `json:"id" gorm:"primaryKey"`
+	OrderNo               string       `json:"orderNo" gorm:"type:varchar(50);uniqueIndex;not null;comment:订单号"`
+	UserID                uint         `json:"userId" gorm:"index:idx_user_order;not null;comment:用户ID"`
+	ProductID             uint         `json:"productId" gorm:"index;not null;comment:产品ID"`
+	Amount                float64      `json:"amount" gorm:"type:decimal(10,2);not null;comment:订单金额"`
+	Status                int          `json:"status" gorm:"index;default:0;comment:订单状态"`
+	PaymentMethod         string       `json:"paymentMethod" gorm:"type:varchar(20);comment:支付方式"`
+	PaymentTransactionID  string       `json:"paymentTransactionId" gorm:"type:varchar(100);comment:支付交易ID"`
+	PaymentTime           *time.Time   `json:"paymentTime" gorm:"comment:支付时间"`
+	PaidAmount            float64      `json:"paidAmount" gorm:"type:decimal(10,2);default:0;comment:实付金额"`
+	ProductData           string       `json:"productData" gorm:"type:json;comment:产品快照"`
+	Remark                string       `json:"remark" gorm:"type:varchar(255);comment:备注"`
+	ExpireAt              time.Time    `json:"expireAt" gorm:"comment:订单过期时间"`
+	CreatedAt             time.Time    `json:"createdAt" gorm:"autoCreateTime"`
+	UpdatedAt             time.Time    `json:"updatedAt" gorm:"autoUpdateTime"`
+	DeletedAt             *time.Time   `json:"deletedAt" gorm:"index"`
 
 	User    *userModel.User      `json:"user" gorm:"foreignKey:UserID"`
 	Product *productModel.Product `json:"product" gorm:"foreignKey:ProductID"`
@@ -34,11 +36,11 @@ func (Order) TableName() string {
 
 // 订单状态常量
 const (
-	OrderStatusPending   = "pending"   // 待支付
-	OrderStatusPaid      = "paid"      // 已支付
-	OrderStatusCancelled = "cancelled" // 已取消
-	OrderStatusRefunded  = "refunded"  // 已退款
-	OrderStatusExpired   = "expired"   // 已过期
+	OrderStatusPending   = 0 // 待支付
+	OrderStatusPaid      = 1 // 已支付
+	OrderStatusCancelled = 2 // 已取消
+	OrderStatusRefunded  = 3 // 已退款
+	OrderStatusExpired   = 4 // 已过期
 )
 
 // 支付方式常量

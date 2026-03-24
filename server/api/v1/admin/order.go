@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"fmt"
 	"oneclickvirt/global"
 	orderModel "oneclickvirt/model/order"
 	"strconv"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 // GetOrders 获取所有订单列表
@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(20)
-// @Param status query string false "订单状态"
+// @Param status query int false "订单状态"
 // @Param orderNo query string false "订单号"
 // @Param username query string false "用户名"
 // @Success 200 {object} common.Response
@@ -46,7 +46,9 @@ func GetOrders(c *gin.Context) {
 
 	// 状态筛选
 	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+		if statusInt, err := strconv.Atoi(status); err == nil {
+			query = query.Where("status = ?", statusInt)
+		}
 	}
 
 	// 订单号筛选
@@ -82,10 +84,34 @@ func GetOrders(c *gin.Context) {
 	var ordersWithUser []OrderWithUser
 	offset := (page - 1) * pageSize
 
+	// 构建查询条件
+	whereClause := "1=1"
+	args := []interface{}{}
+
+	// 状态筛选
+	if status := c.Query("status"); status != "" {
+		if statusInt, err := strconv.Atoi(status); err == nil {
+			whereClause += " AND orders.status = ?"
+			args = append(args, statusInt)
+		}
+	}
+
+	// 订单号筛选
+	if orderNo := c.Query("orderNo"); orderNo != "" {
+		whereClause += " AND orders.order_no = ?"
+		args = append(args, orderNo)
+	}
+
+	// 用户名筛选
+	if username := c.Query("username"); username != "" {
+		whereClause += " AND users.username LIKE ?"
+		args = append(args, "%"+username+"%")
+	}
+
 	// 使用JOIN查询获取订单和关联的用户名
 	if err := global.APP_DB.Table("orders").Select("orders.*, users.username").
 		Joins("LEFT JOIN users ON orders.user_id = users.id").
-		Where(query.Session(&gorm.Session{})).
+		Where(whereClause, args...).
 		Order("orders.created_at DESC").
 		Limit(pageSize).
 		Offset(offset).
@@ -100,7 +126,7 @@ func GetOrders(c *gin.Context) {
 		zap.Int64("total", total))
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
 		"data": gin.H{
 			"list":  ordersWithUser,
@@ -143,9 +169,9 @@ func GetOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "success",
-		"data": orderWithUser,
+		"data":    orderWithUser,
 	})
 }
 
@@ -172,7 +198,7 @@ func DeleteOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "删除成功",
 	})
 }
@@ -203,7 +229,7 @@ func CancelOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "订单已取消",
 	})
 }
@@ -252,58 +278,119 @@ func RefundOrder(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
+		"code":    200,
 		"message": "退款成功",
 	})
 }
 
-// BatchDeleteUnpaidOrders 批量删除未支付订单
-// @Summary 批量删除未支付订单
-// @Description 管理员批量删除未支付订单
+// BatchCancelOrders 批量取消订单
+// @Summary 批量取消订单
+// @Description 管理员批量取消未支付订单
 // @Tags 管理员/订单管理
 // @Accept json
 // @Produce json
-// @Param request body object true "删除参数"
+// @Param request body object true "批量取消订单请求" schema:{"orderIds":[1,2,3]}
 // @Success 200 {object} common.Response
-// @Router /v1/admin/orders/batch-delete [post]
-func BatchDeleteUnpaidOrders(c *gin.Context) {
+// @Router /v1/admin/orders/batch-cancel [post]
+func BatchCancelOrders(c *gin.Context) {
 	var req struct {
-		Days int `json:"days"` // 删除多少天前的未支付订单
+		OrderIDs []uint `json:"orderIds"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
 		return
 	}
 
-	if req.Days <= 0 {
-		req.Days = 30 // 默认30天
-	}
-
-	// 计算截止日期
-	cutoffDate := time.Now().AddDate(0, 0, -req.Days)
-
-	// 删除未支付且已过期的订单
-	result := global.APP_DB.Where("status = ?", orderModel.OrderStatusPending).
-		Where("expire_at < ?", cutoffDate).
-		Delete(&orderModel.Order{})
-
-	if result.Error != nil {
-		global.APP_LOG.Error("批量删除未支付订单失败", zap.Error(result.Error))
-		c.JSON(500, gin.H{"code": 500, "message": "删除失败"})
+	if len(req.OrderIDs) == 0 {
+		c.JSON(400, gin.H{"code": 400, "message": "订单ID列表不能为空"})
 		return
 	}
 
-	global.APP_LOG.Info("批量删除未支付订单成功",
-		zap.Int64("count", result.RowsAffected),
-		zap.Int("days", req.Days),
-	)
+	if err := global.APP_DB.Model(&orderModel.Order{}).
+		Where("id IN ?", req.OrderIDs).
+		Where("status = ?", "pending").
+		Update("status", "cancelled").Error; err != nil {
+		global.APP_LOG.Error("批量取消订单失败", zap.Error(err))
+		c.JSON(500, gin.H{"code": 500, "message": "批量取消订单失败"})
+		return
+	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
-		"message": "删除成功",
-		"data": gin.H{
-			"count": result.RowsAffected,
-		},
+		"code":    200,
+		"message": "批量取消订单成功",
 	})
 }
 
+// BatchDeleteOrders 批量删除订单
+// @Summary 批量删除订单
+// @Description 管理员批量删除订单
+// @Tags 管理员/订单管理
+// @Accept json
+// @Produce json
+// @Param request body object true "批量删除订单请求" schema:{"orderIds":[1,2,3]}
+// @Success 200 {object} common.Response
+// @Router /v1/admin/orders/batch-delete [post]
+func BatchDeleteOrders(c *gin.Context) {
+	var req struct {
+		OrderIDs []uint `json:"orderIds"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	if len(req.OrderIDs) == 0 {
+		c.JSON(400, gin.H{"code": 400, "message": "订单ID列表不能为空"})
+		return
+	}
+
+	if err := global.APP_DB.Delete(&orderModel.Order{}, req.OrderIDs).Error; err != nil {
+		global.APP_LOG.Error("批量删除订单失败", zap.Error(err))
+		c.JSON(500, gin.H{"code": 500, "message": "批量删除订单失败"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": "批量删除订单成功",
+	})
+}
+
+// CleanUnpaidOrders 清理未支付订单
+// @Summary 清理未支付订单
+// @Description 管理员清理超过指定时间的未支付订单
+// @Tags 管理员/订单管理
+// @Accept json
+// @Produce json
+// @Param request body object true "清理未支付订单请求" schema:{"hours":24}
+// @Success 200 {object} common.Response
+// @Router /v1/admin/orders/clean-unpaid [post]
+func CleanUnpaidOrders(c *gin.Context) {
+	var req struct {
+		Hours int `json:"hours"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	if req.Hours <= 0 {
+		req.Hours = 24 // 默认24小时
+	}
+
+	// 计算清理时间
+	cleanTime := time.Now().Add(-time.Duration(req.Hours) * time.Hour)
+
+	// 查找并删除超过指定时间的未支付订单
+	result := global.APP_DB.Where("status = ? AND created_at < ?", "pending", cleanTime).Delete(&orderModel.Order{})
+	if result.Error != nil {
+		global.APP_LOG.Error("清理未支付订单失败", zap.Error(result.Error))
+		c.JSON(500, gin.H{"code": 500, "message": "清理未支付订单失败"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code":    200,
+		"message": fmt.Sprintf("成功清理%d个未支付订单", result.RowsAffected),
+	})
+}

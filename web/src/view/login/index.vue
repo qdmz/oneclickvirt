@@ -262,7 +262,14 @@ const handleLogin = async () => {
       })
 
       if (result.success) {
-        router.push('/user/dashboard')
+        // 根据用户类型跳转到相应的仪表盘
+        if (userStore.userType === 'admin') {
+          router.push('/admin/dashboard')
+        } else if (userStore.userType === 'agent') {
+          router.push('/agent/dashboard')
+        } else {
+          router.push('/user/dashboard')
+        }
       } else {
         // 检查是否是邮箱未验证错误 (code 4009)
         const errData = result.error?.response?.data

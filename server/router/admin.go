@@ -22,6 +22,7 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		// 系统配置（管理员专用）
 		AdminGroup.GET("/config", config.GetUnifiedConfig)
 		AdminGroup.PUT("/config", config.UpdateUnifiedConfig)
+		AdminGroup.POST("/config/test-email", config.TestEmailSend)
 
 		// 用户管理
 		AdminGroup.GET("/users", admin.GetUserList)
@@ -182,6 +183,8 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 
 		// 域名管理
 		AdminGroup.GET("/domains", admin.AdminGetDomains)
+		AdminGroup.POST("/domains", admin.AdminCreateDomain)
+		AdminGroup.PUT("/domains/:id", admin.AdminUpdateDomain)
 		AdminGroup.DELETE("/domains/:id", admin.AdminDeleteDomain)
 		AdminGroup.GET("/domain-config", admin.GetDomainConfig)
 		AdminGroup.PUT("/domain-config", admin.UpdateDomainConfig)

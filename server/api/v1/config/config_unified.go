@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"oneclickvirt/service/auth"
+	"oneclickvirt/service/email"
 	"strings"
 
 	"oneclickvirt/config"
@@ -303,6 +304,47 @@ func getAdminConfig(cm *config.ConfigManager) map[string]interface{} {
 		"defaultLanguage": global.APP_CONFIG.Other.DefaultLanguage,
 	}
 
+	// 系统配置
+	result["system"] = map[string]interface{}{
+		"addr":                     global.APP_CONFIG.System.Addr,
+		"dbType":                   global.APP_CONFIG.System.DbType,
+		"env":                      global.APP_CONFIG.System.Env,
+		"frontendURL":              global.APP_CONFIG.System.FrontendURL,
+		"ipLimitCount":             global.APP_CONFIG.System.LimitCountIP,
+		"ipLimitTime":              global.APP_CONFIG.System.LimitTimeIP,
+		"oauth2StateTokenMinutes":  global.APP_CONFIG.System.OAuth2StateTokenMinutes,
+		"ossType":                  global.APP_CONFIG.System.OssType,
+		"providerInactiveHours":    global.APP_CONFIG.System.ProviderInactiveHours,
+		"useMultipoint":            global.APP_CONFIG.System.UseMultipoint,
+		"useRedis":                 global.APP_CONFIG.System.UseRedis,
+	}
+
+	// 验证码配置
+	result["captcha"] = map[string]interface{}{
+		"enabled":    global.APP_CONFIG.Captcha.Enabled,
+		"expireTime": global.APP_CONFIG.Captcha.ExpireTime,
+		"height":     global.APP_CONFIG.Captcha.Height,
+		"length":     global.APP_CONFIG.Captcha.Length,
+		"width":      global.APP_CONFIG.Captcha.Width,
+	}
+
+	// 任务配置
+	result["task"] = map[string]interface{}{
+		"deleteRetryCount": global.APP_CONFIG.Task.DeleteRetryCount,
+		"deleteRetryDelay": global.APP_CONFIG.Task.DeleteRetryDelay,
+	}
+
+	// 站点配置
+	result["site"] = map[string]interface{}{
+		"name":        "OneClickVirt",
+		"description": "虚拟化管理平台",
+		"keywords":    "虚拟化,Docker,LXD,Incus,Proxmox",
+	}
+
+	// 系统名称和描述
+	result["systemName"] = "虚拟化管理平台"
+	result["systemDescription"] = "支持多种虚拟化技术的管理平台"
+
 	// 支付接口配置
 	result["payment"] = map[string]interface{}{
 		"alipayAppId":       global.APP_CONFIG.Payment.AlipayAppID,
@@ -410,6 +452,19 @@ func filterConfigByScope(config map[string]interface{}, scope string, authCtx *a
 		hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
 		if hasAdminPermission {
 			allowedKeys["auth.enablePublicRegistration"] = true
+			// 允许邮箱相关配置
+			allowedKeys["auth.enableEmail"] = true
+			allowedKeys["auth.emailSMTPPort"] = true
+			allowedKeys["auth.emailSMTPHost"] = true
+			allowedKeys["auth.emailUsername"] = true
+			allowedKeys["auth.emailPassword"] = true
+			// 允许其他认证相关配置
+			allowedKeys["auth.enableTelegram"] = true
+			allowedKeys["auth.enableQQ"] = true
+			allowedKeys["auth.enableOAuth2"] = true
+			allowedKeys["auth.telegramBotToken"] = true
+			allowedKeys["auth.qqAppID"] = true
+			allowedKeys["auth.qqAppKey"] = true
 		}
 
 		for key, value := range config {
@@ -418,18 +473,152 @@ func filterConfigByScope(config map[string]interface{}, scope string, authCtx *a
 			}
 		}
 	case "admin":
-		// 管理员可以更新所有配置
+		// 管理员可以更新所有非系统级配置
 		hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
 		if hasAdminPermission {
-			filtered = config
+			for key, value := range config {
+				// 过滤掉系统级配置
+				if !isSystemLevelConfig(key) {
+					filtered[key] = value
+				}
+			}
 		}
 	case "global":
-		// 全局配置，只有管理员可以更新
+		// 全局配置，只有管理员可以更新，且排除系统级配置
 		hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
 		if hasAdminPermission {
-			filtered = config
+			for key, value := range config {
+				// 过滤掉系统级配置
+				if !isSystemLevelConfig(key) {
+					filtered[key] = value
+				}
+			}
 		}
 	}
 
 	return filtered
+}
+
+// isSystemLevelConfig 检查是否为系统级配置（启动必需，必须来自YAML）
+func isSystemLevelConfig(key string) bool {
+	systemLevelConfigKeys := map[string]bool{
+		// System 配置（所有 system.* 都是系统级配置）
+		"system.addr":                       true,
+		"system.db-type":                    true,
+		"system.env":                        true,
+		"system.frontend-url":               true,
+		"system.iplimit-count":              true,
+		"system.iplimit-time":               true,
+		"system.oauth2-state-token-minutes": true,
+		"system.oss-type":                   true,
+		"system.provider-inactive-hours":    true,
+		"system.use-multipoint":             true,
+		"system.use-redis":                  true,
+
+		// MySQL 配置（数据库连接信息，必须在连接数据库前读取）
+		"mysql.path":           true,
+		"mysql.port":           true,
+		"mysql.config":         true,
+		"mysql.db-name":        true,
+		"mysql.username":       true,
+		"mysql.password":       true,
+		"mysql.prefix":         true,
+		"mysql.singular":       true,
+		"mysql.engine":         true,
+		"mysql.max-idle-conns": true,
+		"mysql.max-open-conns": true,
+		"mysql.max-lifetime":   true,
+		"mysql.log-mode":       true,
+		"mysql.log-zap":        true,
+		"mysql.auto-create":    true,
+
+		// Redis 配置（如果启用Redis，也是启动必需）
+		"redis.addr":     true,
+		"redis.password": true,
+		"redis.db":       true,
+
+		// Zap 日志配置（日志系统启动必需）
+		"zap.level":              true,
+		"zap.format":             true,
+		"zap.prefix":             true,
+		"zap.director":           true,
+		"zap.encode-level":       true,
+		"zap.stacktrace-key":     true,
+		"zap.max-file-size":      true,
+		"zap.max-backups":        true,
+		"zap.max-log-length":     true,
+		"zap.retention-day":      true,
+		"zap.show-line":          true,
+		"zap.log-in-console":     true,
+		"zap.max-string-length":  true,
+		"zap.max-array-elements": true,
+	}
+	return systemLevelConfigKeys[key]
+}
+
+// TestEmailSend 测试邮件发送接口
+// @Summary 测试邮件发送
+// @Description 测试SMTP配置是否能正确发送邮件
+// @Tags 配置管理
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body map[string]string true "测试邮件请求" schema:{"recipient":"test@example.com"}
+// @Success 200 {object} common.Response "发送成功"
+// @Failure 400 {object} common.Response "参数错误"
+// @Failure 401 {object} common.Response "认证失败"
+// @Failure 403 {object} common.Response "权限不足"
+// @Failure 500 {object} common.Response "发送失败"
+// @Router /admin/config/test-email [post]
+func TestEmailSend(c *gin.Context) {
+	authCtx, exists := middleware.GetAuthContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, common.Response{
+			Code: 401,
+			Msg:  "用户未认证",
+		})
+		return
+	}
+
+	// 验证权限
+	permissionService := auth.PermissionService{}
+	hasAdminPermission := permissionService.HasPermission(authCtx.UserID, "admin")
+	if !hasAdminPermission {
+		c.JSON(http.StatusForbidden, common.Response{
+			Code: 403,
+			Msg:  "权限不足",
+		})
+		return
+	}
+
+	// 解析请求体
+	var req struct {
+		Recipient string `json:"recipient" binding:"required,email"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		common.ResponseWithError(c, common.NewError(common.CodeValidationError, "参数错误: 请输入有效的邮箱地址"))
+		return
+	}
+
+	// 检查邮箱配置
+	config := global.APP_CONFIG.Auth
+	if !config.EnableEmail {
+		common.ResponseWithError(c, common.NewError(common.CodeConfigError, "邮箱功能未启用"))
+		return
+	}
+
+	if config.EmailSMTPHost == "" || config.EmailSMTPPort == 0 || config.EmailUsername == "" || config.EmailPassword == "" {
+		common.ResponseWithError(c, common.NewError(common.CodeConfigError, "SMTP配置不完整"))
+		return
+	}
+
+	// 发送测试邮件
+	emailService := email.NewEmailService()
+	err := emailService.SendWelcomeEmail(req.Recipient, "测试用户")
+	if err != nil {
+		common.ResponseWithError(c, common.NewError(common.CodeConfigError, fmt.Sprintf("邮件发送失败: %v", err)))
+		return
+	}
+
+	common.ResponseSuccess(c, nil, "测试邮件发送成功，请查收")
 }

@@ -144,6 +144,30 @@
                 </el-form-item>
               </el-col>
             </el-row>
+            
+            <!-- 测试邮件发送 -->
+            <el-divider content-position="left">
+              {{ $t('admin.config.emailTest') || '测试邮件发送' }}
+            </el-divider>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item :label="$t('admin.config.emailTestRecipient') || '收信人邮箱'">
+                  <el-input
+                    v-model="testEmailRecipient"
+                    placeholder="请输入测试邮箱地址"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" style="display: flex; align-items: flex-end; padding-bottom: 24px;">
+                <el-button
+                  type="primary"
+                  @click="testEmailSend"
+                  :loading="testEmailLoading"
+                >
+                  {{ $t('admin.config.emailTestSend') || '发送测试邮件' }}
+                </el-button>
+              </el-col>
+            </el-row>
           </el-form>
         </el-tab-pane>
 
@@ -535,6 +559,38 @@
                   placeholder="请输入回调URL"
                 />
               </el-form-item>
+            </el-card>
+
+            <!-- 实名认证配置 -->
+            <el-card
+              class="payment-card"
+              shadow="never"
+            >
+              <template #header>
+                <div class="payment-header">
+                  <span>实名认证配置</span>
+                  <el-switch v-model="config.payment.enableRealName" />
+                </div>
+              </template>
+              <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="是否强制实名认证">
+                    <el-switch v-model="config.payment.requireRealName" :disabled="!config.payment.enableRealName" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="回调URL">
+                    <el-input
+                      v-model="config.payment.realNameCallbackURL"
+                      placeholder="请输入回调URL"
+                      :disabled="!config.payment.enableRealName"
+                    />
+                    <div class="form-item-hint">
+                      例如: https://your-domain.com/api/v1/kyc/callback
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
             </el-card>
           </el-form>
         </el-tab-pane>
@@ -973,6 +1029,302 @@
             </el-row>
           </el-form>
         </el-tab-pane>
+
+        <!-- 系统配置 -->
+        <el-tab-pane
+          label="系统配置"
+          name="system"
+        >
+          <el-form
+            v-loading="loading"
+            :model="config"
+            label-width="140px"
+            class="config-form"
+          >
+            <el-alert
+              title="系统配置说明"
+              type="info"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 20px;"
+            >
+              配置系统基本参数，包括服务器端口、环境设置等
+            </el-alert>
+
+            <el-divider content-position="left">
+              基本设置
+            </el-divider>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="服务器端口">
+                  <el-input-number
+                    v-model="config.system.addr"
+                    :min="1"
+                    :max="65535"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="运行环境">
+                  <el-select
+                    v-model="config.system.env"
+                    style="width: 100%"
+                  >
+                    <el-option label="开发环境" value="development" />
+                    <el-option label="生产环境" value="production" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="前端URL">
+                  <el-input v-model="config.system.frontendURL" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="数据库类型">
+                  <el-select
+                    v-model="config.system.dbType"
+                    style="width: 100%"
+                  >
+                    <el-option label="MySQL" value="mysql" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-divider content-position="left">
+              安全设置
+            </el-divider>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="IP限制计数">
+                  <el-input-number
+                    v-model="config.system.ipLimitCount"
+                    :min="0"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="IP限制时间（秒）">
+                  <el-input-number
+                    v-model="config.system.ipLimitTime"
+                    :min="0"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="使用Redis">
+                  <el-switch v-model="config.system.useRedis" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="多点登录">
+                  <el-switch v-model="config.system.useMultipoint" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 验证码配置 -->
+        <el-tab-pane
+          label="验证码配置"
+          name="captcha"
+        >
+          <el-form
+            v-loading="loading"
+            :model="config"
+            label-width="140px"
+            class="config-form"
+          >
+            <el-alert
+              title="验证码配置说明"
+              type="info"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 20px;"
+            >
+              配置图形验证码参数，用于登录和注册验证
+            </el-alert>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="启用验证码">
+                  <el-switch v-model="config.captcha.enabled" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="验证码长度">
+                  <el-input-number
+                    v-model="config.captcha.length"
+                    :min="4"
+                    :max="10"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="验证码过期时间（秒）">
+                  <el-input-number
+                    v-model="config.captcha.expireTime"
+                    :min="60"
+                    :max="3600"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="验证码宽度">
+                  <el-input-number
+                    v-model="config.captcha.width"
+                    :min="100"
+                    :max="300"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="验证码高度">
+                  <el-input-number
+                    v-model="config.captcha.height"
+                    :min="30"
+                    :max="100"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 任务配置 -->
+        <el-tab-pane
+          label="任务配置"
+          name="task"
+        >
+          <el-form
+            v-loading="loading"
+            :model="config"
+            label-width="140px"
+            class="config-form"
+          >
+            <el-alert
+              title="任务配置说明"
+              type="info"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 20px;"
+            >
+              配置任务执行参数，包括删除重试次数和延迟时间
+            </el-alert>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="删除重试次数">
+                  <el-input-number
+                    v-model="config.task.deleteRetryCount"
+                    :min="1"
+                    :max="10"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="删除重试延迟（秒）">
+                  <el-input-number
+                    v-model="config.task.deleteRetryDelay"
+                    :min="1"
+                    :max="60"
+                    :controls="false"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 站点配置 -->
+        <el-tab-pane
+          label="站点配置"
+          name="site"
+        >
+          <el-form
+            v-loading="loading"
+            :model="config"
+            label-width="140px"
+            class="config-form"
+          >
+            <el-alert
+              title="站点配置说明"
+              type="info"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 20px;"
+            >
+              配置站点基本信息，包括站点名称、描述等
+            </el-alert>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="站点名称">
+                  <el-input v-model="config.site.name" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="站点描述">
+                  <el-input v-model="config.site.description" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="站点关键词">
+                  <el-input v-model="config.site.keywords" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="系统名称">
+                  <el-input v-model="config.systemName" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="系统描述">
+                  <el-input v-model="config.systemDescription" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
       </el-tabs>
 
       <!-- 底部操作按钮 -->
@@ -1001,7 +1353,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { getAdminConfig, updateAdminConfig } from '@/api/config'
-import { getInstanceTypePermissions, updateInstanceTypePermissions } from '@/api/admin'
+import { getInstanceTypePermissions, updateInstanceTypePermissions, testEmail } from '@/api/admin'
 import { useLanguageStore } from '@/pinia/modules/language'
 
 const { t, locale } = useI18n()
@@ -1036,7 +1388,8 @@ const config = ref({
     }
   },
   inviteCode: {
-    enabled: false
+    enabled: false,
+    required: false
   },
   payment: {
     enableAlipay: false,
@@ -1067,12 +1420,47 @@ const config = ref({
     mapayID: '',
     mapayKey: '',
     mapayReturnURL: '',
-    mapayNotifyURL: ''
+    mapayNotifyURL: '',
+    // 实名认证配置
+    enableRealName: false,
+    requireRealName: false,
+    realNameCallbackURL: ''
   },
   other: {
     maxAvatarSize: 2, // MB
     defaultLanguage: '' // 默认语言，空字符串表示使用浏览器语言
-  }
+  },
+  system: {
+    addr: 8890,
+    dbType: 'mysql',
+    env: 'development',
+    frontendURL: 'https://heyun.ypvps.com',
+    ipLimitCount: 15000,
+    ipLimitTime: 3600,
+    oauth2StateTokenMinutes: 15,
+    ossType: 'local',
+    providerInactiveHours: 24,
+    useMultipoint: false,
+    useRedis: false
+  },
+  captcha: {
+    enabled: false,
+    expireTime: 300,
+    height: 40,
+    length: 4,
+    width: 120
+  },
+  task: {
+    deleteRetryCount: 3,
+    deleteRetryDelay: 2
+  },
+  site: {
+    name: 'OneClickVirt',
+    description: '虚拟化管理平台',
+    keywords: '虚拟化,Docker,LXD,Incus,Proxmox'
+  },
+  systemName: '虚拟化管理平台',
+  systemDescription: '支持多种虚拟化技术的管理平台'
 })
 
 const instanceTypePermissions = ref({
@@ -1085,6 +1473,10 @@ const instanceTypePermissions = ref({
 })
 
 const loading = ref(false)
+
+// 测试邮件相关变量
+const testEmailRecipient = ref('')
+const testEmailLoading = ref(false)
 
 // 记录系统配置的语言，用于判断是否修改
 const systemConfigLanguage = ref('')
@@ -1132,6 +1524,50 @@ const loadConfig = async () => {
         systemConfigLanguage.value = config.value.other.defaultLanguage || ''
         console.log('合并后的其他配置:', config.value.other)
         console.log('当前系统语言配置:', systemConfigLanguage.value)
+      }
+      
+      // 加载系统配置
+      if (response.data.system) {
+        console.log('加载系统配置:', response.data.system)
+        config.value.system = {
+          ...config.value.system,
+          ...response.data.system
+        }
+      }
+
+      // 加载验证码配置
+      if (response.data.captcha) {
+        console.log('加载验证码配置:', response.data.captcha)
+        config.value.captcha = {
+          ...config.value.captcha,
+          ...response.data.captcha
+        }
+      }
+
+      // 加载任务配置
+      if (response.data.task) {
+        console.log('加载任务配置:', response.data.task)
+        config.value.task = {
+          ...config.value.task,
+          ...response.data.task
+        }
+      }
+
+      // 加载站点配置
+      if (response.data.site) {
+        console.log('加载站点配置:', response.data.site)
+        config.value.site = {
+          ...config.value.site,
+          ...response.data.site
+        }
+      }
+
+      // 加载系统名称和描述
+      if (response.data.systemName) {
+        config.value.systemName = response.data.systemName
+      }
+      if (response.data.systemDescription) {
+        config.value.systemDescription = response.data.systemDescription
       }
       
       // 加载等级配置
@@ -1254,8 +1690,47 @@ const saveConfig = async () => {
     const newLanguage = config.value.other.defaultLanguage
     const languageChanged = oldLanguage !== newLanguage
     
-    // 转换 levelLimits 为 kebab-case 格式（外层字段），max-resources 内部保持 camelCase
+    // 转换配置为 kebab-case 格式
     const configToSave = JSON.parse(JSON.stringify(config.value))
+    
+    // 转换 auth 配置为 kebab-case 格式
+    if (configToSave.auth) {
+      const auth = configToSave.auth
+      configToSave.auth = {
+        'enable-email': auth.enableEmail,
+        'enable-telegram': auth.enableTelegram,
+        'enable-qq': auth.enableQQ,
+        'enable-oauth2': auth.enableOAuth2,
+        'enable-public-registration': auth.enablePublicRegistration,
+        'email-smtp-host': auth.emailSMTPHost,
+        'email-smtp-port': auth.emailSMTPPort,
+        'email-username': auth.emailUsername,
+        'email-password': auth.emailPassword,
+        'telegram-bot-token': auth.telegramBotToken,
+        'qq-app-id': auth.qqAppID,
+        'qq-app-key': auth.qqAppKey
+      }
+    }
+    
+    // 转换 inviteCode 配置为 kebab-case 格式
+    if (configToSave.inviteCode) {
+      const inviteCode = configToSave.inviteCode
+      configToSave.inviteCode = {
+        'enabled': inviteCode.enabled,
+        'required': inviteCode.required
+      }
+    }
+    
+    // 转换 other 配置为 kebab-case 格式
+    if (configToSave.other) {
+      const other = configToSave.other
+      configToSave.other = {
+        'max-avatar-size': other.maxAvatarSize,
+        'default-language': other.defaultLanguage
+      }
+    }
+    
+    // 转换 levelLimits 为 kebab-case 格式（外层字段），max-resources 内部保持 camelCase
     if (configToSave.quota && configToSave.quota.levelLimits) {
       const convertedLimits = {}
       Object.keys(configToSave.quota.levelLimits).forEach(level => {
@@ -1309,7 +1784,45 @@ const saveConfig = async () => {
         'mapay-id': payment.mapayID,
         'mapay-key': payment.mapayKey,
         'mapay-return-url': payment.mapayReturnURL,
-        'mapay-notify-url': payment.mapayNotifyURL
+        'mapay-notify-url': payment.mapayNotifyURL,
+        // 实名认证配置
+        'enable-real-name': payment.enableRealName,
+        'require-real-name': payment.requireRealName,
+        'real-name-callback-url': payment.realNameCallbackURL
+      }
+    }
+    
+    // 完全移除系统配置，因为所有 system.* 都是系统级配置，不允许通过API修改
+    delete configToSave.system
+    
+    // 转换验证码配置为 kebab-case 格式
+    if (configToSave.captcha) {
+      const captcha = configToSave.captcha
+      configToSave.captcha = {
+        'enabled': captcha.enabled,
+        'expire-time': captcha.expireTime,
+        'height': captcha.height,
+        'length': captcha.length,
+        'width': captcha.width
+      }
+    }
+    
+    // 转换任务配置为 kebab-case 格式
+    if (configToSave.task) {
+      const task = configToSave.task
+      configToSave.task = {
+        'delete-retry-count': task.deleteRetryCount,
+        'delete-retry-delay': task.deleteRetryDelay
+      }
+    }
+    
+    // 转换站点配置为 kebab-case 格式
+    if (configToSave.site) {
+      const site = configToSave.site
+      configToSave.site = {
+        'name': site.name,
+        'description': site.description,
+        'keywords': site.keywords
       }
     }
     
@@ -1363,6 +1876,65 @@ const resetConfig = async () => {
   await loadConfig()
   await loadInstanceTypePermissions()
   ElMessage.success(t('admin.config.configReset'))
+}
+
+// 测试邮件发送
+const testEmailSend = async () => {
+  if (!testEmailRecipient.value) {
+    ElMessage.error('请输入收信人邮箱地址')
+    return
+  }
+  
+  if (!config.value.auth.enableEmail) {
+    ElMessage.error('请先启用邮箱功能')
+    return
+  }
+  
+  if (!config.value.auth.emailSMTPHost || !config.value.auth.emailSMTPPort || !config.value.auth.emailUsername || !config.value.auth.emailPassword) {
+    ElMessage.error('请完整填写SMTP配置')
+    return
+  }
+  
+  testEmailLoading.value = true
+  try {
+    // 先保存当前配置，确保测试使用最新配置
+    const configToSave = JSON.parse(JSON.stringify(config.value))
+    
+    // 转换 auth 配置为 kebab-case 格式
+    if (configToSave.auth) {
+      const auth = configToSave.auth
+      configToSave.auth = {
+        'enable-email': auth.enableEmail,
+        'enable-telegram': auth.enableTelegram,
+        'enable-qq': auth.enableQQ,
+        'enable-oauth2': auth.enableOAuth2,
+        'enable-public-registration': auth.enablePublicRegistration,
+        'email-smtp-host': auth.emailSMTPHost,
+        'email-smtp-port': auth.emailSMTPPort,
+        'email-username': auth.emailUsername,
+        'email-password': auth.emailPassword,
+        'telegram-bot-token': auth.telegramBotToken,
+        'qq-app-id': auth.qqAppID,
+        'qq-app-key': auth.qqAppKey
+      }
+    }
+    
+    // 保存配置
+    await updateAdminConfig(configToSave)
+    
+    // 发送测试邮件
+    const response = await testEmail({ recipient: testEmailRecipient.value })
+    if (response.code === 0) {
+      ElMessage.success('测试邮件发送成功，请查收')
+    } else {
+      ElMessage.error('测试邮件发送失败: ' + (response.message || '未知错误'))
+    }
+  } catch (error) {
+    console.error('测试邮件发送失败:', error)
+    ElMessage.error('测试邮件发送失败: ' + (error.message || '未知错误'))
+  } finally {
+    testEmailLoading.value = false
+  }
 }
 
 onMounted(() => {

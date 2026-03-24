@@ -1,9 +1,206 @@
 -- OneClickVirt 数据库初始化脚本
--- 使用方法: mysql -uroot oneclickvirt < init.sql
+-- 使用方法: mysql -uroot [数据库名称] < init.sql
 
 -- 设置字符集
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ============================================
+-- 0. 创建基础表结构
+-- ============================================
+
+-- 创建域名相关表
+CREATE TABLE IF NOT EXISTS `domains` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `instance_id` bigint unsigned NOT NULL,
+  `domain` varchar(255) NOT NULL,
+  `protocol` varchar(10) DEFAULT 'http',
+  `internal_ip` varchar(45) NOT NULL,
+  `internal_port` int NOT NULL,
+  `external_port` int DEFAULT 0,
+  `ssl` tinyint(1) DEFAULT 0,
+  `status` int DEFAULT 0,
+  `agent_id` bigint unsigned DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `domain` (`domain`),
+  INDEX `user_id` (`user_id`),
+  INDEX `instance_id` (`instance_id`),
+  INDEX `agent_id` (`agent_id`),
+  INDEX `status` (`status`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `domain_configs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `max_domains_per_user` bigint DEFAULT 3,
+  `max_domains_per_agent_user` bigint DEFAULT 5,
+  `default_ttl` bigint DEFAULT 300,
+  `auto_ssl` bigint DEFAULT 0,
+  `allowed_suffixes` text,
+  `dns_type` varchar(50) DEFAULT 'dnsmasq',
+  `dns_config_path` varchar(255) DEFAULT '/etc/dnsmasq.d/oneclickvirt-hosts.conf',
+  `nginx_config_path` varchar(255) DEFAULT '/etc/nginx/conf.d/oneclickvirt-domains',
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 创建订单相关表
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `product_id` bigint unsigned NOT NULL,
+  `order_no` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` int DEFAULT 0,
+  `payment_method` varchar(20) DEFAULT NULL,
+  `payment_transaction_id` varchar(100) DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `order_no` (`order_no`),
+  INDEX `user_id` (`user_id`),
+  INDEX `product_id` (`product_id`),
+  INDEX `status` (`status`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 创建兑换码相关表
+CREATE TABLE IF NOT EXISTS `redemption_codes` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `value` decimal(10,2) NOT NULL,
+  `uses` int DEFAULT 0,
+  `max_uses` int DEFAULT 1,
+  `expires_at` datetime DEFAULT NULL,
+  `status` int DEFAULT 1,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
+  INDEX `status` (`status`),
+  INDEX `expires_at` (`expires_at`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 创建代理商相关表
+CREATE TABLE IF NOT EXISTS `agents` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `status` int DEFAULT 1,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
+  UNIQUE KEY `user_id` (`user_id`),
+  INDEX `status` (`status`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `agent_sub_users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `agent_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `agent_id_user_id` (`agent_id`,`user_id`),
+  INDEX `agent_id` (`agent_id`),
+  INDEX `user_id` (`user_id`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `commissions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `agent_id` bigint unsigned NOT NULL,
+  `order_id` bigint unsigned NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` int DEFAULT 0,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `agent_id` (`agent_id`),
+  INDEX `order_id` (`order_id`),
+  INDEX `status` (`status`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 创建钱包相关表
+CREATE TABLE IF NOT EXISTS `wallets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `balance` decimal(10,2) DEFAULT 0,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `wallet_transactions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `user_id` (`user_id`),
+  INDEX `type` (`type`),
+  INDEX `created_at` (`created_at`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 创建实名认证相关表
+CREATE TABLE IF NOT EXISTS `kyc_verifications` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `real_name` varchar(50) NOT NULL,
+  `id_card` varchar(20) NOT NULL,
+  `status` int DEFAULT 0,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  INDEX `status` (`status`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 创建产品购买记录相关表
+CREATE TABLE IF NOT EXISTS `product_purchases` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `product_id` bigint unsigned NOT NULL,
+  `order_id` bigint unsigned DEFAULT NULL,
+  `level` int NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_product_purchases_order_id` (`order_id`),
+  KEY `idx_product_purchases_user_id` (`user_id`),
+  KEY `idx_product_purchases_product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
 -- 1. 创建默认角色
@@ -14,10 +211,10 @@ INSERT INTO `roles` (`name`, `code`, `description`, `status`, `created_at`, `upd
 
 -- ============================================
 -- 2. 创建默认管理员账户
--- 默认密码: admin123456
+-- 默认密码: TestPass12!#
 -- ============================================
 INSERT INTO `users` (`uuid`, `username`, `password`, `nickname`, `email`, `phone`, `status`, `level`, `level_expire_at`, `user_type`, `created_at`, `updated_at`) VALUES
-('admin-uuid-001', 'admin', '$2a$10$AKvQPFPqSVBQWv6J0hCCeujsogZRK2dZReuye1ZZXJFEzWgL61IZK', '管理员', 'admin@example.com', '13800138000', 1, 5, '2099-12-31 23:59:59', 'admin', NOW(), NOW());
+('admin-uuid-001', 'admin', 'TestPass12!#', '管理员', 'admin@example.com', '13800138000', 1, 5, '2099-12-31 23:59:59', 'admin', NOW(), NOW());
 
 -- 创建用户角色关联
 INSERT INTO `user_roles` (`user_id`, `role_id`, `created_at`, `updated_at`) VALUES
@@ -34,11 +231,11 @@ INSERT INTO `announcements` (`title`, `content`, `content_html`, `type`, `status
 -- ============================================
 -- 4. 创建默认产品套餐
 -- ============================================
-INSERT INTO `products` (`name`, `description`, `price`, `billing_cycle`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `instance_limit`, `features`, `status`, `sort_order`, `created_at`, `updated_at`) VALUES
-('入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0.00, 'monthly', 1, 512, 10240, 100, 1, '{"cpu": "1核", "memory": "512MB", "disk": "10GB", "bandwidth": "100Mbps", "instances": "1个实例"}', 1, 1, NOW(), NOW()),
-('标准套餐', '适合小型团队的标准套餐，包含更多资源', 9.90, 'monthly', 2, 1024, 20480, 200, 3, '{"cpu": "2核", "memory": "1GB", "disk": "20GB", "bandwidth": "200Mbps", "instances": "3个实例"}', 1, 2, NOW(), NOW()),
-('专业套餐', '适合中型团队的专业套餐，包含完整功能', 29.90, 'monthly', 4, 2048, 40960, 500, 5, '{"cpu": "4核", "memory": "2GB", "disk": "40GB", "bandwidth": "500Mbps", "instances": "5个实例"}', 1, 3, NOW(), NOW()),
-('企业套餐', '适合大型团队的企业套餐，包含无限资源', 99.90, 'monthly', 8, 4096, 102400, 1000, 10, '{"cpu": "8核", "memory": "4GB", "disk": "100GB", "bandwidth": "1000Mbps", "instances": "10个实例"}', 1, 4, NOW(), NOW());
+INSERT INTO `products` (`name`, `description`, `price`, `billing_cycle`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `instance_limit`, `features`, `status`, `sort_order`, `is_enabled`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `period`, `allow_repeat`, `created_at`, `updated_at`) VALUES
+('入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0, 'monthly', 1, 512, 10240, 100, 1, '{}', 1, 1, 1, 1, 512, 10240, 100, 0, 30, 1, NOW(), NOW()),
+('标准套餐', '适合小型团队的标准套餐，包含更多资源', 990, 'monthly', 2, 1024, 20480, 200, 3, '{}', 1, 2, 1, 2, 1024, 20480, 200, 0, 30, 1, NOW(), NOW()),
+('专业套餐', '适合中型团队的专业套餐，包含完整功能', 2990, 'monthly', 4, 2048, 40960, 500, 5, '{}', 1, 3, 1, 4, 2048, 40960, 500, 0, 30, 1, NOW(), NOW()),
+('企业套餐', '适合大型团队的企业套餐，包含无限资源', 9990, 'monthly', 8, 4096, 102400, 1000, 10, '{}', 1, 4, 1, 8, 4096, 102400, 1000, 0, 30, 1, NOW(), NOW());
 
 -- ============================================
 -- 5. 创建默认系统配置
@@ -83,24 +280,28 @@ INSERT INTO `system_configs` (`key`, `value`, `description`, `created_at`, `upda
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================
+-- 9. 为现有用户创建钱包
+-- ============================================
+INSERT INTO `wallets` (`user_id`, `balance`) SELECT `id`, 0 FROM `users` WHERE `id` NOT IN (SELECT `user_id` FROM `wallets`);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================
 -- 初始化完成
 -- 默认管理员账户:
 --   用户名: admin
---   密码: admin123456
+--   密码: TestPass12!#
 --
--- 新增功能表（由 GORM AutoMigrate 自动创建）:
+-- 所有必要的表都已创建:
 --   domains          - 域名绑定表
 --   domain_configs   - 域名系统配置表
+--   orders           - 订单表
+--   redemption_codes - 兑换码表
 --   agents           - 代理商表
---   sub_user_relations - 代理商子用户关系表
+--   agent_sub_users  - 代理商子用户关系表
 --   commissions      - 佣金记录表
---   kyc_records      - 实名认证记录表
---
--- 产品表新增字段（AutoMigrate 自动添加）:
---   stock            - 库存量（-1=无限）
---   sold_count       - 已售数量
---
--- 用户表新增字段（AutoMigrate 自动添加）:
---   email_verified   - 邮箱是否验证
---   real_name_verified - 是否实名认证
+--   wallets          - 钱包表
+--   wallet_transactions - 钱包交易记录表
+--   kyc_verifications - 实名认证记录表
+--   product_purchases - 产品购买记录表
 -- ============================================

@@ -14,6 +14,7 @@ import (
 	walletModel "oneclickvirt/model/wallet"
 	"oneclickvirt/service/cache"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -112,7 +113,7 @@ func fillProductResourcesFromLevelLimit(product *productModel.Product) {
 // @Produce json
 // @Param page query int false "页码"
 // @Param pageSize query int false "每页数量"
-// @Param status query string false "订单状态"
+// @Param status query int false "订单状态"
 // @Success 200 {object} common.Response
 // @Router /v1/user/orders [get]
 func GetUserOrders(c *gin.Context) {
@@ -144,7 +145,9 @@ func GetUserOrders(c *gin.Context) {
 
 	// 订单状态筛选
 	if status := c.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
+		if statusInt, err := strconv.Atoi(status); err == nil {
+			query = query.Where("status = ?", statusInt)
+		}
 	}
 
 	// 查询总数
@@ -302,20 +305,21 @@ func GetUserProducts(c *gin.Context) {
 		fillProductResourcesFromLevelLimit(&products[i])
 	}
 
-	// 查询用户已经购买过的产品ID列表
+	// 初始化购买记录映射
+	purchasedMap := make(map[uint]bool)
+
+	// 尝试查询用户已经购买过的产品ID列表
 	var purchasedProductIDs []uint
 	if err := global.APP_DB.Model(&productModel.ProductPurchase{}).
 		Where("user_id = ?", userID).
 		Pluck("product_id", &purchasedProductIDs).Error; err != nil {
-		global.APP_LOG.Error("查询用户购买记录失败", zap.Error(err))
-		c.JSON(500, gin.H{"code": 500, "message": "获取产品列表失败"})
-		return
-	}
-
-	// 将购买记录转换为map，方便查询
-	purchasedMap := make(map[uint]bool)
-	for _, productID := range purchasedProductIDs {
-		purchasedMap[productID] = true
+		// 如果查询失败（例如表不存在），记录警告但继续执行
+		global.APP_LOG.Warn("查询用户购买记录失败，将显示所有产品", zap.Error(err))
+	} else {
+		// 将购买记录转换为map，方便查询
+		for _, productID := range purchasedProductIDs {
+			purchasedMap[productID] = true
+		}
 	}
 
 	// 过滤产品列表，只返回用户可以购买的产品
@@ -447,9 +451,9 @@ func PurchaseProduct(c *gin.Context) {
 	order := orderModel.Order{
 		OrderNo:       orderNo,
 		UserID:        userID.(uint),
-		ProductID:     &product.ID,
-		Amount:        product.Price,
-		Status:        orderModel.OrderStatusPending,
+		ProductID:     product.ID,
+		Amount:        float64(product.Price) / 100,
+		Status:        0, // 0: 待支付
 		PaymentMethod: params.PaymentMethod,
 		ProductData:   productData,
 		ExpireAt:      time.Now().Add(30 * time.Minute), // 30分钟过期
@@ -511,7 +515,7 @@ func PurchaseProduct(c *gin.Context) {
 		order.Status = orderModel.OrderStatusPaid
 		now := time.Now()
 		order.PaymentTime = &now
-		order.PaidAmount = product.Price
+		order.PaidAmount = float64(product.Price) / 100
 	}
 
 	// 创建订单
@@ -709,6 +713,7 @@ func marshalProductData(product productModel.Product) string {
 // @Accept json
 // @Produce json
 // @Param orderNo path string true "订单号"
+// @Param type query string false "支付方式: alipay, wechat, qqpay"
 // @Success 200 {object} common.Response
 // @Router /v1/user/orders/epay-qr/{orderNo} [get]
 func GetPurchaseEpayQR(c *gin.Context) {
@@ -716,6 +721,17 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	if orderNo == "" {
 		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
 		return
+	}
+
+	// 获取支付方式，默认为alipay
+	payType := c.DefaultQuery("type", "alipay")
+	// 验证支付方式是否支持
+	if payType != "alipay" && payType != "wechat" && payType != "qqpay" {
+		payType = "alipay" // 默认使用支付宝
+	}
+	// 转换支付方式类型以符合易支付要求
+	if payType == "wechat" {
+		payType = "wxpay"
 	}
 
 	var order orderModel.Order
@@ -752,12 +768,12 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	// 构建易支付参数
 	params := url.Values{}
 	params.Set("pid", global.APP_CONFIG.Payment.EpayPID)
-	params.Set("type", "alipay")
+	params.Set("type", payType)
 	params.Set("out_trade_no", orderNo)
 	params.Set("notify_url", global.APP_CONFIG.Payment.EpayNotifyURL)
 	params.Set("return_url", global.APP_CONFIG.Payment.EpayReturnURL)
 	params.Set("name", "产品购买")
-	params.Set("money", fmt.Sprintf("%.2f", float64(order.Amount)/100))
+	params.Set("money", fmt.Sprintf("%.2f", order.Amount))
 
 	// 生成签名
 	sign := generatePurchaseEpaySign(params, global.APP_CONFIG.Payment.EpayKey)

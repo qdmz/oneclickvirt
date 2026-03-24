@@ -13,7 +13,6 @@ import (
 
 	"oneclickvirt/config"
 	"oneclickvirt/global"
-	adminModel "oneclickvirt/model/admin"
 	"oneclickvirt/model/auth"
 	"oneclickvirt/model/common"
 	"oneclickvirt/model/system"
@@ -84,27 +83,34 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		// 如果密码验证失败，检查是否是明文密码
-		// 尝试将明文密码哈希化并更新到数据库
-		hashedPassword, hashErr := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
-		if hashErr == nil {
-			// 更新用户密码为哈希值
-			global.APP_DB.Model(&user).Update("password", string(hashedPassword))
-			global.APP_LOG.Info("自动更新用户密码为哈希值", zap.String("username", user.Username))
-			// 重新验证密码
-			if err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(req.Password)); err != nil {
+		// 检查密码是否已经是哈希值（bcrypt哈希值长度固定为60）
+		if len(user.Password) != 60 {
+			// 如果不是哈希值，检查输入的密码是否与原始明文密码匹配
+			if user.Password != req.Password {
+				// 密码不匹配，返回错误
 				global.APP_LOG.Debug("用户密码验证失败", zap.String("username", utils.SanitizeUserInput(req.Username)), zap.String("userType", user.UserType))
 				return nil, "", common.NewError(common.CodeInvalidCredentials)
 			}
+			// 密码匹配，将明文密码哈希化并更新到数据库
+			hashedPassword, hashErr := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
+			if hashErr == nil {
+				// 更新用户密码为哈希值
+				global.APP_DB.Model(&user).Update("password", string(hashedPassword))
+				global.APP_LOG.Info("自动更新用户密码为哈希值", zap.String("username", user.Username))
+			} else {
+				global.APP_LOG.Error("密码哈希化失败", zap.Error(hashErr))
+				return nil, "", common.NewError(common.CodeInvalidCredentials)
+			}
 		} else {
+			// 密码已经是哈希值但验证失败，直接返回错误
 			global.APP_LOG.Debug("用户密码验证失败", zap.String("username", utils.SanitizeUserInput(req.Username)), zap.String("userType", user.UserType))
 			return nil, "", common.NewError(common.CodeInvalidCredentials)
 		}
 	}
 
-	// Check email verification
-	if !user.EmailVerified && global.APP_CONFIG.Auth.EnableEmailVerification {
-		return nil, "", common.NewError(4009, "email not verified")
+	// Check email verification (skip for admin users)
+	if !user.EmailVerified && global.APP_CONFIG.Auth.EnableEmailVerification && user.UserType != "admin" {
+		return nil, "", common.NewError(common.CodeEmailNotVerified, "邮箱未验证，请先验证邮箱")
 	}
 
 	global.APP_LOG.Info("用户登录成功", zap.String("username", user.Username), zap.String("userType", user.UserType), zap.Uint("userID", user.ID))
@@ -113,10 +119,13 @@ func (s *AuthService) loginWithPassword(req auth.LoginRequest) (*userModel.User,
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -156,10 +165,13 @@ func (s *AuthService) loginWithEmailCode(req auth.LoginRequest) (*userModel.User
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -199,10 +211,13 @@ func (s *AuthService) loginWithTelegramCode(req auth.LoginRequest) (*userModel.U
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -242,10 +257,13 @@ func (s *AuthService) loginWithQQCode(req auth.LoginRequest) (*userModel.User, s
 	token, err := utils.GenerateToken(user.ID, user.Username, user.UserType)
 	if err != nil {
 		global.APP_LOG.Error("生成JWT令牌失败", zap.Error(err))
-		return nil, "", errors.New("登录失败，请稍后重试")
+		return nil, "", common.NewError(common.CodeTokenGenerateError, "登录失败，请稍后重试")
 	}
 	// 更新最后登录时间
-	global.APP_DB.Model(&user).Update("last_login_at", time.Now())
+	if err := global.APP_DB.Model(&user).Update("last_login_at", time.Now()).Error; err != nil {
+		global.APP_LOG.Error("更新最后登录时间失败", zap.Error(err))
+		// 继续执行，不影响登录流程
+	}
 	return &user, token, nil
 }
 
@@ -946,13 +964,49 @@ func (s *AuthService) sendEmail(to, subject, body string) error {
 	}
 	auth := smtp.PlainAuth("", config.EmailUsername, config.EmailPassword, config.EmailSMTPHost)
 	msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", to, subject, body)
-	return smtp.SendMail(
-		fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort),
-		auth,
-		config.EmailUsername,
-		[]string{to},
-		[]byte(msg),
-	)
+
+	// 建立TLS连接
+	c, err := smtp.Dial(fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort))
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	// 启用TLS
+	if err = c.StartTLS(nil); err != nil {
+		return err
+	}
+
+	// 认证
+	if err = c.Auth(auth); err != nil {
+		return err
+	}
+
+	// 设置发件人
+	if err = c.Mail(config.EmailUsername); err != nil {
+		return err
+	}
+
+	// 设置收件人
+	if err = c.Rcpt(to); err != nil {
+		return err
+	}
+
+	// 发送邮件内容
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		return err
+	}
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+
+	return c.Quit()
 }
 
 func generateRandomCode() string {
@@ -1344,9 +1398,6 @@ func (s *AuthService) VerifyResetToken(token string) error {
 // isEmailConfigured 检查邮箱配置是否可用
 func (s *AuthService) isEmailConfigured() bool {
 	// 检查系统配置中是否配置了邮箱服务
-	var emailConfig adminModel.SystemConfig
-	if err := global.APP_DB.Where("key = ?", "email_enabled").First(&emailConfig).Error; err != nil {
-		return false
-	}
-	return emailConfig.Value == "true"
+	config := global.APP_CONFIG.Auth
+	return config.EmailSMTPHost != "" && config.EmailUsername != "" && config.EmailPassword != ""
 }
