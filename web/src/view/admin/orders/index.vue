@@ -308,7 +308,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getOrders, getOrder, deleteOrder, cancelOrder, refundOrder, batchDeleteUnpaidOrders } from '@/api/admin'
+import { getOrders, getOrder, deleteOrder, cancelOrder, refundOrder, batchDeleteOrders } from '@/api/admin'
 
 const loading = ref(false)
 const page = ref(1)
@@ -551,7 +551,7 @@ const handleBatchDeleteUnpaid = () => {
     type: 'warning'
   }).then(async () => {
     try {
-      const res = await batchDeleteUnpaidOrders({ days: 30 })
+      const res = await batchDeleteOrders({ orderIds: [] }) // 暂时传入空数组，后续需要实现批量选择订单的功能
       if (res.code === 200) {
         ElMessage.success(`成功删除${res.data.count}个未支付订单`)
         loadOrders()
