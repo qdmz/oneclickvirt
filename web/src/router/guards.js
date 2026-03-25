@@ -1,7 +1,6 @@
 import { useUserStore } from '@/pinia/modules/user'
 import { checkSystemInit } from '@/api/init'
 import { ElMessage } from 'element-plus'
-import i18n from '@/i18n'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -234,7 +233,7 @@ export function setupRouterGuards(router) {
       // 严格检查：普通用户不能访问管理员路由
       if (to.path.startsWith('/admin/') && userStore.userType !== 'admin') {
         console.log('普通用户尝试访问管理员页面，拒绝访问')
-        ElMessage.warning(i18n.global.t('navbar.noPermission'))
+        ElMessage.warning('您没有权限访问该页面')
         next('/user/dashboard')
         return
       }
