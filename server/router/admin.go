@@ -193,7 +193,7 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.DELETE("/orders/:id", admin.DeleteOrder)
 		AdminGroup.POST("/orders/:id/cancel", admin.CancelOrder)
 		AdminGroup.POST("/orders/:id/refund", admin.RefundOrder)
-		AdminGroup.POST("/orders/batch-delete", admin.BatchDeleteUnpaidOrders)
+		AdminGroup.POST("/orders/batch-delete", admin.BatchDeleteOrders)
 
 		// 代理商管理
 		AdminGroup.GET("/agents", admin.GetAgentList)

@@ -11,7 +11,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
         npm install --no-save @rollup/rollup-linux-arm64-gnu; \
     fi
 COPY web/ ./
-RUN npm run build || (echo "Build failed, checking for common issues" && ls -la && cat package.json && exit 1)
+RUN ls -la && npm run build
 
 
 FROM golang:1.25-alpine AS backend-builder
