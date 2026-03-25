@@ -1,18 +1,18 @@
 auth:
-    email-password: fftmxpjehjcmbigf
-    email-smtp-host: smtp.qq.com
-    email-smtp-port: 587
-    email-username: qdmzhost@qq.com
+    email-password: ${EMAIL_PASSWORD}
+    email-smtp-host: smtp.gmail.com
+    email-smtp-port: 25
+    email-username: qdmzhost
     enable-email: true
     enable-oauth2: false
     enable-public-registration: true
     enable-qq: false
     enable-telegram: false
-    qq-app-id: ""
-    qq-app-key: ""
-    telegram-bot-token: ""
+    qq-app-id: ${QQ_APP_ID}
+    qq-app-key: ${QQ_APP_KEY}
+    telegram-bot-token: ${TELEGRAM_BOT_TOKEN}
 captcha:
-    enabled: true
+    enabled: false
     expire-time: 300
     height: 40
     length: 4
@@ -45,62 +45,20 @@ mysql:
     max-idle-conns: "10"
     max-lifetime: "3600"
     max-open-conns: "100"
-    password: ""
-    path: 127.0.0.1
+    password: "123456"
+    path: localhost
     port: "3306"
     prefix: ""
     singular: "false"
-    username: root
+    username: oneclickvirt
 quota:
     instance-type-permissions:
         min-level-for-container: 1
         min-level-for-delete-container: 1
-        min-level-for-delete-vm: 1
+        min-level-for-delete-vm: 2
         min-level-for-reset-container: 1
-        min-level-for-reset-vm: 1
-        min-level-for-vm: 1
-    level-limits:
-        "1":
-            max-instances: 1
-            max-resources:
-                bandwidth: 10
-                cpu: 1
-                disk: 1024
-                memory: 350
-            max-traffic: 102400
-        "2":
-            max-instances: 1
-            max-resources:
-                bandwidth: 200
-                cpu: 1
-                disk: 2048
-                memory: 1024
-            max-traffic: 204800
-        "3":
-            max-instances: 1
-            max-resources:
-                bandwidth: 300
-                cpu: 2
-                disk: 4096
-                memory: 2048
-            max-traffic: 307200
-        "4":
-            max-instances: 1
-            max-resources:
-                bandwidth: 1000
-                cpu: 4
-                disk: 8192
-                memory: 4096
-            max-traffic: 409600
-        "5":
-            max-instances: 10
-            max-resources:
-                bandwidth: 1000
-                cpu: 8
-                disk: 16384
-                memory: 8192
-            max-traffic: 5.12e+06
-    default-level: 1
+        min-level-for-reset-vm: 2
+        min-level-for-vm: 2
 redis:
     addr: ""
     db: 0
@@ -109,7 +67,7 @@ system:
     addr: 8890
     db-type: mysql
     env: development
-    frontend-url: "https://heyun.ypvps.com"
+    frontend-url: "http://localhost:8080"
     iplimit-count: 15000
     iplimit-time: 3600
     oauth2-state-token-minutes: 15
@@ -140,13 +98,13 @@ zap:
     retention-day: 3
     show-line: false
     stacktrace-key: stacktrace
-max_avatar_size: 2
+max_avatar_size: 1
 default_language:
 signing_key_v1:
-    created_at: "2026-03-19T12:01:03.545103213+08:00"
-    expires_at: "2026-03-20T12:01:03.545103213+08:00"
+    created_at: "2026-03-12T13:52:39.7982892+08:00"
+    expires_at: "2026-03-13T13:52:39.7982892+08:00"
     is_active: false
-    key: 4bb2a98448af083ad749eb1513dbe994a2a56c1923cf8c469474afbf695d819a
+    key: e93c228bb22f3d614b2fb0c04b526ffc4f541f07ccaafdc0f3d44ccb853cae7e
     version: 1
 active_version: 1
 payment:
@@ -154,16 +112,15 @@ payment:
     alipay-gateway: https://openapi.alipay.com/gateway.do
     alipay-private-key: ${ALIPAY_PRIVATE_KEY}
     alipay-public-key: ${ALIPAY_PUBLIC_KEY}
-    balance-daily-limit: 500
-    balance-min-amount: 0
-    enable-alipay: false
+    balance-daily-limit: 9998
+    balance-min-amount: 2
+    enable-alipay: true
     enable-balance: true
     enable-epay: true
-    enable-mapay: false
-    enable-real-name: false
-    enable-wechat: false
-    epay-api-url: https://pay.wanjuanxueyi.com/submit.php
-    epay-key: 7o6IxRTgt67ntX9nIZRx2koiPX9X2ix2
+    enable-mapay: true
+    enable-wechat: true
+    epay-api-url: https://pay.example.com/creat_order
+    epay-key: ${EPAY_KEY}
     epay-notify-url: https://heyun.ypvps.com/api/v1/payment/epay/notify
     epay-pid: "2093"
     epay-return-url: https://heyun.ypvps.com/user/wallet
@@ -172,8 +129,6 @@ payment:
     mapay-key: ${MAPAY_KEY}
     mapay-notify-url: https://heyun.ypvps.com/api/v1/payment/mapay/notify
     mapay-return-url: https://heyun.ypvps.com/user/wallet
-    real-name-callback-url: ""
-    require-real-name: false
     wechat-api-key: ${WECHAT_API_KEY}
     wechat-api-v3-key: ${WECHAT_API_V3_KEY}
     wechat-app-id: ${WECHAT_APP_ID}
@@ -183,7 +138,7 @@ payment:
 system_name: 虚拟化管理平台
 system_description: 支持多种虚拟化技术的管理平台
 enable_email_verification: false
-enable_captcha: true
+enable_captcha: false
 captcha_expire_time: 10
 max_login_attempts: 5
 login_lockout_duration: 30
@@ -201,21 +156,3 @@ smtp_port: 587
 smtp_username:
 smtp_password:
 smtp_secure: true
-site_name: OneClickVirt
-site_description: 虚拟化管理平台
-site_keywords: 虚拟化,Docker,LXD,Incus,Proxmox
-enable_registration: true
-enable_email_verify: false
-default_user_level: 1
-max_instances_per_user: 10
-default_instance_expiry_days: 30
-email_activation_expire_hours: 24
-enable_real_name: false
-require_real_name: false
-enable_agent: true
-system-name: 虚拟化管理平台
-system-description: 支持多种虚拟化技术的管理平台
-site:
-    description: 虚拟化管理平台
-    keywords: 虚拟化,Docker,LXD,Incus,Proxmox
-    name: OneClickVirt

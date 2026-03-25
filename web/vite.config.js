@@ -19,12 +19,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: 'http://localhost:8890',
           changeOrigin: true,
-          rewrite: (path) => path,
-          configure: (proxy, options) => {
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              console.log(`代理请求: ${req.method} ${req.url} -> ${options.target}${proxyReq.path}`)
-            })
-          }
+          rewrite: (path) => path
         }
       }
     },
@@ -49,7 +44,6 @@ export default defineConfig(({ mode }) => {
       },
       terserOptions: {
         compress: {
-          // 生产环境移除 console
           drop_console: mode === 'production',
           drop_debugger: mode === 'production'
         }

@@ -279,8 +279,11 @@ func (s *DomainService) configureDnsmasq(domainName, internalIP, configPath stri
 		return fmt.Errorf("写入配置失败: %v", err)
 	}
 
-	// 重载dnsmasq（忽略错误，因为服务可能不存在）
-	exec.Command("systemctl", "reload", "dnsmasq").Run()
+	// 重载dnsmasq
+	if err := exec.Command("systemctl", "reload", "dnsmasq").Run(); err != nil {
+		global.APP_LOG.Warn("重载dnsmasq失败，尝试restart", zap.Error(err))
+		exec.Command("systemctl", "restart", "dnsmasq").Run()
+	}
 
 	return nil
 }
@@ -409,7 +412,6 @@ func (s *DomainService) rebuildDnsmasq(domains []domainModel.Domain, configPath 
 		return err
 	}
 
-	// 重载dnsmasq（忽略错误，因为服务可能不存在）
 	exec.Command("systemctl", "reload", "dnsmasq").Run()
 	return nil
 }

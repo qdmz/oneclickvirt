@@ -4,14 +4,14 @@ FROM node:22-slim AS frontend-builder
 ARG TARGETARCH
 WORKDIR /app/web
 COPY web/package*.json ./
-RUN npm ci --include=optional
+RUN npm install --legacy-peer-deps
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
         npm install --no-save @rollup/rollup-linux-x64-gnu; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
         npm install --no-save @rollup/rollup-linux-arm64-gnu; \
     fi
 COPY web/ ./
-RUN npm run build
+RUN npm run build --verbose
 
 
 FROM golang:1.25-alpine AS backend-builder

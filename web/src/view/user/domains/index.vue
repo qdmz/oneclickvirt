@@ -99,23 +99,17 @@
     <!-- 添加/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑域名' : '添加域名'" width="500px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-        <el-form-item label="实例" prop="instanceId">
-          <el-select v-model="form.instanceId" placeholder="请选择实例" @change="handleInstanceChange">
-            <el-option v-for="instance in instanceList" :key="instance.id" :label="`${instance.id} - ${instance.name}`" :value="instance.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="内部IP" prop="internalIp">
-          <el-select v-model="form.internalIp" placeholder="请选择内部IP">
-            <el-option v-for="ip in instanceIps" :key="ip" :label="ip" :value="ip" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="内部端口" prop="internalPort">
-          <el-select v-model="form.internalPort" placeholder="请选择内部端口">
-            <el-option v-for="port in instancePorts" :key="port" :label="port" :value="port" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="域名" prop="domain">
           <el-input v-model="form.domain" placeholder="example.com" :disabled="isEdit" />
+        </el-form-item>
+        <el-form-item label="实例ID" prop="instanceId">
+          <el-input-number v-model="form.instanceId" :min="1" />
+        </el-form-item>
+        <el-form-item label="内部IP" prop="internalIp">
+          <el-input v-model="form.internalIp" placeholder="10.0.0.x" />
+        </el-form-item>
+        <el-form-item label="内部端口" prop="internalPort">
+          <el-input-number v-model="form.internalPort" :min="1" :max="65535" />
         </el-form-item>
         <el-form-item label="外部端口">
           <el-input-number v-model="form.externalPort" :min="0" :max="65535" placeholder="0=自动分配" />
@@ -144,7 +138,6 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getDomains, createDomain, updateDomain, deleteDomain, getDomainQuota } from '@/api/domain'
-import { getUserInstances } from '@/api/user'
 
 const loading = ref(false)
 const domainList = ref([])
@@ -167,16 +160,11 @@ const form = reactive({
   protocol: 'http'
 })
 
-// 实例相关数据
-const instanceList = ref([])
-const instanceIps = ref([])
-const instancePorts = ref([])
-
 const rules = {
   domain: [{ required: true, message: '请输入域名', trigger: 'blur' }],
   instanceId: [{ required: true, message: '请选择实例', trigger: 'change' }],
-  internalIp: [{ required: true, message: '请选择内部IP', trigger: 'blur' }],
-  internalPort: [{ required: true, message: '请选择内部端口', trigger: 'blur' }],
+  internalIp: [{ required: true, message: '请输入内部IP', trigger: 'blur' }],
+  internalPort: [{ required: true, message: '请输入内部端口', trigger: 'blur' }],
   protocol: [{ required: true, message: '请选择协议', trigger: 'change' }]
 }
 
@@ -211,68 +199,15 @@ async function fetchQuota() {
   } catch {}
 }
 
-// 获取用户的实例列表
-async function fetchInstances() {
-  try {
-    const res = await getUserInstances()
-    if (res.code === 0) {
-      instanceList.value = res.data?.list || []
-    }
-  } catch (e) {
-    console.error('获取实例列表失败', e)
-  }
-}
-
-// 实例选择变化时
-async function handleInstanceChange(instanceId) {
-  if (!instanceId) {
-    instanceIps.value = []
-    instancePorts.value = []
-    return
-  }
-  
-  // 从实例列表中获取实例详情
-  const instance = instanceList.value.find(i => i.id === instanceId)
-  if (instance) {
-    // 设置IP列表
-    instanceIps.value = []
-    if (instance.private_ip) {
-      instanceIps.value.push(instance.private_ip)
-    }
-    if (instance.ipv6_address) {
-      instanceIps.value.push(instance.ipv6_address)
-    }
-    
-    // 简单设置端口列表，实际项目中可能需要从端口映射中获取
-    instancePorts.value = [80, 443, 22, 3389, 8080, 3306]
-    
-    // 自动选择第一个IP和端口
-    if (instanceIps.value.length > 0) {
-      form.internalIp = instanceIps.value[0]
-    }
-    if (instancePorts.value.length > 0) {
-      form.internalPort = instancePorts.value[0]
-    }
-  }
-}
-
 function showAddDialog() {
   isEdit.value = false
   Object.assign(form, { id: null, domain: '', instanceId: null, internalIp: '', internalPort: 80, externalPort: 0, protocol: 'http' })
-  instanceIps.value = []
-  instancePorts.value = []
-  // 加载实例列表
-  fetchInstances()
   dialogVisible.value = true
 }
 
-async function showEditDialog(row) {
+function showEditDialog(row) {
   isEdit.value = true
   Object.assign(form, { id: row.id, domain: row.domain, instanceId: row.instanceId, internalIp: row.internalIp, internalPort: row.internalPort, externalPort: row.externalPort, protocol: row.protocol })
-  // 加载实例列表
-  await fetchInstances()
-  // 加载实例详情
-  await handleInstanceChange(row.instanceId)
   dialogVisible.value = true
 }
 

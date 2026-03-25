@@ -167,7 +167,14 @@ const userRoutes = computed(() => {
             icon: 'List'
           }
         },
-
+        {
+          path: '/user/wallet',
+          name: 'UserWallet',
+          meta: {
+            title: t('sidebar.wallet'),
+            icon: 'Wallet'
+          }
+        },
         {  path: '/user/domains',
           name: 'UserDomains',
           meta: {
@@ -191,33 +198,13 @@ const userRoutes = computed(() => {
             icon: 'ShoppingCart'
           }
         },
-        {
-          path: '/user/kyc',
+        {  path: '/user/kyc',
           name: 'UserKYC',
           meta: {
             title: t('sidebar.kycManagement'),
             icon: 'User'
           }
         },
-        {
-          path: '/user/wallet',
-          name: 'UserWallet',
-          meta: {
-            title: '资金管理',
-            icon: 'Wallet'
-          }
-        },
-        {
-          path: '/user/profile',
-          name: 'UserProfile',
-          meta: {
-            title: t('sidebar.personalCenter'),
-            icon: 'User'
-          }
-        }
-      ],
-      // 代理商路由
-      agent: [
         {
           path: '/agent/dashboard',
           name: 'AgentDashboard',
@@ -251,27 +238,11 @@ const userRoutes = computed(() => {
           }
         },
         {
-          path: '/user/instances',
-          name: 'UserInstances',
+          path: '/agent/wallet',
+          name: 'AgentWallet',
           meta: {
-            title: t('sidebar.myInstances'),
-            icon: 'Box'
-          }
-        },
-        {
-          path: '/user/apply',
-          name: 'UserApply',
-          meta: {
-            title: t('sidebar.apply'),
-            icon: 'Plus'
-          }
-        },
-        {
-          path: '/user/tasks',
-          name: 'UserTasks',
-          meta: {
-            title: t('sidebar.taskList'),
-            icon: 'List'
+            title: t('sidebar.wallet'),
+            icon: 'Wallet'
           }
         },
         {

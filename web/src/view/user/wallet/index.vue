@@ -109,16 +109,6 @@
                   </el-icon>
                   {{ t('user.wallet.paymentMethods.epay') }}
                 </el-radio>
-                <el-select
-                  v-if="rechargeForm.paymentMethod === 'epay'"
-                  v-model="rechargeForm.epayType"
-                  placeholder="选择支付方式"
-                  class="mt-10"
-                >
-                  <el-option label="支付宝" value="alipay" />
-                  <el-option label="微信" value="wechat" />
-                  <el-option label="QQ钱包" value="qqpay" />
-                </el-select>
               </el-radio-group>
             </el-form-item>
             <el-form-item>
@@ -280,7 +270,7 @@
           class="qr-code"
         />
         <p class="amount-text">
-          支付金额: ¥{{ currentOrder.amount.toFixed(2) }}
+          支付金额: ¥{{ (currentOrder.amount / 100).toFixed(2) }}
         </p>
         <p class="tip-text">
           请使用{{ getPaymentMethodName(rechargeForm.paymentMethod) }}{{ rechargeForm.paymentMethod === 'epay' || rechargeForm.paymentMethod === 'mapay' ? '完成支付' : '扫描二维码' }}
@@ -342,8 +332,7 @@ const paymentConfig = ref({
 
 const rechargeForm = ref({
   amount: 10,
-  paymentMethod: 'alipay',
-  epayType: 'alipay'
+  paymentMethod: 'alipay'
 })
 
 const exchangeForm = ref({
@@ -547,7 +536,7 @@ const getQRCode = async () => {
     } else if (rechargeForm.value.paymentMethod === 'wechat') {
       res = await getWechatQR(currentOrder.value.orderNo)
     } else if (rechargeForm.value.paymentMethod === 'epay') {
-      res = await getEpayQR(currentOrder.value.orderNo, rechargeForm.value.epayType)
+      res = await getEpayQR(currentOrder.value.orderNo)
     } else if (rechargeForm.value.paymentMethod === 'mapay') {
       res = await getMapayQR(currentOrder.value.orderNo)
     } else {
@@ -713,19 +702,14 @@ onMounted(() => {
   font-size: 48px;
   font-weight: bold;
   margin: 20px 0;
-  color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .wallet-card :deep(.el-descriptions__label) {
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .wallet-card :deep(.el-descriptions__content) {
-  color: #ffffff;
-  font-weight: bold;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: white;
 }
 
 .card-header {
