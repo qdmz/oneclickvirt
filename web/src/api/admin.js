@@ -812,6 +812,14 @@ export const deleteOrder = (id) => {
   })
 }
 
+export const batchDeleteOrders = (data) => {
+  return request({
+    url: '/v1/admin/orders/batch-delete',
+    method: 'post',
+    data
+  })
+}
+
 export const cancelOrder = (id) => {
   return request({
     url: `/v1/admin/orders/${id}/cancel`,
