@@ -554,7 +554,14 @@ export const updateInstanceTypePermissions = (data) => {
   })
 }
 
-
+// 测试邮件配置
+export const testEmail = (data) => {
+  return request({
+    url: '/v1/admin/settings/test-email',
+    method: 'post',
+    data
+  })
+}
 
 // 端口映射管理API
 export const getPortMappings = (params) => {
