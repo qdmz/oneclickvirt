@@ -69,6 +69,7 @@ docker exec -i oneclickvirt mysql -uroot oneclickvirt < scripts/init.sql
 - ✅ **代理商系统管理** — 代理商审核、佣金调整、子用户管理
 - ✅ **域名绑定管理** — DNS 内部解析配置、Nginx 反代、用户域名配额
 - ✅ **实名认证管理** — 查看认证记录、手动审核
+- ✅ **智简魔方集成** — 支持智简魔方 API 管理，可通过智简魔方创建和管理实例
 
 ### 代理商功能
 - ✅ 代理商申请与入驻
@@ -125,7 +126,8 @@ oneclickvirt/
 │   │   ├── docker/            # Docker 支持
 │   │   ├── lxd/               # LXD 支持
 │   │   ├── incus/             # Incus 支持
-│   │   └── proxmox/           # Proxmox VE 支持
+│   │   ├── proxmox/           # Proxmox VE 支持
+│   │   └── zjmf/              # 智简魔方支持
 │   ├── router/                # 路由定义
 │   ├── initialize/            # 初始化（数据库/路由）
 │   ├── utils/                 # 工具函数
