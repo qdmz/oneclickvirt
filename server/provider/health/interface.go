@@ -79,7 +79,11 @@ type HealthConfig struct {
 	CertPath      string `json:"cert_path"`
 	KeyPath       string `json:"key_path"`
 	CertContent   string `json:"cert_content"` // 证书内容（优先于CertPath）
-	KeyContent    string `json:"key_content"`  // 私钥内容（优先于KeyPath）
+	KeyContent    string `json:"key_content"` // 私钥内容（优先于KeyPath）
+
+	// ZJMF API配置
+	APIKey    string `json:"api_key"`    // ZJMF API Key
+	APISecret string `json:"api_secret"` // ZJMF API Secret
 
 	// 检查配置
 	Timeout        time.Duration `json:"timeout"`
@@ -114,7 +118,9 @@ func (c HealthConfig) DeepCopy() HealthConfig {
 		CertPath:       c.CertPath,
 		KeyPath:        c.KeyPath,
 		CertContent:    c.CertContent,
-		KeyContent:     c.KeyContent,
+		KeyContent:    c.KeyContent,
+		APIKey:        c.APIKey,
+		APISecret:     c.APISecret,
 		Timeout:        c.Timeout,
 		SSHEnabled:     c.SSHEnabled,
 		ServiceChecks:  serviceChecks,

@@ -16,6 +16,7 @@ type Server struct {
 	Upload     Upload     `mapstructure:"upload" json:"upload" yaml:"upload"`
 	Other      Other      `mapstructure:"other" json:"other" yaml:"other"`
 	Payment    Payment    `mapstructure:"payment" json:"payment" yaml:"payment"`
+	AI         AI         `mapstructure:"ai" json:"ai" yaml:"ai"`
 }
 
 type Other struct {
@@ -178,4 +179,13 @@ type Payment struct {
 	EnableRealName      bool   `mapstructure:"enable-real-name" json:"enable-real-name" yaml:"enable-real-name"`                   // enable real name verification
 	RequireRealName     bool   `mapstructure:"require-real-name" json:"require-real-name" yaml:"require-real-name"`                // require real name before using services
 	RealNameCallbackURL string `mapstructure:"real-name-callback-url" json:"real-name-callback-url" yaml:"real-name-callback-url"` // callback URL for alipay redirect
+}
+
+// AI AI模型配置
+type AI struct {
+	OpenAIAPIKey      string   `mapstructure:"openai-api-key" json:"openai-api-key" yaml:"openai-api-key"`                   // OpenAI API Key
+	OpenAIAPIURL      string   `mapstructure:"openai-api-url" json:"openai-api-url" yaml:"openai-api-url"`                   // OpenAI API URL
+	CustomModels      []string `mapstructure:"custom-models" json:"custom-models" yaml:"custom-models"`                      // 自定义模型列表
+	DefaultModel      string   `mapstructure:"default-model" json:"default-model" yaml:"default-model"`                      // 默认模型
+	EnableCustomModel bool     `mapstructure:"enable-custom-model" json:"enable-custom-model" yaml:"enable-custom-model"`    // 是否启用自定义模型
 }

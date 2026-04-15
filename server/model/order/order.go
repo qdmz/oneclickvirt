@@ -11,7 +11,7 @@ type Order struct {
 	ID                    uint         `json:"id" gorm:"primaryKey"`
 	OrderNo               string       `json:"orderNo" gorm:"type:varchar(50);uniqueIndex;not null;comment:订单号"`
 	UserID                uint         `json:"userId" gorm:"index:idx_user_order;not null;comment:用户ID"`
-	ProductID             uint         `json:"productId" gorm:"index;not null;comment:产品ID"`
+	ProductID             *uint        `json:"productId" gorm:"index;comment:产品ID"`
 	Amount                float64      `json:"amount" gorm:"type:decimal(10,2);not null;comment:订单金额"`
 	Status                int          `json:"status" gorm:"index;default:0;comment:订单状态"`
 	PaymentMethod         string       `json:"paymentMethod" gorm:"type:varchar(20);comment:支付方式"`

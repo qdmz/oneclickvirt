@@ -307,12 +307,11 @@ func (s *Service) createInstanceWithMinimalTransaction(userID uint, req *userMod
 			PreallocatedBandwidth: bandwidthSpec.SpeedMbps,
 		}
 		
-		// 添加type字段，解决数据库错误：Field 'type' doesn't have a default value
+		// 创建任务数据映射
 		newTaskMap := make(map[string]interface{})
 		newTaskMap["user_id"] = newTask.UserID
 		newTaskMap["provider_id"] = newTask.ProviderID
 		newTaskMap["task_type"] = newTask.TaskType
-		newTaskMap["type"] = "create" // 添加type字段
 		newTaskMap["task_data"] = newTask.TaskData
 		newTaskMap["status"] = newTask.Status
 		newTaskMap["timeout_duration"] = newTask.TimeoutDuration

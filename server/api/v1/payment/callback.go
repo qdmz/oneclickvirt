@@ -152,7 +152,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	}
 
 	// 处理订单类型
-	if order.ProductID > 0 {
+	if order.ProductID != nil && *order.ProductID > 0 {
 		// 产品购买:提升用户等级
 		var user userModel.User
 		if err := tx.First(&user, order.UserID).Error; err != nil {
@@ -233,14 +233,14 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 				}
 
 				// 创建产品购买记录，用于记录用户购买的产品
-				productPurchase := productModel.ProductPurchase{
-					UserID:    order.UserID,
-					ProductID: order.ProductID,
-					Level:     newLevel,
-					StartDate: now,
-					EndDate:   user.LevelExpireAt,
-					IsActive:  true,
-				}
+			productPurchase := productModel.ProductPurchase{
+				UserID:    order.UserID,
+				ProductID: *order.ProductID,
+				Level:     newLevel,
+				StartDate: now,
+				EndDate:   user.LevelExpireAt,
+				IsActive:  true,
+			}
 				if err := tx.Create(&productPurchase).Error; err != nil {
 					global.APP_LOG.Error("创建产品购买记录失败", zap.Error(err))
 					tx.Rollback()
