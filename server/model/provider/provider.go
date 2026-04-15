@@ -128,13 +128,17 @@ type Provider struct {
 	CertPath        string     `json:"certPath" gorm:"size:512"`                 // 客户端证书文件路径
 	KeyPath         string     `json:"keyPath" gorm:"size:512"`                  // 客户端私钥文件路径
 	CACertPath      string     `json:"caCertPath" gorm:"size:512"`               // CA证书文件路径
-	CertFingerprint string `json:"certFingerprint" gorm:"size:128"`          // 证书指纹
+	CertFingerprint string     `json:"certFingerprint" gorm:"size:128"`          // 证书指纹
 	// TrustedFingerprint 可信的服务器证书指纹（SHA256，非空时使用指纹验证替代InsecureSkipVerify）
 	TrustedFingerprint string `json:"trustedFingerprint" gorm:"size:128"` // 可信的服务器证书指纹
 	APIStatus       string     `json:"apiStatus" gorm:"default:unknown;size:16"` // API连接状态：online, offline, unknown
 	SSHStatus       string     `json:"sshStatus" gorm:"default:unknown;size:16"` // SSH连接状态：online, offline, unknown
 	LastAPICheck    *time.Time `json:"lastApiCheck"`                             // 最后一次API健康检查时间
 	LastSSHCheck    *time.Time `json:"lastSshCheck"`                             // 最后一次SSH健康检查时间
+
+	// ZJMF API配置
+	APIKey    string `json:"-" gorm:"size:255"` // ZJMF API Key（不返回给前端）
+	APISecret string `json:"-" gorm:"size:255"` // ZJMF API Secret（不返回给前端）
 
 	// 配置管理字段
 	AuthConfig       string     `json:"-" gorm:"type:text"`                  // 完整认证配置JSON（不返回给前端）
@@ -453,6 +457,10 @@ type ProviderInstanceConfig struct {
 	Metadata     map[string]string `json:"metadata"`
 	InstanceType string            `json:"instance_type"` // container 或 vm
 
+	// ZJMF specific fields
+	ProductID   int    `json:"product_id"`   // ZJMF产品ID
+	BillingCycle string `json:"billing_cycle"` // ZJMF计费周期
+
 	// 容器特殊配置选项（仅适用于 LXD 和 Incus 的容器实例）
 	Privileged   *bool   `json:"privileged,omitempty"`   // 容器特权模式，使用指针以区分 false 和未设置
 	AllowNesting *bool   `json:"allowNesting,omitempty"` // 容器嵌套
@@ -489,6 +497,11 @@ type ProviderNodeConfig struct {
 	SSHExecuteTimeout     int      `json:"ssh_execute_timeout"` // SSH命令执行超时时间（秒）
 	ExecutionRule         string   `json:"execution_rule"`      // 操作轮转规则：auto, api_only, ssh_only
 	NetworkType           string   `json:"networkType"`         // 网络配置类型：nat_ipv4, nat_ipv4_ipv6, dedicated_ipv4, dedicated_ipv4_ipv6, ipv6_only
+
+	// ZJMF API配置
+	APIKey    string `json:"api_key"`    // ZJMF API Key
+	APISecret string `json:"api_secret"` // ZJMF API Secret
+	APIURL    string `json:"api_url"`    // ZJMF API URL
 
 	// 容器资源限制配置（Provider层面）
 	ContainerLimitCPU    bool `json:"containerLimitCpu"`    // 容器是否限制CPU数量，默认不限制

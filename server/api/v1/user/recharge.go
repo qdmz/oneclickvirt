@@ -76,6 +76,7 @@ func CreateRechargeOrder(c *gin.Context) {
 	order := orderModel.Order{
 		OrderNo:       orderNo,
 		UserID:        userID.(uint),
+		ProductID:     nil, // 充值订单没有产品ID
 		Amount:        float64(params.Amount),
 		Status:        orderModel.OrderStatusPending,
 		PaymentMethod: params.PaymentMethod,
@@ -212,6 +213,7 @@ func GetRechargeWechatQR(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param orderNo path string true "订单号"
+// @Param type query string false "支付类型: alipay, wxpay, qqpay"
 // @Success 200 {object} common.Response
 // @Router /v1/user/recharge/epay-qr/{orderNo} [get]
 func GetRechargeEpayQR(c *gin.Context) {
@@ -220,6 +222,9 @@ func GetRechargeEpayQR(c *gin.Context) {
 		c.JSON(400, gin.H{"code": 400, "message": "订单号不能为空"})
 		return
 	}
+
+	// 获取支付类型，默认为alipay
+	payType := c.DefaultQuery("type", "alipay")
 
 	var order orderModel.Order
 	if err := global.APP_DB.Where("order_no = ?", orderNo).First(&order).Error; err != nil {
@@ -255,7 +260,7 @@ func GetRechargeEpayQR(c *gin.Context) {
 	// 构建易支付参数
 	params := url.Values{}
 	params.Set("pid", global.APP_CONFIG.Payment.EpayPID)
-	params.Set("type", "alipay")
+	params.Set("type", payType)
 	params.Set("out_trade_no", orderNo)
 	params.Set("notify_url", global.APP_CONFIG.Payment.EpayNotifyURL)
 	params.Set("return_url", global.APP_CONFIG.Payment.EpayReturnURL)

@@ -451,8 +451,8 @@ func PurchaseProduct(c *gin.Context) {
 	order := orderModel.Order{
 		OrderNo:       orderNo,
 		UserID:        userID.(uint),
-		ProductID:     product.ID,
-		Amount:        float64(product.Price) / 100,
+		ProductID:     &product.ID,
+		Amount:        float64(product.Price),
 		Status:        0, // 0: 待支付
 		PaymentMethod: params.PaymentMethod,
 		ProductData:   productData,
@@ -515,7 +515,7 @@ func PurchaseProduct(c *gin.Context) {
 		order.Status = orderModel.OrderStatusPaid
 		now := time.Now()
 		order.PaymentTime = &now
-		order.PaidAmount = float64(product.Price) / 100
+		order.PaidAmount = float64(product.Price)
 	}
 
 	// 创建订单
@@ -773,7 +773,7 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	params.Set("notify_url", global.APP_CONFIG.Payment.EpayNotifyURL)
 	params.Set("return_url", global.APP_CONFIG.Payment.EpayReturnURL)
 	params.Set("name", "产品购买")
-	params.Set("money", fmt.Sprintf("%.2f", order.Amount))
+	params.Set("money", fmt.Sprintf("%.2f", order.Amount / 100))
 
 	// 生成签名
 	sign := generatePurchaseEpaySign(params, global.APP_CONFIG.Payment.EpayKey)
