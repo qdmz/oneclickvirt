@@ -267,7 +267,11 @@ const formData = ref({
   containerCpuAllowance: '100%',
   containerMemorySwap: true,
   containerMaxProcesses: 0,
-  containerDiskIoLimit: ''
+  containerDiskIoLimit: '',
+  // ZJMF API配置
+  apiKey: '',
+  apiSecret: '',
+  apiURL: ''
 })
 
 // 异步验证器：检查Provider名称是否已存在

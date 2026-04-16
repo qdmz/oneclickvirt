@@ -618,20 +618,34 @@ const fetchPublicStats = async () => {
     const resp = await getPublicStats()
     if (resp && (resp.code === 0 || resp.code === 200) && resp.data) {
       const d = resp.data
+      console.log('获取到的统计数据:', JSON.stringify(d, null, 2))
       // 尝试从常见字段拾取数据，做多层回退以兼容不同返回结构
-      usersCount.value = d.userStats?.totalUsers ?? d.user_count ?? d.userCount ?? d.userTotal ?? null
-      // nodes 可能对应 regionStats 的 count 总和或 provider 总数
-      if (Array.isArray(d.regionStats) && d.regionStats.length > 0) {
+      // 用户数：兼容不同大小写和命名方式
+      usersCount.value = d.UserStats?.TotalUsers ?? d.userStats?.totalUsers ?? d.userStats?.TotalUsers ?? d.user_count ?? d.userCount ?? d.userTotal ?? null
+      // 节点数：兼容不同大小写和命名方式
+      if (Array.isArray(d.RegionStats) && d.RegionStats.length > 0) {
         let total = 0
-        d.regionStats.forEach(r => { total += r.count ?? 0 })
+        d.RegionStats.forEach(r => { total += r.count ?? r.Count ?? 0 })
+        nodesCount.value = total
+      } else if (Array.isArray(d.regionStats) && d.regionStats.length > 0) {
+        let total = 0
+        d.regionStats.forEach(r => { total += r.count ?? r.Count ?? 0 })
         nodesCount.value = total
       } else {
         nodesCount.value = d.provider_count ?? d.node_count ?? d.nodeCount ?? null
       }
 
-      // 容器/虚拟机：尝试从资源统计中读取
-      containersCount.value = d.resourceUsage?.container_count ?? d.resourceUsage?.containerCount ?? d.container_count ?? d.containerCount ?? null
-      vmsCount.value = d.resourceUsage?.vm_count ?? d.resourceUsage?.vmCount ?? d.vm_count ?? d.vmCount ?? null
+      // 容器数：兼容不同大小写和命名方式
+      containersCount.value = d.ResourceUsage?.ContainerCount ?? d.ResourceUsage?.containerCount ?? d.resourceUsage?.ContainerCount ?? d.resourceUsage?.container_count ?? d.resourceUsage?.containerCount ?? d.container_count ?? d.containerCount ?? null
+      // 虚拟机数：兼容不同大小写和命名方式
+      vmsCount.value = d.ResourceUsage?.VMCount ?? d.ResourceUsage?.vmCount ?? d.resourceUsage?.VMCount ?? d.resourceUsage?.vm_count ?? d.resourceUsage?.vmCount ?? d.vm_count ?? d.vmCount ?? null
+      
+      console.log('解析后的统计数据:', {
+        usersCount: usersCount.value,
+        nodesCount: nodesCount.value,
+        containersCount: containersCount.value,
+        vmsCount: vmsCount.value
+      })
     }
   } catch (error) {
     console.error('获取公开统计数据失败', error)

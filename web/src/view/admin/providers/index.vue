@@ -508,7 +508,11 @@ const cancelAddServer = () => {
       3: { maxInstances: 5, maxResources: { cpu: 4, memory: 2048, disk: 40960, bandwidth: 500 }, maxTraffic: 307200 },
       4: { maxInstances: 10, maxResources: { cpu: 8, memory: 4096, disk: 81920, bandwidth: 1000 }, maxTraffic: 409600 },
       5: { maxInstances: 20, maxResources: { cpu: 16, memory: 8192, disk: 163840, bandwidth: 2000 }, maxTraffic: 512000 }
-    }
+    },
+    // ZJMF API配置
+    apiKey: '',
+    apiSecret: '',
+    apiURL: ''
   })
 }
 
@@ -626,7 +630,18 @@ const submitAddServer = async (formData) => {
       // 编辑模式：根据当前选择的认证方式和是否填写了新凭证来决定
       const originalAuthMethod = formData.authMethod // 当前选择的认证方式
       
-      if (originalAuthMethod === 'password') {
+      if (formData.type === 'zjmf') {
+        // ZJMF 类型，使用 API Key 和 API Secret
+        if (formData.apiKey) {
+          serverData.apiKey = formData.apiKey
+        }
+        if (formData.apiSecret) {
+          serverData.apiSecret = formData.apiSecret
+        }
+        if (formData.apiURL) {
+          serverData.apiURL = formData.apiURL
+        }
+      } else if (originalAuthMethod === 'password') {
         // 当前选择密码认证
         if (formData.password) {
           // 填写了新密码，更新密码
@@ -645,7 +660,12 @@ const submitAddServer = async (formData) => {
       }
     } else {
       // 创建模式：根据认证方式发送对应字段，确保只发送一种
-      if (formData.authMethod === 'password') {
+      if (formData.type === 'zjmf') {
+        // ZJMF 类型，使用 API Key 和 API Secret
+        serverData.apiKey = formData.apiKey
+        serverData.apiSecret = formData.apiSecret
+        serverData.apiURL = formData.apiURL
+      } else if (formData.authMethod === 'password') {
         serverData.password = formData.password
         // 创建时不发送sshKey，避免发送空字符串
       } else if (formData.authMethod === 'sshKey') {
@@ -757,6 +777,10 @@ const editProvider = (provider) => {
   addProviderForm.vmLimitCpu = provider.vmLimitCpu !== undefined ? provider.vmLimitCpu : true
   addProviderForm.vmLimitMemory = provider.vmLimitMemory !== undefined ? provider.vmLimitMemory : true
   addProviderForm.vmLimitDisk = provider.vmLimitDisk !== undefined ? provider.vmLimitDisk : true
+  // ZJMF API配置
+  addProviderForm.apiKey = provider.apiKey || ''
+  addProviderForm.apiSecret = ''
+  addProviderForm.apiURL = provider.apiURL || ''
 
   // 根据Provider类型设置端口映射方式，优先使用数据库中保存的值，没有时使用类型默认值
   // Docker 类型固定为 native

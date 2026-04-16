@@ -72,45 +72,63 @@
               />
             </el-form-item>
             <el-form-item :label="t('user.wallet.paymentMethod')">
-              <el-radio-group v-model="rechargeForm.paymentMethod">
-                <el-radio
-                  v-if="paymentConfig.enableAlipay"
-                  value="alipay"
-                >
-                  <el-icon color="#1677ff">
-                    <Wallet />
-                  </el-icon>
-                  {{ t('user.wallet.paymentMethods.alipay') }}
-                </el-radio>
-                <el-radio
-                  v-if="paymentConfig.enableWechat"
-                  value="wechat"
-                >
-                  <el-icon color="#07c160">
-                    <ChatDotRound />
-                  </el-icon>
-                  {{ t('user.wallet.paymentMethods.wechat') }}
-                </el-radio>
-                <el-radio
-                  v-if="paymentConfig.enableMapay"
-                  value="mapay"
-                >
-                  <el-icon color="#f7ba2a">
-                    <Wallet />
-                  </el-icon>
-                  {{ t('user.wallet.paymentMethods.mapay') }}
-                </el-radio>
-                <el-radio
-                  v-if="paymentConfig.enableEpay"
-                  value="epay"
-                >
-                  <el-icon color="#409eff">
-                    <Wallet />
-                  </el-icon>
-                  {{ t('user.wallet.paymentMethods.epay') }}
-                </el-radio>
-              </el-radio-group>
-            </el-form-item>
+          <el-radio-group v-model="rechargeForm.paymentMethod">
+            <el-radio
+              v-if="paymentConfig.enableAlipay"
+              value="alipay"
+            >
+              <el-icon color="#1677ff">
+                <Wallet />
+              </el-icon>
+              {{ t('user.wallet.paymentMethods.alipay') }}
+            </el-radio>
+            <el-radio
+              v-if="paymentConfig.enableWechat"
+              value="wechat"
+            >
+              <el-icon color="#07c160">
+                <ChatDotRound />
+              </el-icon>
+              {{ t('user.wallet.paymentMethods.wechat') }}
+            </el-radio>
+            <el-radio
+              v-if="paymentConfig.enableMapay"
+              value="mapay"
+            >
+              <el-icon color="#f7ba2a">
+                <Wallet />
+              </el-icon>
+              {{ t('user.wallet.paymentMethods.mapay') }}
+            </el-radio>
+            <el-radio
+              v-if="paymentConfig.enableEpay"
+              value="epay"
+            >
+              <el-icon color="#409eff">
+                <Wallet />
+              </el-icon>
+              {{ t('user.wallet.paymentMethods.epay') }}
+            </el-radio>
+            <el-radio
+              v-if="paymentConfig.enableEpay"
+              value="epay_wxpay"
+            >
+              <el-icon color="#07c160">
+                <ChatDotRound />
+              </el-icon>
+              易支付-微信支付
+            </el-radio>
+            <el-radio
+              v-if="paymentConfig.enableEpay"
+              value="epay_qqpay"
+            >
+              <el-icon color="#12b7f5">
+                <ChatDotRound />
+              </el-icon>
+              易支付-QQ支付
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
             <el-form-item>
               <el-button
                 type="primary"
@@ -421,7 +439,9 @@ const getPaymentMethodName = (method) => {
     alipay: '支付宝',
     wechat: '微信',
     mapay: '码支付',
-    epay: '易支付'
+    epay: '易支付-支付宝',
+    epay_wxpay: '易支付-微信支付',
+    epay_qqpay: '易支付-QQ支付'
   }
   return map[method] || method
 }
@@ -435,12 +455,25 @@ const handleRecharge = async () => {
 
   recharging.value = true
   try {
-    const res = await createRechargeOrder({
+    // 处理支付方式，将epay_xxx转换为epay
+    let paymentMethod = rechargeForm.value.paymentMethod
+    if (paymentMethod.startsWith('epay_')) {
+      paymentMethod = 'epay'
+    }
+
+    console.log('创建充值订单参数:', {
       amount: Math.round(rechargeForm.value.amount * 100),
-      paymentMethod: rechargeForm.value.paymentMethod
+      paymentMethod: paymentMethod
     })
 
-    if (res.code === 200) {
+    const res = await createRechargeOrder({
+      amount: Math.round(rechargeForm.value.amount * 100),
+      paymentMethod: paymentMethod
+    })
+
+    console.log('创建充值订单响应:', res)
+
+    if (res.code === 200 || res.code === 0) {
       currentOrder.value = res.data
       // 获取支付二维码
       await getQRCode()
@@ -448,10 +481,11 @@ const handleRecharge = async () => {
       // 开始轮询订单状态
       startPollOrderStatus()
     } else {
-      ElMessage.error(res.message || '创建订单失败')
+      ElMessage.error(res.message || res.msg || '创建订单失败')
     }
   } catch (error) {
-    ElMessage.error('创建订单失败')
+    console.error('创建充值订单失败:', error)
+    ElMessage.error('创建订单失败: ' + (error.message || '未知错误'))
   } finally {
     recharging.value = false
   }
@@ -531,12 +565,18 @@ const generateQRCode = (text) => {
 const getQRCode = async () => {
   try {
     let res
+    let payType = 'alipay'
+    
     if (rechargeForm.value.paymentMethod === 'alipay') {
       res = await getAlipayQR(currentOrder.value.orderNo)
     } else if (rechargeForm.value.paymentMethod === 'wechat') {
       res = await getWechatQR(currentOrder.value.orderNo)
     } else if (rechargeForm.value.paymentMethod === 'epay') {
-      res = await getEpayQR(currentOrder.value.orderNo)
+      res = await getEpayQR(currentOrder.value.orderNo, 'alipay')
+    } else if (rechargeForm.value.paymentMethod === 'epay_wxpay') {
+      res = await getEpayQR(currentOrder.value.orderNo, 'wxpay')
+    } else if (rechargeForm.value.paymentMethod === 'epay_qqpay') {
+      res = await getEpayQR(currentOrder.value.orderNo, 'qqpay')
     } else if (rechargeForm.value.paymentMethod === 'mapay') {
       res = await getMapayQR(currentOrder.value.orderNo)
     } else {
@@ -702,14 +742,16 @@ onMounted(() => {
   font-size: 48px;
   font-weight: bold;
   margin: 20px 0;
+  color: red;
 }
 
 .wallet-card :deep(.el-descriptions__label) {
-  color: rgba(255, 255, 255, 0.8);
+  color: blue;
 }
 
 .wallet-card :deep(.el-descriptions__content) {
-  color: white;
+  color: blue;
+  font-weight: 500;
 }
 
 .card-header {
