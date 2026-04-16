@@ -41,6 +41,10 @@
           label="Proxmox"
           value="proxmox"
         />
+        <el-option
+          label="智简魔方 (ZJMF)"
+          value="zjmf"
+        />
       </el-select>
     </el-form-item>
     <el-form-item

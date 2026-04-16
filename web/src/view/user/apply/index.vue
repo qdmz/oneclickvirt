@@ -1007,7 +1007,10 @@ const submitApplication = async () => {
       description: configForm.description
     }
     
+    console.log('提交申请参数:', requestData)
+    
     const response = await createInstance(requestData)
+    console.log('提交申请响应:', response)
     if (response.code === 0 || response.code === 200) {
       ElMessage.success(t('user.apply.instanceCreatedSuccess'))
       // 显示任务信息

@@ -144,11 +144,22 @@
           value="epay"
           class="payment-option"
         >
-          <el-icon color="#409eff">
+          <el-icon color="#1677ff">
             <Wallet />
           </el-icon>
           <span>{{ t('user.purchase.epay') }}</span>
         </el-radio>
+        <el-radio
+          v-if="paymentConfig.enableEpay"
+          value="epay_wxpay"
+          class="payment-option"
+        >
+          <el-icon color="#07c160">
+            <ChatDotRound />
+          </el-icon>
+          <span>易支付-微信支付</span>
+        </el-radio>
+
         <el-radio
           v-if="paymentConfig.enableBalance"
           value="balance"
@@ -411,6 +422,8 @@ const getPaymentMethodName = (method) => {
     wechat: t('user.purchase.wechat'),
     mapay: t('user.purchase.mapay'),
     epay: t('user.purchase.epay'),
+    epay_wxpay: '易支付-微信支付',
+    epay_qqpay: '易支付-QQ支付',
     balance: t('user.purchase.balance')
   }
   return map[method] || method
@@ -429,8 +442,14 @@ const handleConfirmPurchase = async () => {
 
   purchasing.value = true
   try {
+    // 处理支付方式，将epay_xxx转换为epay
+    let paymentMethodValue = paymentMethod.value
+    if (paymentMethodValue.startsWith('epay_')) {
+      paymentMethodValue = 'epay'
+    }
+
     const res = await purchaseProduct(selectedProduct.value.id, {
-      paymentMethod: paymentMethod.value
+      paymentMethod: paymentMethodValue
     })
 
     if (res.code === 200) {
@@ -438,7 +457,7 @@ const handleConfirmPurchase = async () => {
         paymentDialogVisible.value = false
 
         // 如果是余额支付,直接完成
-        if (paymentMethod.value === 'balance') {
+        if (paymentMethodValue === 'balance') {
           ElMessage.success(t('user.purchase.purchaseSuccess'))
           loadProducts()
           // 跳转到实例创建页面
@@ -469,7 +488,11 @@ const getQRCode = async () => {
     } else if (paymentMethod.value === 'wechat') {
       res = await getWechatQR(currentOrder.value.orderNo)
     } else if (paymentMethod.value === 'epay') {
-      res = await getPurchaseEpayQR(currentOrder.value.orderNo)
+      res = await getPurchaseEpayQR(currentOrder.value.orderNo, 'alipay')
+    } else if (paymentMethod.value === 'epay_wxpay') {
+      res = await getPurchaseEpayQR(currentOrder.value.orderNo, 'wxpay')
+    } else if (paymentMethod.value === 'epay_qqpay') {
+      res = await getPurchaseEpayQR(currentOrder.value.orderNo, 'qqpay')
     } else if (paymentMethod.value === 'mapay') {
       res = await getPurchaseMapayQR(currentOrder.value.orderNo)
     }
