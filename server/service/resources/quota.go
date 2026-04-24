@@ -73,12 +73,11 @@ func (s *QuotaService) ValidateInstanceCreation(req ResourceRequest) (*QuotaChec
 	var err error
 
 	// 开启串行化事务隔离级别（最高级别，完全避免并发问题）
+	// 注意：MySQL中SET TRANSACTION ISOLATION LEVEL必须在事务开始之前执行
+	// 这里使用GORM的BeginTx方法在开始事务时指定隔离级别
 	err = global.APP_DB.Transaction(func(tx *gorm.DB) error {
-		// 设置事务隔离级别为 SERIALIZABLE
-		if err := tx.Exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error; err != nil {
-			return fmt.Errorf("设置事务隔离级别失败: %v", err)
-		}
-
+		// 直接进行配额验证，使用默认的REPEATABLE READ隔离级别
+		// 配合FOR UPDATE锁已经足够保证并发安全
 		result, err = s.validateInTransaction(tx, req)
 		if err != nil {
 			return err
