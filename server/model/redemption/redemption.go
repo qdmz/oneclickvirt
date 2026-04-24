@@ -11,7 +11,7 @@ type RedemptionCode struct {
 	ID        uint       `json:"id" gorm:"primaryKey"`
 	Code      string     `json:"code" gorm:"type:varchar(32);uniqueIndex;not null;comment:兑换码"`
 	Type      string     `json:"type" gorm:"type:varchar(20);not null;comment:兑换码类型"`
-	Amount    int64      `json:"amount" gorm:"default:0;comment:金额(分)或等级数"`
+	Amount    int64      `json:"amount" gorm:"column:value;default:0;comment:金额(分)或等级数"`
 	ProductID *uint      `json:"productId" gorm:"index;comment:产品ID"`
 	MaxUses   int        `json:"maxUses" gorm:"default:1;comment:最大使用次数"`
 	UsedCount int        `json:"usedCount" gorm:"default:0;comment:已使用次数"`
