@@ -413,6 +413,17 @@ func syncPaymentConfig(paymentConfig map[string]interface{}) {
 		global.APP_CONFIG.Payment.EnableBalance = v
 	}
 
+	// 实名认证配置
+	if v, ok := paymentConfig["enable-real-name"].(bool); ok {
+		global.APP_CONFIG.Payment.EnableRealName = v
+	}
+	if v, ok := paymentConfig["require-real-name"].(bool); ok {
+		global.APP_CONFIG.Payment.RequireRealName = v
+	}
+	if v, ok := paymentConfig["real-name-callback-url"].(string); ok {
+		global.APP_CONFIG.Payment.RealNameCallbackURL = v
+	}
+
 	// 易支付配置
 	if v, ok := paymentConfig["epay-api-url"].(string); ok {
 		global.APP_CONFIG.Payment.EpayAPIURL = v

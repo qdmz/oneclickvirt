@@ -248,6 +248,16 @@ func (s *PortMappingService) UpdateProviderPortConfig(providerID uint, req admin
 		return fmt.Errorf("Provider不存在")
 	}
 
+	// 检查是否存在已激活端口不在新范围内
+	var outOfRangeCount int64
+	if err := global.APP_DB.Model(&provider.Port{}).
+		Where("provider_id = ? AND status = 'active' AND (host_port < ? OR host_port > ?)", providerID, req.PortRangeStart, req.PortRangeEnd).
+		Count(&outOfRangeCount).Error; err != nil {
+		global.APP_LOG.Warn("检查Provider端口范围失败", zap.Error(err), zap.Uint("provider_id", providerID))
+	} else if outOfRangeCount > 0 {
+		return fmt.Errorf("存在 %d 个已激活端口不在新范围内，请先调整或删除这些端口", outOfRangeCount)
+	}
+
 	// 更新端口配置
 	providerInfo.DefaultPortCount = req.DefaultPortCount
 	providerInfo.PortRangeStart = req.PortRangeStart
@@ -256,8 +266,8 @@ func (s *PortMappingService) UpdateProviderPortConfig(providerID uint, req admin
 		providerInfo.NetworkType = req.NetworkType
 	}
 
-	// 如果没有设置NextAvailablePort，则设置为范围起始值
-	if providerInfo.NextAvailablePort < req.PortRangeStart {
+	// 调整NextAvailablePort，确保它落在范围内
+	if providerInfo.NextAvailablePort < req.PortRangeStart || providerInfo.NextAvailablePort > req.PortRangeEnd {
 		providerInfo.NextAvailablePort = req.PortRangeStart
 	}
 

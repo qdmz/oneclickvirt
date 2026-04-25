@@ -6,6 +6,7 @@ import (
 	"oneclickvirt/service/resources"
 	"oneclickvirt/service/task"
 	"strconv"
+	"strings"
 
 	"oneclickvirt/global"
 	"oneclickvirt/middleware"
@@ -129,6 +130,18 @@ func ClaimResource(c *gin.Context) {
 			zap.Uint("providerID", req.ProviderID),
 			zap.String("instanceType", req.InstanceType),
 			zap.Error(err))
+
+		if appErr, ok := err.(*common.AppError); ok {
+			common.ResponseWithError(c, appErr)
+			return
+		}
+
+		msg := err.Error()
+		if strings.Contains(msg, "不存在") || strings.Contains(msg, "不允许") || strings.Contains(msg, "已冻结") || strings.Contains(msg, "已过期") || strings.Contains(msg, "已达上限") || strings.Contains(msg, "资源不足") || strings.Contains(msg, "配额验证失败") || strings.Contains(msg, "资源分配失败") || strings.Contains(msg, "用户账户已被禁用") {
+			common.ResponseWithError(c, common.NewError(common.CodeValidationError, msg))
+			return
+		}
+
 		common.ResponseWithError(c, common.NewError(common.CodeInternalError, err.Error()))
 		return
 	}
