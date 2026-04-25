@@ -958,55 +958,8 @@ func (s *AuthService) sendSMSCode(phone, code string) error {
 }
 
 func (s *AuthService) sendEmail(to, subject, body string) error {
-	config := global.APP_CONFIG.Auth
-	if config.EmailSMTPHost == "" {
-		return errors.New("邮件服务未配置")
-	}
-	auth := smtp.PlainAuth("", config.EmailUsername, config.EmailPassword, config.EmailSMTPHost)
-	msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s", to, subject, body)
-
-	// 建立TLS连接
-	c, err := smtp.Dial(fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort))
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-
-	// 启用TLS
-	if err = c.StartTLS(nil); err != nil {
-		return err
-	}
-
-	// 认证
-	if err = c.Auth(auth); err != nil {
-		return err
-	}
-
-	// 设置发件人
-	if err = c.Mail(config.EmailUsername); err != nil {
-		return err
-	}
-
-	// 设置收件人
-	if err = c.Rcpt(to); err != nil {
-		return err
-	}
-
-	// 发送邮件内容
-	w, err := c.Data()
-	if err != nil {
-		return err
-	}
-	_, err = w.Write([]byte(msg))
-	if err != nil {
-		return err
-	}
-	err = w.Close()
-	if err != nil {
-		return err
-	}
-
-	return c.Quit()
+	emailSvc := email.NewEmailService()
+	return emailSvc.SendEmail(to, subject, body)
 }
 
 func generateRandomCode() string {
@@ -1399,5 +1352,5 @@ func (s *AuthService) VerifyResetToken(token string) error {
 func (s *AuthService) isEmailConfigured() bool {
 	// 检查系统配置中是否配置了邮箱服务
 	config := global.APP_CONFIG.Auth
-	return config.EmailSMTPHost != "" && config.EmailUsername != "" && config.EmailPassword != ""
+	return config.EmailSMTPHost != "" && config.EmailSMTPPort > 0 && config.EmailUsername != "" && config.EmailPassword != ""
 }

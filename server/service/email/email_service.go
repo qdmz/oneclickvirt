@@ -18,6 +18,11 @@ func NewEmailService() *EmailService {
 	return &EmailService{}
 }
 
+// SendEmail 发送原始HTML邮件
+func (s *EmailService) SendEmail(to, subject, htmlBody string) error {
+	return s.sendEmail(to, subject, htmlBody)
+}
+
 // sendEmail 发送邮件通用方法
 func (s *EmailService) sendEmail(to, subject, htmlBody string) error {
 	config := global.APP_CONFIG.Auth
@@ -27,6 +32,10 @@ func (s *EmailService) sendEmail(to, subject, htmlBody string) error {
 
 	if config.EmailUsername == "" || config.EmailPassword == "" {
 		return fmt.Errorf("邮件服务用户名或密码未配置")
+	}
+
+	if config.EmailSMTPPort <= 0 {
+		return fmt.Errorf("邮件SMTP端口未配置或无效")
 	}
 
 	auth := smtp.PlainAuth("", config.EmailUsername, config.EmailPassword, config.EmailSMTPHost)
@@ -40,32 +49,44 @@ func (s *EmailService) sendEmail(to, subject, htmlBody string) error {
 
 	// 处理安全连接
 	addr := fmt.Sprintf("%s:%d", config.EmailSMTPHost, config.EmailSMTPPort)
-	
-	// 建立连接
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		global.APP_LOG.Error("连接邮件服务器失败", zap.Error(err), zap.String("addr", addr))
-		return fmt.Errorf("连接邮件服务器失败: %v", err)
-	}
-	defer conn.Close()
 
-	// 创建SMTP客户端
-	client, err := smtp.NewClient(conn, config.EmailSMTPHost)
-	if err != nil {
-		global.APP_LOG.Error("创建SMTP客户端失败", zap.Error(err), zap.String("host", config.EmailSMTPHost))
-		return fmt.Errorf("创建SMTP客户端失败: %v", err)
+	var client *smtp.Client
+	if config.EmailSMTPPort == 465 {
+		conn, err := tls.Dial("tcp", addr, &tls.Config{
+			ServerName: config.EmailSMTPHost,
+		})
+		if err != nil {
+			global.APP_LOG.Error("连接邮件服务器失败", zap.Error(err), zap.String("addr", addr))
+			return fmt.Errorf("连接邮件服务器失败: %v", err)
+		}
+		client, err = smtp.NewClient(conn, config.EmailSMTPHost)
+		if err != nil {
+			global.APP_LOG.Error("创建SMTP客户端失败", zap.Error(err), zap.String("host", config.EmailSMTPHost))
+			return fmt.Errorf("创建SMTP客户端失败: %v", err)
+		}
+	} else {
+		conn, err := net.Dial("tcp", addr)
+		if err != nil {
+			global.APP_LOG.Error("连接邮件服务器失败", zap.Error(err), zap.String("addr", addr))
+			return fmt.Errorf("连接邮件服务器失败: %v", err)
+		}
+		defer conn.Close()
+
+		client, err = smtp.NewClient(conn, config.EmailSMTPHost)
+		if err != nil {
+			global.APP_LOG.Error("创建SMTP客户端失败", zap.Error(err), zap.String("host", config.EmailSMTPHost))
+			return fmt.Errorf("创建SMTP客户端失败: %v", err)
+		}
+
+		// 启用TLS 如果支持
+		tlsConfig := &tls.Config{
+			ServerName: config.EmailSMTPHost,
+		}
+		if err := client.StartTLS(tlsConfig); err != nil {
+			global.APP_LOG.Warn("SMTP服务器不支持STARTTLS或TLS握手失败，尝试继续", zap.Error(err))
+		}
 	}
 	defer client.Close()
-
-	// 启用TLS
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		ServerName:         config.EmailSMTPHost,
-	}
-	if err := client.StartTLS(tlsConfig); err != nil {
-		global.APP_LOG.Error("启用TLS失败", zap.Error(err))
-		return fmt.Errorf("启用TLS失败: %v", err)
-	}
 
 	// 认证
 	if err := client.Auth(auth); err != nil {
