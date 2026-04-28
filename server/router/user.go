@@ -120,5 +120,15 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.POST("/user/kyc/submit", user.SubmitCertification)
 		UserGroup.GET("/user/kyc/status", user.GetKYCStatus)
 		UserGroup.POST("/user/kyc/query", user.QueryAndUpdate)
+
+		// API Key 管理
+		apiKeyController := &user.APIKeyController{}
+		UserGroup.GET("/user/api-keys", apiKeyController.GetAPIKeys)
+		UserGroup.GET("/user/api-keys/stats", apiKeyController.GetAPIKeyStats)
+		UserGroup.POST("/user/api-keys", apiKeyController.CreateAPIKey)
+		UserGroup.GET("/user/api-keys/:id", apiKeyController.GetAPIKey)
+		UserGroup.PUT("/user/api-keys/:id", apiKeyController.UpdateAPIKey)
+		UserGroup.DELETE("/user/api-keys/:id", apiKeyController.DeleteAPIKey)
+		UserGroup.PUT("/user/api-keys/:id/revoke", apiKeyController.RevokeAPIKey)
 	}
 }

@@ -17,6 +17,7 @@ import (
 	providerModel "oneclickvirt/model/provider"
 	userModel "oneclickvirt/model/user"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -289,7 +290,9 @@ func (s *Service) CreateInstance(req admin.CreateInstanceRequest) error {
 	}
 
 	// 创建实例
+	uuid := uuid.New().String()
 	instance := providerModel.Instance{
+		UUID:         uuid,
 		Name:         req.Name,
 		Provider:     req.Provider,
 		ProviderID:   provider.ID,

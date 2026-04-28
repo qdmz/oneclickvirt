@@ -76,13 +76,14 @@ func CreateRechargeOrder(c *gin.Context) {
 	order := orderModel.Order{
 		OrderNo:       orderNo,
 		UserID:        userID.(uint),
-		ProductID:     nil, // 充值订单没有产品ID
+		ProductID:     0, // 充值订单没有产品ID
 		Amount:        float64(params.Amount),
 		Status:        orderModel.OrderStatusPending,
 		PaymentMethod: params.PaymentMethod,
 		PaidAmount:    0,
-		ProductData:   "{}",                             // 充值订单设置默认空JSON对象，避免约束失败
-		ExpireAt:      time.Now().Add(30 * time.Minute), // 30分钟过期
+		ProductData:   "{}", // 充值订单设置默认空JSON对象，避免约束失败
+		ExpiredAt:    func() *time.Time { t := time.Now().Add(30 * time.Minute); return &t }(), // 30分钟过期
+		ExpireAt:      func() *time.Time { t := time.Now().Add(30 * time.Minute); return &t }(), // 30分钟过期（兼容）
 	}
 
 	if err := global.APP_DB.Create(&order).Error; err != nil {
@@ -128,7 +129,7 @@ func GetRechargeAlipayQR(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if time.Now().After(order.ExpireAt) {
+	if order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
@@ -180,7 +181,7 @@ func GetRechargeWechatQR(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if time.Now().After(order.ExpireAt) {
+	if order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
@@ -239,7 +240,7 @@ func GetRechargeEpayQR(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if time.Now().After(order.ExpireAt) {
+	if order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
@@ -316,7 +317,7 @@ func GetRechargeMapayQR(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if time.Now().After(order.ExpireAt) {
+	if order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
@@ -608,7 +609,7 @@ func GetRechargeOrderStatus(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if order.Status == orderModel.OrderStatusPending && time.Now().After(order.ExpireAt) {
+	if order.Status == orderModel.OrderStatusPending && order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 	}

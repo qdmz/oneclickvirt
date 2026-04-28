@@ -15,6 +15,7 @@ import (
 	"oneclickvirt/service/resources"
 	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -308,7 +309,10 @@ func (s *Service) createInstanceWithMinimalTransaction(userID uint, req *userMod
 		}
 		
 		// 创建任务数据映射
+		taskUUID := uuid.New().String()
 		newTaskMap := make(map[string]interface{})
+		newTaskMap["uuid"] = taskUUID
+		newTaskMap["type"] = "instance" // 设置type字段
 		newTaskMap["user_id"] = newTask.UserID
 		newTaskMap["provider_id"] = newTask.ProviderID
 		newTaskMap["task_type"] = newTask.TaskType

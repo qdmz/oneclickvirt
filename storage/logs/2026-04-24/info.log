@@ -1,0 +1,748 @@
+[oneclickvirt]2026/04/24 - 15:08:21.992	info	系统初始化开始
+[oneclickvirt]2026/04/24 - 15:08:21.992	info	系统配置加载完成	{"env": "development", "addr": 8890, "captcha_enabled": false}
+[oneclickvirt]2026/04/24 - 15:08:21.992	info	全局SSH连接池已初始化
+[oneclickvirt]2026/04/24 - 15:08:21.992	info	开始初始化存储目录结构	{"baseDir": "storage", "dirsCount": 8}
+[oneclickvirt]2026/04/24 - 15:08:21.993	info	存储目录结构初始化完成	{"baseDir": "storage", "dirs": 8}
+[oneclickvirt]2026/04/24 - 15:08:21.993	info	正在连接数据库...
+[oneclickvirt]2026/04/24 - 15:08:21.993	info	日志清理任务已安排	{"nextRun": "[oneclickvirt]2026/04/25 - 01:00:00.000", "duration": 35498.006579487}
+[oneclickvirt]2026/04/24 - 15:08:21.994	error	数据库初始化失败	{"error": "连接数据库失败: Error 1130: Host '127.0.0.1' is not allowed to connect to this MySQL server"}
+[oneclickvirt]2026/04/24 - 15:08:21.995	warn	数据库连接失败，系统将以待初始化模式运行	{"dbType": "mysql", "error": "连接数据库失败: Error 1130: Host '127.0.0.1' is not allowed to connect to this MySQL server"}
+[oneclickvirt]2026/04/24 - 15:08:21.995	warn	系统未初始化，运行在待初始化模式
+[oneclickvirt]2026/04/24 - 15:08:21.995	info	请访问前端初始化页面完成系统初始化
+[oneclickvirt]2026/04/24 - 15:08:21.998	info	服务器启动成功	{"port": 8890}
+[oneclickvirt]2026/04/24 - 15:21:31.899	info	Shutdown Server ...
+[oneclickvirt]2026/04/24 - 15:21:31.900	info	开始关闭所有已注册服务	{"count": 0}
+[oneclickvirt]2026/04/24 - 15:21:31.900	info	所有服务关闭完成
+[oneclickvirt]2026/04/24 - 15:21:31.900	info	日志轮转任务已停止
+[oneclickvirt]2026/04/24 - 15:21:31.900	info	采样器清理任务已停止
+[oneclickvirt]2026/04/24 - 15:21:31.900	info	已关闭所有SSH连接
+[oneclickvirt]2026/04/24 - 15:21:31.900	info	SSH连接池清理goroutine已停止
+[oneclickvirt]2026/04/24 - 15:21:31.901	info	OAuth2服务已停止
+[oneclickvirt]2026/04/24 - 15:21:31.902	info	HTTP Transport已全部清理
+[oneclickvirt]2026/04/24 - 15:21:31.902	info	正在关闭数据库连接管理器...
+[oneclickvirt]2026/04/24 - 15:21:31.902	info	HTTP Transport定期清理已停止
+[oneclickvirt]2026/04/24 - 15:21:31.902	info	Transport清理goroutine已停止
+[oneclickvirt]2026/04/24 - 15:21:31.903	fatal	服务器启动失败	{"error": "http: Server closed"}
+[oneclickvirt]2026/04/24 - 15:21:44.014	info	系统初始化开始
+[oneclickvirt]2026/04/24 - 15:21:44.014	info	系统配置加载完成	{"env": "development", "addr": 8890, "captcha_enabled": false}
+[oneclickvirt]2026/04/24 - 15:21:44.015	info	全局SSH连接池已初始化
+[oneclickvirt]2026/04/24 - 15:21:44.015	info	开始初始化存储目录结构	{"baseDir": "storage", "dirsCount": 8}
+[oneclickvirt]2026/04/24 - 15:21:44.015	info	存储目录结构初始化完成	{"baseDir": "storage", "dirs": 8}
+[oneclickvirt]2026/04/24 - 15:21:44.015	info	正在连接数据库...
+[oneclickvirt]2026/04/24 - 15:21:44.016	info	日志清理任务已安排	{"nextRun": "[oneclickvirt]2026/04/25 - 01:00:00.000", "duration": 34695.983762679}
+[oneclickvirt]2026/04/24 - 15:21:44.019	error	数据库初始化失败	{"error": "连接数据库失败: Error 1049 (42000): Unknown database 'oneclickvirt'"}
+[oneclickvirt]2026/04/24 - 15:21:44.019	warn	数据库连接失败，系统将以待初始化模式运行	{"dbType": "mysql", "error": "连接数据库失败: Error 1049 (42000): Unknown database 'oneclickvirt'"}
+[oneclickvirt]2026/04/24 - 15:21:44.019	warn	系统未初始化，运行在待初始化模式
+[oneclickvirt]2026/04/24 - 15:21:44.020	info	请访问前端初始化页面完成系统初始化
+[oneclickvirt]2026/04/24 - 15:21:44.022	info	服务器启动成功	{"port": 8890}
+[oneclickvirt]2026/04/24 - 15:29:23.927	info	Shutdown Server ...
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	开始关闭所有已注册服务	{"count": 0}
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	所有服务关闭完成
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	已关闭所有SSH连接
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	OAuth2服务已停止
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	日志轮转任务已停止
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	采样器清理任务已停止
+[oneclickvirt]2026/04/24 - 15:29:23.928	info	SSH连接池清理goroutine已停止
+[oneclickvirt]2026/04/24 - 15:29:23.929	info	HTTP Transport已全部清理
+[oneclickvirt]2026/04/24 - 15:29:23.929	info	正在关闭数据库连接管理器...
+[oneclickvirt]2026/04/24 - 15:29:23.929	info	HTTP Transport定期清理已停止
+[oneclickvirt]2026/04/24 - 15:29:23.929	info	Transport清理goroutine已停止
+[oneclickvirt]2026/04/24 - 15:29:23.930	fatal	服务器启动失败	{"error": "http: Server closed"}
+[oneclickvirt]2026/04/24 - 15:29:23.930	info	Server shutdown completed
+[oneclickvirt]2026/04/24 - 15:29:36.020	info	系统初始化开始
+[oneclickvirt]2026/04/24 - 15:29:36.020	info	系统配置加载完成	{"env": "development", "addr": 8890, "captcha_enabled": false}
+[oneclickvirt]2026/04/24 - 15:29:36.020	info	全局SSH连接池已初始化
+[oneclickvirt]2026/04/24 - 15:29:36.021	info	开始初始化存储目录结构	{"baseDir": "storage", "dirsCount": 8}
+[oneclickvirt]2026/04/24 - 15:29:36.021	info	存储目录结构初始化完成	{"baseDir": "storage", "dirs": 8}
+[oneclickvirt]2026/04/24 - 15:29:36.021	info	正在连接数据库...
+[oneclickvirt]2026/04/24 - 15:29:36.021	info	日志清理任务已安排	{"nextRun": "[oneclickvirt]2026/04/25 - 01:00:00.000", "duration": 34223.978551485}
+[oneclickvirt]2026/04/24 - 15:29:36.025	info	数据库连接池状态	{"max_open_connections": 100, "open_connections": 1, "in_use": 0, "idle": 1}
+[oneclickvirt]2026/04/24 - 15:29:36.025	info	数据库连接成功
+[oneclickvirt]2026/04/24 - 15:29:36.025	info	数据库连接管理器初始化成功
+[oneclickvirt]2026/04/24 - 15:29:36.026	info	开始数据库表结构自动迁移
+[oneclickvirt]2026/04/24 - 15:29:36.026	warn	修复重复数据时出现警告（可忽略，如果是新数据库）	{"error": "数据库连接不可用"}
+[oneclickvirt]2026/04/24 - 15:29:36.026	info	数据库心跳检测已启动
+[oneclickvirt]2026/04/24 - 15:29:57.175	error	register table failed	{"error": "Error 3780 (HY000): Referencing column 'user_id' and referenced column 'id' in foreign key constraint 'fk_product_purchases_user' are incompatible."}
+[oneclickvirt]2026/04/24 - 15:29:57.176	info	数据库表结构迁移完成
+[oneclickvirt]2026/04/24 - 15:29:57.182	info	开始检查并修复 instance_traffic_histories 表中的重复数据...
+[oneclickvirt]2026/04/24 - 15:29:57.183	info	未发现重复数据，无需修复
+[oneclickvirt]2026/04/24 - 15:29:58.280	error	register table failed	{"error": "Error 3780 (HY000): Referencing column 'user_id' and referenced column 'id' in foreign key constraint 'fk_product_purchases_user' are incompatible."}
+[oneclickvirt]2026/04/24 - 15:29:58.281	info	配置变更回调已提前注册
+[oneclickvirt]2026/04/24 - 15:29:58.283	info	配置加载策略分析	{"configModified": false, "dbConfigCount": 13}
+[oneclickvirt]2026/04/24 - 15:29:58.283	info	场景：数据库有配置但无标志文件（检查YAML是否最近修改）
+[oneclickvirt]2026/04/24 - 15:29:58.284	info	YAML和数据库修改时间对比	{"yamlModTime": "[oneclickvirt]2026/04/24 - 15:20:49.356", "dbModTime": "[oneclickvirt]2026/04/24 - 15:28:42.000"}
+[oneclickvirt]2026/04/24 - 15:29:58.285	info	判断：数据库配置更新，优先使用数据库保护用户配置
+[oneclickvirt]2026/04/24 - 15:29:58.285	info	配置修改标志文件已创建	{"file": "./storage/.config_modified"}
+[oneclickvirt]2026/04/24 - 15:29:58.285	info	执行策略：数据库 → YAML → global（保留用户配置，不补全默认值）
+[oneclickvirt]2026/04/24 - 15:29:58.285	info	开始从数据库恢复配置到YAML文件
+[oneclickvirt]2026/04/24 - 15:29:58.286	info	从数据库读取到配置	{"count": 13}
+[oneclickvirt]2026/04/24 - 15:29:58.287	info	过滤配置	{"totalCount": 13, "restoreCount": 13, "skippedSystemCount": 0}
+[oneclickvirt]2026/04/24 - 15:29:58.288	info	配置恢复统计	{"attemptedCount": 13, "restoredCount": 13}
+[oneclickvirt]2026/04/24 - 15:29:58.289	info	配置已成功从数据库恢复到YAML文件
+[oneclickvirt]2026/04/24 - 15:29:58.289	info	配置已从数据库恢复到YAML文件
+[oneclickvirt]2026/04/24 - 15:29:58.290	info	开始构建嵌套配置	{"flatConfigCount": 13}
+[oneclickvirt]2026/04/24 - 15:29:58.290	info	嵌套配置构建完成	{"nestedConfigCount": 13, "skippedSystemCount": 0, "topLevelKeys": ["default_user_level", "enable_email_verification", "email_activation_expire_hours", "enable_agent", "site_name", "site_description", "max_instances_per_user", "default_instance_expiry_days", "enable_real_name", "require_real_name", "site_keywords", "enable_registration", "enable_email_verify"]}
+[oneclickvirt]2026/04/24 - 15:29:58.290	info	触发配置同步回调	{"key": "enable_registration", "valueType": "bool"}
+[oneclickvirt]2026/04/24 - 15:29:58.290	info	触发配置同步回调	{"key": "enable_agent", "valueType": "bool"}
+[oneclickvirt]2026/04/24 - 15:29:58.290	info	触发配置同步回调	{"key": "enable_real_name", "valueType": "bool"}
+[oneclickvirt]2026/04/24 - 15:29:58.290	info	数据库配置已成功同步到全局配置
+[oneclickvirt]2026/04/24 - 15:29:58.292	info	从数据库加载JWT密钥
+[oneclickvirt]2026/04/24 - 15:29:58.292	info	JWT密钥初始化成功
+[oneclickvirt]2026/04/24 - 15:29:58.294	info	未找到活跃JWT密钥，开始生成初始密钥
+[oneclickvirt]2026/04/24 - 15:29:58.310	info	生成新的JWT密钥	{"version": 1, "keyLength": "256 bits", "expiresAt": "[oneclickvirt]2026/04/25 - 15:29:58.295"}
+[oneclickvirt]2026/04/24 - 15:29:58.317	info	JWT密钥系统初始化完成	{"version": 1}
+[oneclickvirt]2026/04/24 - 15:29:58.322	info	开始初始化等级与带宽配置
+[oneclickvirt]2026/04/24 - 15:29:58.322	info	等级配置已存在，跳过初始化
+[oneclickvirt]2026/04/24 - 15:29:58.322	info	开始初始化产品数据
+[oneclickvirt]2026/04/24 - 15:29:58.330	info	更新产品	{"name": "入门级套餐", "level": 1}
+[oneclickvirt]2026/04/24 - 15:29:58.352	info	创建新产品	{"name": "旗舰套餐", "level": 5}
+[oneclickvirt]2026/04/24 - 15:29:58.353	info	产品初始化完成
+[oneclickvirt]2026/04/24 - 15:29:58.353	info	开始初始化其他配置
+[oneclickvirt]2026/04/24 - 15:29:58.359	info	已创建max_avatar_size默认配置	{"value": "2"}
+[oneclickvirt]2026/04/24 - 15:29:58.364	info	已创建default_language默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.371	info	已创建system_name默认配置	{"value": "虚拟化管理平台"}
+[oneclickvirt]2026/04/24 - 15:29:58.379	info	已创建system_description默认配置	{"value": "支持多种虚拟化技术的管理平台"}
+[oneclickvirt]2026/04/24 - 15:29:58.384	error	创建enable_email_verification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/04/24 - 15:29:58.390	info	已创建enable_captcha默认配置	{"value": "true"}
+[oneclickvirt]2026/04/24 - 15:29:58.398	info	已创建captcha_expire_time默认配置	{"value": "10"}
+[oneclickvirt]2026/04/24 - 15:29:58.413	info	已创建max_login_attempts默认配置	{"value": "5"}
+[oneclickvirt]2026/04/24 - 15:29:58.425	info	已创建login_lockout_duration默认配置	{"value": "30"}
+[oneclickvirt]2026/04/24 - 15:29:58.433	info	已创建enable_ssl默认配置	{"value": "false"}
+[oneclickvirt]2026/04/24 - 15:29:58.446	info	已创建ssl_cert_path默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.456	info	已创建ssl_key_path默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.469	info	已创建enable_backup默认配置	{"value": "true"}
+[oneclickvirt]2026/04/24 - 15:29:58.476	info	已创建backup_retention_days默认配置	{"value": "7"}
+[oneclickvirt]2026/04/24 - 15:29:58.482	info	已创建enable_audit_log默认配置	{"value": "true"}
+[oneclickvirt]2026/04/24 - 15:29:58.490	info	已创建audit_log_retention_days默认配置	{"value": "30"}
+[oneclickvirt]2026/04/24 - 15:29:58.498	info	已创建enable_notification默认配置	{"value": "true"}
+[oneclickvirt]2026/04/24 - 15:29:58.510	info	已创建notification_email默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.517	info	已创建smtp_host默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.522	info	已创建smtp_port默认配置	{"value": "587"}
+[oneclickvirt]2026/04/24 - 15:29:58.527	info	已创建smtp_username默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.534	info	已创建smtp_password默认配置	{"value": ""}
+[oneclickvirt]2026/04/24 - 15:29:58.540	info	已创建smtp_secure默认配置	{"value": "true"}
+[oneclickvirt]2026/04/24 - 15:29:58.540	info	开始同步系统镜像列表
+[oneclickvirt]2026/04/24 - 15:29:58.541	info	镜像数据已存在，跳过同步	{"count": 4}
+[oneclickvirt]2026/04/24 - 15:29:58.547	info	开始同步Provider层面的数据（资源和流量统计）
+[oneclickvirt]2026/04/24 - 15:29:58.548	info	找到需要同步的Provider	{"count": 1}
+[oneclickvirt]2026/04/24 - 15:29:58.561	info	Provider数据同步完成	{"total": 1, "success": 1}
+[oneclickvirt]2026/04/24 - 15:29:58.561	info	Task scheduler started
+[oneclickvirt]2026/04/24 - 15:29:58.561	info	启动监控调度器
+[oneclickvirt]2026/04/24 - 15:29:58.562	info	启动Provider健康检查调度器
+[oneclickvirt]2026/04/24 - 15:29:58.562	info	启动pmacct自适应批量处理器	{"minInterval": 5, "maxInterval": 30}
+[oneclickvirt]2026/04/24 - 15:29:58.563	info	所有调度器和全局服务已启动并注册到生命周期管理器
+[oneclickvirt]2026/04/24 - 15:29:58.563	info	系统完整初始化完成
+[oneclickvirt]2026/04/24 - 15:29:58.564	info	启动pmacct守护进程重置任务
+[oneclickvirt]2026/04/24 - 15:29:58.564	info	启动pmacct流量数据收集任务
+[oneclickvirt]2026/04/24 - 15:29:58.565	info	Task scheduler main loop started with traffic aggregation
+[oneclickvirt]2026/04/24 - 15:29:58.566	info	启动pmacct数据清理任务
+[oneclickvirt]2026/04/24 - 15:29:58.568	info	服务器启动成功	{"port": 8890}
+[oneclickvirt]2026/04/24 - 15:29:58.569	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:29:58.569	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d902a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc001dbe300"}
+[oneclickvirt]2026/04/24 - 15:29:58.580	info	Provider状态发生变化	{"provider_id": 1, "provider_name": "默认节点", "old_status": "active", "new_status": "partial", "old_ssh": "unknown", "new_ssh": "offline", "old_api": "unknown", "new_api": "unknown"}
+[oneclickvirt]2026/04/24 - 15:32:58.588	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:32:58.588	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f603a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:34:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 15:34:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 15:35:58.591	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:35:58.592	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60320", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:38:58.594	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:38:58.594	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e480", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:39:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 15:39:58.571	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 15:41:58.595	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:41:58.596	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90280", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:44:39.441	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "127.0.0.1"}
+[oneclickvirt]2026/04/24 - 15:44:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 15:44:58.570	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 15:44:58.598	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:44:58.599	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1eee0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:47:58.599	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:47:58.600	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1eb80", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:48:30.172	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "172.17.0.1"}
+[oneclickvirt]2026/04/24 - 15:49:58.593	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 15:49:58.596	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 15:50:58.601	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:50:58.602	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90380", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:53:58.605	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:53:58.605	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe6e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:54:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 15:54:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 15:56:58.606	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:56:58.607	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d905c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 15:59:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 15:59:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 15:59:58.569	info	清理过期Transport对象	{"cleaned": 1, "remaining": 9}
+[oneclickvirt]2026/04/24 - 15:59:58.607	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 15:59:58.607	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d907a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:02:58.609	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:02:58.609	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e6e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:04:58.570	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:04:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:05:58.611	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:05:58.612	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e3c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:08:58.614	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:08:58.615	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:09:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:09:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 16:09:58.570	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:11:58.616	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:11:58.617	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90960", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:14:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:14:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:14:58.620	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:14:58.621	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90720", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:17:58.622	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:17:58.622	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1ea80", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:19:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 16:19:58.577	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:19:58.579	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:20:58.626	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:20:58.627	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe400", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:23:58.628	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:23:58.628	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f605a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:24:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:24:58.570	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:26:58.631	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:26:58.631	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60380", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:29:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 16:29:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:29:58.578	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:29:58.634	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:29:58.634	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe8c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:32:58.635	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:32:58.636	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e8a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:34:58.575	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:34:58.578	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:35:58.640	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:35:58.640	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90660", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:38:58.644	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:38:58.644	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d905a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 16:39:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:39:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:41:58.647	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:41:58.647	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e640", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:44:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:44:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:44:58.649	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:44:58.650	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90540", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:47:58.651	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:47:58.652	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe820", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:49:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 16:49:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:49:58.578	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:50:58.655	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:50:58.655	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:53:58.665	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:53:58.665	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe520", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:54:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:54:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:56:58.666	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:56:58.666	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 16:59:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 16:59:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 16:59:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 16:59:58.666	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 16:59:58.666	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:02:58.669	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:02:58.670	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe0e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:04:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:04:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:05:58.671	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:05:58.672	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e940", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:08:58.674	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:08:58.674	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e800", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:09:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 17:09:58.577	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:09:58.578	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:11:58.678	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:11:58.679	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe3e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:12:09.184	info	从数据库查询到的公开配置数量	{"count": 3}
+[oneclickvirt]2026/04/24 - 17:14:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:14:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:14:58.680	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:14:58.680	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90260", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:17:58.683	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:17:58.683	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60600", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:19:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 17:19:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:19:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:20:58.684	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:20:58.685	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e480", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:23:58.686	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:23:58.686	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:24:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:24:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:26:58.688	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:26:58.688	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e5c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:29:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 17:29:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:29:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:29:58.691	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:29:58.691	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:32:58.694	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:32:58.695	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d902c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:34:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:34:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:35:58.699	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:35:58.700	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60320", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:38:58.701	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:38:58.701	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90640", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 17:39:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:39:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:41:58.704	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:41:58.705	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe460", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:44:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:44:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:44:58.707	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:44:58.708	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f603e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:47:58.711	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:47:58.711	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60400", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:49:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 17:49:58.575	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:49:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:50:58.711	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:50:58.711	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d903c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:53:58.713	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:53:58.713	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f604a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:54:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:54:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:56:58.716	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:56:58.717	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f604c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 17:59:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 17:59:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 17:59:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 17:59:58.718	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 17:59:58.718	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d906a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:02:58.720	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:02:58.721	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90100", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:04:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:04:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:05:58.722	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:05:58.722	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e560", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:08:58.724	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:08:58.724	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:09:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 18:09:58.570	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:09:58.571	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:11:58.725	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:11:58.725	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90400", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:14:58.566	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:14:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:14:58.729	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:14:58.729	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe5c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:17:58.730	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:17:58.730	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f609c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:19:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 18:19:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:19:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:20:58.732	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:20:58.733	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe400", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:23:58.735	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:23:58.735	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60a80", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:24:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:24:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:26:58.737	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:26:58.738	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e120", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:29:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 18:29:58.575	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:29:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:29:58.738	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:29:58.739	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60780", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:32:58.741	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:32:58.741	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe0e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:34:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:34:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:35:58.742	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:35:58.743	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d908c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:38:58.745	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:38:58.745	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe280", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 18:39:58.574	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:39:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:41:58.748	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:41:58.748	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60860", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:44:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:44:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:44:58.749	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:44:58.749	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:47:58.752	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:47:58.752	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60080", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:49:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 18:49:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:49:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:50:58.755	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:50:58.755	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d902c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:53:58.755	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:53:58.756	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90260", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:54:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:54:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:56:58.758	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:56:58.758	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f602a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 18:59:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 18:59:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 18:59:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 18:59:58.762	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 18:59:58.762	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90780", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:02:58.763	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:02:58.763	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:04:58.566	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:04:58.567	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:05:58.765	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:05:58.765	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90a40", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:08:58.767	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:08:58.768	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90560", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:09:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:09:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:09:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 19:11:58.769	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:11:58.770	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60560", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:14:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:14:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:14:58.770	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:14:58.771	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60320", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:17:58.773	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:17:58.774	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f60a60", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:19:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 19:19:58.575	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:19:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:20:58.775	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:20:58.775	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:23:58.778	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:23:58.778	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f605e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:24:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:24:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:26:58.779	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:26:58.779	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d904a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:29:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 19:29:58.574	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:29:58.575	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:29:58.783	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:29:58.783	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe360", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:32:58.782	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:32:58.783	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001f1e4c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:34:58.570	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:34:58.571	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:35:58.785	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:35:58.786	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d905e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:38:58.788	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:38:58.789	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90280", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 19:39:58.570	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:39:58.570	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:41:58.790	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:41:58.791	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe680", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:44:58.566	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:44:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:44:58.793	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:44:58.793	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d902c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:47:58.794	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:47:58.795	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90880", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:49:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 19:49:58.585	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:49:58.586	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:50:58.797	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:50:58.798	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe0c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:53:58.798	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:53:58.799	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe320", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:54:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:54:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:56:58.800	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:56:58.800	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe260", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 19:59:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 19:59:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 19:59:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 19:59:58.802	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 19:59:58.803	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:02:58.804	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:02:58.804	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f603c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:04:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:04:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:04:59.693	info	从数据库查询到的公开配置数量	{"count": 3}
+[oneclickvirt]2026/04/24 - 20:05:43.430	warn	用户登录失败	{"username": "admin", "error": "[2004] 用户名或密码错误", "ip": "222.79.116.184"}
+[oneclickvirt]2026/04/24 - 20:05:58.806	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:05:58.806	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f61d40", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:08:58.807	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:08:58.808	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88380", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:09:58.570	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 20:09:58.574	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:09:58.575	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:11:58.809	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:11:58.809	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e03c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:14:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:14:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:14:58.811	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:14:58.811	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e07e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:17:58.814	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:17:58.814	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88ba0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:19:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 20:19:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:19:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:20:58.816	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:20:58.816	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:23:58.818	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:23:58.819	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d905c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:24:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:24:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:26:58.820	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:26:58.820	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90480", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:29:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 20:29:58.570	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:29:58.571	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:29:58.822	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:29:58.822	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e04400", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:32:58.825	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:32:58.825	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e0480", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:34:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:34:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:35:58.826	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:35:58.826	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e0300", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:38:58.829	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:38:58.829	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e883a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 20:39:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:39:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:41:58.833	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:41:58.833	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001d90580", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:44:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:44:58.575	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:44:58.836	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:44:58.836	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88340", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:47:58.837	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:47:58.837	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2f00", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:49:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 20:49:58.585	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:49:58.587	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:50:58.839	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:50:58.839	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001500540", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:53:58.841	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:53:58.842	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001501620", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:54:58.566	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:54:58.567	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:56:58.842	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:56:58.843	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be6a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 20:59:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 20:59:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 20:59:58.575	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 20:59:58.845	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 20:59:58.846	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc000f7c5c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:02:58.848	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:02:58.848	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be280", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:04:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:04:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:05:58.856	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:05:58.857	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:08:58.858	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:08:58.858	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc00157c580", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:09:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:09:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:09:58.570	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 21:11:58.860	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:11:58.860	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be940", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:14:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:14:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:14:58.863	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:14:58.863	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be560", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:17:58.865	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:17:58.865	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc00157c960", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:19:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:19:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:19:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 21:20:58.869	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:20:58.870	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe1a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:23:58.870	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:23:58.870	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015bf6c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:24:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:24:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:26:58.872	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:26:58.872	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88420", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:29:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 21:29:58.578	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:29:58.579	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:29:58.874	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:29:58.875	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001500960", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:32:58.877	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:32:58.877	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88360", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:34:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:34:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:35:58.886	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:35:58.887	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001500820", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:38:58.887	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:38:58.888	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e03e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:39:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:39:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 21:41:58.890	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:41:58.890	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e07a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:44:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:44:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:44:58.892	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:44:58.892	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88220", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:47:58.892	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:47:58.893	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be520", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:49:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 21:49:58.574	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:49:58.576	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:50:58.897	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:50:58.897	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88400", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:53:58.897	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:53:58.898	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e04a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:54:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:54:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:56:58.899	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:56:58.900	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e88260", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 21:59:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 21:59:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 21:59:58.574	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 21:59:58.903	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 21:59:58.903	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e0720", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:02:58.903	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:02:58.904	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be300", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:04:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:04:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:05:58.906	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:05:58.906	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0008e0720", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:08:58.908	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:08:58.909	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015003e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:09:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 22:09:58.575	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:09:58.576	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:11:58.910	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:11:58.910	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015be580", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:13:28.518	warn	用户登录失败	{"username": "admin", "error": "[4004] 验证码错误", "ip": "222.79.116.184"}
+[oneclickvirt]2026/04/24 - 22:13:34.638	warn	用户登录失败	{"username": "admin", "error": "[2004] 用户名或密码错误", "ip": "222.79.117.226"}
+[oneclickvirt]2026/04/24 - 22:13:59.294	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "222.79.116.122"}
+[oneclickvirt]2026/04/24 - 22:14:20.632	info	自动更新用户密码为哈希值	{"username": "admin"}
+[oneclickvirt]2026/04/24 - 22:14:20.632	info	用户登录成功	{"username": "admin", "userType": "admin", "userID": 1}
+[oneclickvirt]2026/04/24 - 22:14:30.177	info	管理员获取仪表板数据	{"admin_ip": "222.79.116.81"}
+[oneclickvirt]2026/04/24 - 22:14:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:14:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:14:58.913	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:14:58.913	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2340", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:17:58.915	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:17:58.915	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e049e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:19:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 22:19:58.582	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:19:58.583	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:20:58.918	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:20:58.918	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:23:58.920	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:23:58.921	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e045e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:24:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:24:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:26:58.924	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:26:58.924	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2500", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:29:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:29:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:29:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 22:29:58.928	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:29:58.928	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc00157c120", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:32:58.927	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:32:58.928	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e045a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:34:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:34:58.570	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:35:58.929	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:35:58.929	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2220", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:38:58.933	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:38:58.933	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e04380", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:39:58.570	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 22:39:58.573	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:39:58.575	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:41:58.934	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:41:58.934	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe540", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:44:58.575	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:44:58.576	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:44:58.937	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:44:58.937	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e04380", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:47:58.938	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:47:58.938	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe7a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:49:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 22:49:58.577	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:49:58.578	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:50:58.940	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:50:58.940	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e04340", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:53:58.944	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:53:58.944	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e046e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:54:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:54:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:56:58.946	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:56:58.946	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001e04260", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 22:59:50.111	info	开始批量创建兑换码	{"count": 10, "amount": 100}
+[oneclickvirt]2026/04/24 - 22:59:50.113	error	批量生成兑换码失败	{"error": "Error 1054 (42S22): Unknown column 'used_count' in 'field list'"}
+[oneclickvirt]2026/04/24 - 22:59:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 22:59:58.577	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 22:59:58.579	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 22:59:58.949	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 22:59:58.949	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015001a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:02:58.951	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:02:58.951	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001532340", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:04:58.568	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:04:58.570	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:05:58.956	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:05:58.956	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2580", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:08:58.957	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:08:58.958	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2360", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:09:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:09:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:09:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 23:11:58.959	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:11:58.960	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001532860", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:14:58.566	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:14:58.568	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:14:58.962	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:14:58.962	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d22c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:17:58.966	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:17:58.966	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe9e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:19:58.570	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 23:19:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:19:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:20:58.968	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:20:58.969	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001532420", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:23:58.969	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:23:58.970	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2280", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:24:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:24:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:26:58.971	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:26:58.971	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe440", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:29:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 23:29:58.574	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:29:58.575	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:29:58.974	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:29:58.974	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2320", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:32:58.976	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:32:58.976	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d2240", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:34:58.570	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:34:58.571	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:35:58.978	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:35:58.978	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe820", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:38:58.980	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:38:58.980	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0019d22c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:39:58.567	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:39:58.569	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:39:58.569	info	清理过期Transport对象	{"cleaned": 4, "remaining": 10}
+[oneclickvirt]2026/04/24 - 23:41:58.982	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:41:58.982	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001532480", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:44:58.571	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:44:58.572	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:44:58.983	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:44:58.984	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015002c0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:47:58.986	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:47:58.987	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015007e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:49:58.574	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 23:49:58.578	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:49:58.579	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:50:58.989	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:50:58.990	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc0015323a0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:53:58.989	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:53:58.989	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001532760", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:54:58.572	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:54:58.573	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:56:58.992	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:56:58.992	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001bbe4e0", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
+[oneclickvirt]2026/04/24 - 23:59:58.569	info	清理过期Transport对象	{"cleaned": 3, "remaining": 10}
+[oneclickvirt]2026/04/24 - 23:59:58.576	info	开始聚合流量数据	{"year": 2026, "month": 4}
+[oneclickvirt]2026/04/24 - 23:59:58.577	info	没有需要聚合的流量数据
+[oneclickvirt]2026/04/24 - 23:59:58.993	info	开始检查Provider健康状态	{"providerId": 1, "providerName": "默认节点", "providerType": "docker", "endpoint": "127.0.0.1", "host": "127.0.0.1", "port": 22}
+[oneclickvirt]2026/04/24 - 23:59:58.993	info	创建SSH通用健康检查器	{"checkerType": "SSH通用检查", "instancePtr": "0xc001532760", "configHost": "127.0.0.1", "configPort": 22, "providerID": 1, "providerName": "默认节点", "baseCheckerPtr": "0xc0000f0780"}
