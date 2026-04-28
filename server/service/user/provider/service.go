@@ -23,6 +23,7 @@ import (
 	"oneclickvirt/service/resources"
 	"oneclickvirt/service/traffic"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
@@ -200,7 +201,9 @@ func (s *Service) prepareInstanceCreation(ctx context.Context, task *adminModel.
 		}
 
 		// 创建实例记录
+		uuid := uuid.New().String()
 		instance = providerModel.Instance{
+			UUID:               uuid,
 			Name:               instanceName,
 			Provider:           provider.Name,
 			ProviderID:         provider.ID,

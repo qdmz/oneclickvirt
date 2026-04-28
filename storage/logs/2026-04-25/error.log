@@ -1,0 +1,5 @@
+[oneclickvirt]2026/04/25 - 10:03:06.728	error	CreateUserInstance binding error: Key: 'CreateInstanceRequest.CPUId' Error:Field validation for 'CPUId' failed on the 'required' tag
+Key: 'CreateInstanceRequest.MemoryId' Error:Field validation for 'MemoryId' failed on the 'required' tag
+Key: 'CreateInstanceRequest.DiskId' Error:Field validation for 'DiskId' failed on the 'required' tag
+Key: 'CreateInstanceRequest.BandwidthId' Error:Field validation for 'BandwidthId' failed on the 'required' tag
+[oneclickvirt]2026/04/25 - 10:03:32.334	error	Provider和镜像不匹配	{"providerId": 1, "imageId": 1, "providerType": "docker", "imageProviderType": "", "providerArch": "amd64", "imageArch": "", "error": "所选镜像不支持Provider类型 docker，支持的类型: "}

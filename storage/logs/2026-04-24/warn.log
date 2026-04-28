@@ -1,0 +1,19 @@
+[oneclickvirt]2026/04/24 - 15:08:21.994	error	数据库初始化失败	{"error": "连接数据库失败: Error 1130: Host '127.0.0.1' is not allowed to connect to this MySQL server"}
+[oneclickvirt]2026/04/24 - 15:08:21.995	warn	数据库连接失败，系统将以待初始化模式运行	{"dbType": "mysql", "error": "连接数据库失败: Error 1130: Host '127.0.0.1' is not allowed to connect to this MySQL server"}
+[oneclickvirt]2026/04/24 - 15:08:21.995	warn	系统未初始化，运行在待初始化模式
+[oneclickvirt]2026/04/24 - 15:21:31.903	fatal	服务器启动失败	{"error": "http: Server closed"}
+[oneclickvirt]2026/04/24 - 15:21:44.019	error	数据库初始化失败	{"error": "连接数据库失败: Error 1049 (42000): Unknown database 'oneclickvirt'"}
+[oneclickvirt]2026/04/24 - 15:21:44.019	warn	数据库连接失败，系统将以待初始化模式运行	{"dbType": "mysql", "error": "连接数据库失败: Error 1049 (42000): Unknown database 'oneclickvirt'"}
+[oneclickvirt]2026/04/24 - 15:21:44.019	warn	系统未初始化，运行在待初始化模式
+[oneclickvirt]2026/04/24 - 15:29:23.930	fatal	服务器启动失败	{"error": "http: Server closed"}
+[oneclickvirt]2026/04/24 - 15:29:36.026	warn	修复重复数据时出现警告（可忽略，如果是新数据库）	{"error": "数据库连接不可用"}
+[oneclickvirt]2026/04/24 - 15:29:57.175	error	register table failed	{"error": "Error 3780 (HY000): Referencing column 'user_id' and referenced column 'id' in foreign key constraint 'fk_product_purchases_user' are incompatible."}
+[oneclickvirt]2026/04/24 - 15:29:58.280	error	register table failed	{"error": "Error 3780 (HY000): Referencing column 'user_id' and referenced column 'id' in foreign key constraint 'fk_product_purchases_user' are incompatible."}
+[oneclickvirt]2026/04/24 - 15:29:58.384	error	创建enable_email_verification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/04/24 - 15:44:39.441	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "127.0.0.1"}
+[oneclickvirt]2026/04/24 - 15:48:30.172	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "172.17.0.1"}
+[oneclickvirt]2026/04/24 - 20:05:43.430	warn	用户登录失败	{"username": "admin", "error": "[2004] 用户名或密码错误", "ip": "222.79.116.184"}
+[oneclickvirt]2026/04/24 - 22:13:28.518	warn	用户登录失败	{"username": "admin", "error": "[4004] 验证码错误", "ip": "222.79.116.184"}
+[oneclickvirt]2026/04/24 - 22:13:34.638	warn	用户登录失败	{"username": "admin", "error": "[2004] 用户名或密码错误", "ip": "222.79.117.226"}
+[oneclickvirt]2026/04/24 - 22:13:59.294	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "222.79.116.122"}
+[oneclickvirt]2026/04/24 - 22:59:50.113	error	批量生成兑换码失败	{"error": "Error 1054 (42S22): Unknown column 'used_count' in 'field list'"}

@@ -211,5 +211,11 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.GET("/kyc/records", admin.GetKYCRecords)
 		AdminGroup.PUT("/kyc/:id/status", admin.UpdateKYCStatus)
 		AdminGroup.GET("/kyc/stats", admin.GetKYCStats)
+
+		// 邮件管理
+		emailApi := admin.EmailApi{}
+		AdminGroup.GET("/email/config", emailApi.GetEmailConfig)
+		AdminGroup.PUT("/email/config", emailApi.UpdateEmailConfig)
+		AdminGroup.POST("/email/test", emailApi.SendTestEmail)
 	}
 }

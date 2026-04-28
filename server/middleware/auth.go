@@ -45,6 +45,48 @@ func RequireAuth(minLevel auth.AuthLevel) gin.HandlerFunc {
 			return
 		}
 
+
+		// 检查是否是 API Key 认证
+		authHeader := c.GetHeader("Authorization")
+		if strings.HasPrefix(authHeader, "ApiKey ") {
+			// API Key 认证
+			apiKey := strings.TrimPrefix(authHeader, "ApiKey ")
+			authCtx, err := validateAPIKey(apiKey)
+			if err != nil {
+				respondAuthError(c, err)
+				return
+			}
+
+			// 检查权限级别
+			if !hasRequiredLevel(authCtx, minLevel) {
+				global.APP_LOG.Warn("用户权限级别不足",
+					zap.Uint("userID", authCtx.UserID),
+					zap.String("username", authCtx.Username),
+					zap.String("userType", authCtx.UserType),
+					zap.String("baseUserType", authCtx.BaseUserType),
+					zap.Int("userLevel", authCtx.Level),
+					zap.Int("requiredLevel", int(minLevel)),
+					zap.String("path", c.Request.URL.Path),
+					zap.String("method", c.Request.Method))
+
+				c.JSON(http.StatusForbidden, common.Response{
+					Code: 403,
+					Msg:  "权限不足",
+				})
+				c.Abort()
+				return
+			}
+
+			// 设置认证上下文
+			c.Set("auth_context", authCtx)
+			c.Set("user_id", authCtx.UserID)
+			c.Set("username", authCtx.Username)
+			c.Set("user_type", authCtx.UserType)
+
+			c.Next()
+			return
+		}
+
 		// 验证JWT Token并获取最新权限
 		authCtx, claims, err := validateJWTTokenWithClaims(c)
 		if err != nil {
@@ -341,3 +383,4 @@ func respondAuthError(c *gin.Context, err error) {
 	}
 	c.Abort()
 }
+

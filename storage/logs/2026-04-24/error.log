@@ -1,0 +1,8 @@
+[oneclickvirt]2026/04/24 - 15:08:21.994	error	数据库初始化失败	{"error": "连接数据库失败: Error 1130: Host '127.0.0.1' is not allowed to connect to this MySQL server"}
+[oneclickvirt]2026/04/24 - 15:21:31.903	fatal	服务器启动失败	{"error": "http: Server closed"}
+[oneclickvirt]2026/04/24 - 15:21:44.019	error	数据库初始化失败	{"error": "连接数据库失败: Error 1049 (42000): Unknown database 'oneclickvirt'"}
+[oneclickvirt]2026/04/24 - 15:29:23.930	fatal	服务器启动失败	{"error": "http: Server closed"}
+[oneclickvirt]2026/04/24 - 15:29:57.175	error	register table failed	{"error": "Error 3780 (HY000): Referencing column 'user_id' and referenced column 'id' in foreign key constraint 'fk_product_purchases_user' are incompatible."}
+[oneclickvirt]2026/04/24 - 15:29:58.280	error	register table failed	{"error": "Error 3780 (HY000): Referencing column 'user_id' and referenced column 'id' in foreign key constraint 'fk_product_purchases_user' are incompatible."}
+[oneclickvirt]2026/04/24 - 15:29:58.384	error	创建enable_email_verification配置失败	{"error": "Error 1062 (23000): Duplicate entry 'enable_email_verification' for key 'system_configs.idx_system_configs_key'"}
+[oneclickvirt]2026/04/24 - 22:59:50.113	error	批量生成兑换码失败	{"error": "Error 1054 (42S22): Unknown column 'used_count' in 'field list'"}

@@ -36,5 +36,23 @@ func InitPaymentRouter(Router *gin.RouterGroup) {
 		PaymentGroup.POST("/epay/notify", payment.EpayNotify)
 		PaymentGroup.GET("/epay/notify", payment.EpayNotify) // 支持GET请求
 		PaymentGroup.POST("/mapay/notify", payment.MapayNotify)
+
+		// 易支付接口
+		PaymentGroup.POST("/yipay/notify", payment.YipayNotify)
+		PaymentGroup.GET("/yipay/notify", payment.YipayNotify) // 支持GET请求
+		PaymentGroup.GET("/yipay/return", payment.YipayReturn)
+	}
+
+	// 易支付管理接口(需要认证)
+	YipayAdminGroup := Router.Group("v1/admin/payment/yipay")
+	YipayAdminGroup.Use(middleware.RequireAuth(authModel.AuthLevelAdmin))
+	{
+		YipayAdminGroup.GET("/config", payment.GetYipayConfig)
+		YipayAdminGroup.PUT("/config", payment.UpdateYipayConfig)
+		YipayAdminGroup.GET("/stats", payment.GetYipayStats)
+		YipayAdminGroup.GET("/orders", payment.GetYipayOrders)
+		YipayAdminGroup.POST("/test", payment.TestYipay)
+		YipayAdminGroup.POST("/create", payment.CreateYipayOrder)
+		YipayAdminGroup.GET("/query", payment.QueryYipayOrder)
 	}
 }

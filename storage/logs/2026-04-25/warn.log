@@ -1,0 +1,10 @@
+[oneclickvirt]2026/04/25 - 03:29:58.582	warn	聚合为日度数据失败	{"error": "failed to aggregate to daily: Error 1055 (42000): Expression #9 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'oneclickvirt.pmacct_traffic_records.timestamp' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by"}
+[oneclickvirt]2026/04/25 - 03:29:58.586	warn	聚合为小时数据失败	{"error": "failed to aggregate to hourly: Error 1055 (42000): Expression #9 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'oneclickvirt.pmacct_traffic_records.timestamp' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by"}
+[oneclickvirt]2026/04/25 - 10:00:31.458	warn	用户登录失败	{"username": "testuser", "error": "[2004] 用户名或密码错误", "ip": "43.168.34.51"}
+[oneclickvirt]2026/04/25 - 10:00:49.156	warn	用户注册失败	{"username": "testuser2", "error": "密码不能包含常见弱密码模式", "ip": "43.168.34.51"}
+[oneclickvirt]2026/04/25 - 10:03:06.728	error	CreateUserInstance binding error: Key: 'CreateInstanceRequest.CPUId' Error:Field validation for 'CPUId' failed on the 'required' tag
+Key: 'CreateInstanceRequest.MemoryId' Error:Field validation for 'MemoryId' failed on the 'required' tag
+Key: 'CreateInstanceRequest.DiskId' Error:Field validation for 'DiskId' failed on the 'required' tag
+Key: 'CreateInstanceRequest.BandwidthId' Error:Field validation for 'BandwidthId' failed on the 'required' tag
+[oneclickvirt]2026/04/25 - 10:03:32.334	error	Provider和镜像不匹配	{"providerId": 1, "imageId": 1, "providerType": "docker", "imageProviderType": "", "providerArch": "amd64", "imageArch": "", "error": "所选镜像不支持Provider类型 docker，支持的类型: "}
+[oneclickvirt]2026/04/25 - 18:55:42.718	warn	服务没有实现已知的关闭接口	{"name": "SchedulerService"}

@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"math/big"
 	mathRand "math/rand"
-	"net/smtp"
-	"oneclickvirt/service/database"
 	"time"
 
 	"oneclickvirt/config"
@@ -17,6 +15,7 @@ import (
 	"oneclickvirt/model/common"
 	"oneclickvirt/model/system"
 	userModel "oneclickvirt/model/user"
+	"oneclickvirt/service/database"
 	"oneclickvirt/service/email"
 	"oneclickvirt/utils"
 
@@ -959,7 +958,7 @@ func (s *AuthService) sendSMSCode(phone, code string) error {
 
 func (s *AuthService) sendEmail(to, subject, body string) error {
 	emailSvc := email.NewEmailService()
-	return emailSvc.SendEmail(to, subject, body)
+	return emailSvc.SendEmail([]string{to}, subject, body)
 }
 
 func generateRandomCode() string {

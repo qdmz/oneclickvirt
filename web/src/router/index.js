@@ -193,6 +193,16 @@ const routes = [
           requiresAuth: true,
           roles: ['user', 'admin']
         }
+      },
+      {
+        path: 'api-keys',
+        name: 'UserAPIKeys',
+        component: () => import('@/view/user/api-keys/index.vue'),
+        meta: {
+          title: 'API 密钥管理',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
       }
     ]
   },

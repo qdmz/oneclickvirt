@@ -119,6 +119,7 @@ func (s *TaskService) CreateTask(userID uint, providerID *uint, instanceID *uint
 	estimatedDuration := s.calculateEstimatedDuration(taskType, instanceType)
 
 	task := &adminModel.Task{
+		Type:                  "instance",
 		UserID:                userID,
 		ProviderID:            providerID,
 		InstanceID:            instanceID,
@@ -132,6 +133,13 @@ func (s *TaskService) CreateTask(userID uint, providerID *uint, instanceID *uint
 		PreallocatedMemory:    memory,
 		PreallocatedDisk:      disk,
 		PreallocatedBandwidth: bandwidth,
+	}
+
+	// 设置Type字段
+	if taskType == "create" {
+		task.Type = "instance"
+	} else {
+		task.Type = "instance"
 	}
 
 	err := s.dbService.ExecuteTransaction(context.Background(), func(tx *gorm.DB) error {

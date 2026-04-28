@@ -2,83 +2,94 @@ package order
 
 import (
 	"time"
-	productModel "oneclickvirt/model/product"
-	userModel "oneclickvirt/model/user"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
-
-// Order 订单表
-type Order struct {
-	ID                    uint         `json:"id" gorm:"primaryKey"`
-	OrderNo               string       `json:"orderNo" gorm:"type:varchar(50);uniqueIndex;not null;comment:订单号"`
-	UserID                uint         `json:"userId" gorm:"index:idx_user_order;not null;comment:用户ID"`
-	ProductID             *uint        `json:"productId" gorm:"index;comment:产品ID"`
-	Amount                float64      `json:"amount" gorm:"type:decimal(10,2);not null;comment:订单金额"`
-	Status                int          `json:"status" gorm:"index;default:0;comment:订单状态"`
-	PaymentMethod         string       `json:"paymentMethod" gorm:"type:varchar(20);comment:支付方式"`
-	PaymentTransactionID  string       `json:"paymentTransactionId" gorm:"type:varchar(100);comment:支付交易ID"`
-	PaymentTime           *time.Time   `json:"paymentTime" gorm:"comment:支付时间"`
-	PaidAmount            float64      `json:"paidAmount" gorm:"type:decimal(10,2);default:0;comment:实付金额"`
-	ProductData           string       `json:"productData" gorm:"type:json;comment:产品快照"`
-	Remark                string       `json:"remark" gorm:"type:varchar(255);comment:备注"`
-	ExpireAt              time.Time    `json:"expireAt" gorm:"comment:订单过期时间"`
-	CreatedAt             time.Time    `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt             time.Time    `json:"updatedAt" gorm:"autoUpdateTime"`
-	DeletedAt             *time.Time   `json:"deletedAt" gorm:"index"`
-
-	User    *userModel.User      `json:"user" gorm:"foreignKey:UserID"`
-	Product *productModel.Product `json:"product" gorm:"foreignKey:ProductID"`
-}
-
-// TableName 指定表名
-func (Order) TableName() string {
-	return "orders"
-}
 
 // 订单状态常量
 const (
-	OrderStatusPending   = 0 // 待支付
-	OrderStatusPaid      = 1 // 已支付
-	OrderStatusCancelled = 2 // 已取消
-	OrderStatusRefunded  = 3 // 已退款
-	OrderStatusExpired   = 4 // 已过期
+	OrderStatusPending   = "pending"   // 待支付
+	OrderStatusPaid      = "paid"      // 已支付
+	OrderStatusCancelled = "cancelled" // 已取消
+	OrderStatusExpired   = "expired"   // 已过期
+	OrderStatusActive    = "active"    // 已开通
 )
 
 // 支付方式常量
 const (
 	PaymentMethodAlipay   = "alipay"   // 支付宝
-	PaymentMethodWechat   = "wechat"   // 微信支付
-	PaymentMethodBalance  = "balance"  // 余额支付
-	PaymentMethodExchange = "exchange" // 兑换码
-	PaymentMethodEpay     = "epay"     // 易支付
-	PaymentMethodMapay    = "mapay"    // 码支付
+	PaymentMethodWechat   = "wechat"   // 微信
+	PaymentMethodBalance  = "balance"  // 余额
+	PaymentMethodYipay    = "yipay"    // 易支付
+	PaymentMethodEpay     = "epay"     // 易支付（旧）
+	PaymentMethodMapay   = "mapay"   // 马支付
 )
 
-// PaymentRecord 支付记录表
-type PaymentRecord struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
-	OrderID        uint      `gorm:"index:idx_order_payment;not null;comment:订单ID" json:"orderId"`
-	UserID         uint      `gorm:"index;not null;comment:用户ID" json:"userId"`
-	Type           string    `gorm:"type:varchar(20);not null;comment:支付类型" json:"type"`
-	TransactionID  string    `gorm:"type:varchar(64);uniqueIndex;comment:第三方交易号" json:"transactionId"`
-	Amount         int64     `gorm:"not null;comment:支付金额(分)" json:"amount"`
-	Status         string    `gorm:"type:varchar(20);not null;comment:支付状态" json:"status"`
-	NotifyData     string    `gorm:"type:text;comment:回调数据" json:"notifyData"`
-	CreatedAt      time.Time `gorm:"autoCreateTime" json:"createdAt"`
-	UpdatedAt      time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
+// Order 订单模型
+type Order struct {
+	ID           uint           `json:"id" gorm:"primarykey;type:int(11)"`
+	UUID         string         `json:"uuid" gorm:"uniqueIndex;not null;size:36"`
+	UserID       uint           `json:"userId" gorm:"not null;index:idx_user_id;type:int(11)"`
+	ProductID    uint           `json:"productId" gorm:"not null;index:idx_product_id;type:int(11)"`
+	InstanceID   *uint          `json:"instanceId" gorm:"index:idx_instance_id;type:int(11)"`
+	OrderNo      string         `json:"orderNo" gorm:"uniqueIndex;not null;size:64"` // 订单号
+	Amount       float64        `json:"amount" gorm:"not null;type:decimal(10,2)"`    // 订单金额
+	Status       string         `json:"status" gorm:"default:pending;size:20;index"`  // 订单状态
+	PaymentMethod string        `json:"paymentMethod" gorm:"size:20"`                 // 支付方式
+	PaymentID    string         `json:"paymentId" gorm:"size:64"`                     // 支付ID
+	PaidAt       *time.Time     `json:"paidAt"`                                       // 支付时间
+	ProvisionedAt *time.Time    `json:"provisionedAt"`                                // 开通时间
+	ExpiredAt    *time.Time     `json:"expiredAt"`                                    // 过期时间
+	Remark       string         `json:"remark" gorm:"size:500"`                      // 备注
+	CreatedAt    time.Time      `json:"createdAt"`
+	UpdatedAt    time.Time      `json:"updatedAt"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
 
-	Order Order       `gorm:"foreignKey:OrderID" json:"-"`
-	User  userModel.User `gorm:"foreignKey:UserID" json:"-"`
-}
-
-// TableName 指定表名
-func (PaymentRecord) TableName() string {
-	return "payment_records"
+	// 兼容字段
+	ProductData  string         `json:"productData" gorm:"type:text"`  // 产品数据（JSON）
+	ExpireAt     *time.Time     `json:"expireAt"`                   // 过期时间（兼容）
+	PaymentTime  *time.Time     `json:"paymentTime"`                // 支付时间（兼容）
+	PaidAmount   float64        `json:"paidAmount" gorm:"type:decimal(10,2)"` // 已支付金额
 }
 
 // 支付状态常量
 const (
-	PaymentStatusProcessing = "processing" // 处理中
-	PaymentStatusSuccess    = "success"    // 成功
-	PaymentStatusFailed     = "failed"     // 失败
-	PaymentStatusCancelled  = "cancelled"  // 已取消
+	PaymentStatusSuccess = "success" // 支付成功
+	PaymentStatusFailed  = "failed"  // 支付失败
+	PaymentStatusPending = "pending" // 支付中
 )
+
+// PaymentRecord 支付记录模型
+type PaymentRecord struct {
+	ID           uint           `json:"id" gorm:"primarykey;type:int(11)"`
+	UUID         string         `json:"uuid" gorm:"uniqueIndex;not null;size:36"`
+	OrderID      uint           `json:"orderId" gorm:"not null;index:idx_order_id;type:int(11)"`
+	UserID       uint           `json:"userId" gorm:"not null;index:idx_user_id;type:int(11)"`
+	PaymentNo    string         `json:"paymentNo" gorm:"uniqueIndex;not null;size:64"` // 支付号
+	Amount       float64        `json:"amount" gorm:"not null;type:decimal(10,2)"`       // 支付金额
+	PaymentMethod string        `json:"paymentMethod" gorm:"size:20"`                   // 支付方式
+	PaymentStatus string        `json:"paymentStatus" gorm:"size:20;index"`             // 支付状态
+	PaymentTime  *time.Time     `json:"paymentTime"`                                   // 支付时间
+	NotifyData   string         `json:"notifyData" gorm:"type:text"`                    // 回调数据
+	Remark       string         `json:"remark" gorm:"size:500"`                        // 备注
+	CreatedAt    time.Time      `json:"createdAt"`
+	UpdatedAt    time.Time      `json:"updatedAt"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// 兼容字段
+	Type          string  `json:"type" gorm:"size:20"`          // 支付类型
+	TransactionID string  `json:"transactionId" gorm:"size:64"` // 交易ID
+	Status        string  `json:"status" gorm:"size:20"`        // 状态（兼容）
+}
+
+// BeforeCreate 创建前钩子
+func (o *Order) BeforeCreate(tx *gorm.DB) error {
+	o.UUID = uuid.New().String()
+	return nil
+}
+
+func (p *PaymentRecord) BeforeCreate(tx *gorm.DB) error {
+	p.UUID = uuid.New().String()
+	return nil
+}

@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	hash, err := bcrypt.GenerateFromPassword([]byte("admin123456"), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte("admin123456"), 12)
 	if err != nil {
 		fmt.Println("Error generating hash:", err)
 		return

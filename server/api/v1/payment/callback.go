@@ -141,8 +141,9 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		UserID:        order.UserID,
 		Type:          paymentMethod,
 		TransactionID: orderNo, // 这里简化处理,实际应该是第三方交易号
-		Amount:        int64(order.Amount * 100),
+		Amount:        order.Amount,
 		Status:        orderModel.PaymentStatusSuccess,
+		PaymentStatus: orderModel.PaymentStatusSuccess,
 		NotifyData:    notifyDataStr,
 	}
 
@@ -152,7 +153,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	}
 
 	// 处理订单类型
-	if order.ProductID != nil && *order.ProductID > 0 {
+	if order.ProductID > 0 {
 		// 产品购买:提升用户等级
 		var user userModel.User
 		if err := tx.First(&user, order.UserID).Error; err != nil {
@@ -235,7 +236,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 				// 创建产品购买记录，用于记录用户购买的产品
 			productPurchase := productModel.ProductPurchase{
 				UserID:    order.UserID,
-				ProductID: *order.ProductID,
+				ProductID: order.ProductID,
 				Level:     newLevel,
 				StartDate: now,
 				EndDate:   user.LevelExpireAt,

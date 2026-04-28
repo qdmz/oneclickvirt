@@ -19,7 +19,8 @@ type Task struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`                                                                         // 软删除时间
 
 	// 任务基本信息
-	TaskType string `json:"taskType" gorm:"not null;size:32"`                                                                               // 任务类型：create, start, stop, restart, reset, delete, reset-password
+	Type     string `json:"type" gorm:"not null;size:32"` // 任务类型：instance, port-mapping, traffic-sync等
+	TaskType string `json:"taskType" gorm:"not null;size:32"` // 任务类型：create, start, stop, restart, reset, delete, reset-password
 	Status   string `json:"status" gorm:"default:pending;size:32;index:idx_status_created,priority:1;index:idx_provider_status,priority:2"` // 任务状态：pending, processing, running, completed, failed, cancelling, cancelled, timeout
 	Progress int    `json:"progress" gorm:"default:0"`                                                                                      // 任务执行进度百分比（0-100）
 
