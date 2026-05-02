@@ -11,12 +11,9 @@ auth:
     qq-app-id: ${QQ_APP_ID}
     qq-app-key: ${QQ_APP_KEY}
     telegram-bot-token: 8118138315:AAETEX9LyK5aIGRhx28QPvDNogiRF1flWcI
-    enable-kyc: false
-    enable-domain: false
-    enable-checkin: false
 captcha:
-    enabled: true
-    expire-time: 60
+    enabled: false
+    expire-time: 300
     height: 40
     length: 4
     width: 120
@@ -62,48 +59,6 @@ quota:
         min-level-for-reset-container: 1
         min-level-for-reset-vm: 1
         min-level-for-vm: 1
-    level-limits:
-        "1":
-            max-instances: 1
-            max-resources:
-                bandwidth: 10
-                cpu: 1
-                disk: 512
-                memory: 128
-            max-traffic: 10240
-        "2":
-            max-instances: 1
-            max-resources:
-                bandwidth: 200
-                cpu: 2
-                disk: 2048
-                memory: 1024
-            max-traffic: 204800
-        "3":
-            max-instances: 1
-            max-resources:
-                bandwidth: 300
-                cpu: 3
-                disk: 3072
-                memory: 1536
-            max-traffic: 307200
-        "4":
-            max-instances: 1
-            max-resources:
-                bandwidth: 400
-                cpu: 4
-                disk: 4096
-                memory: 4096
-            max-traffic: 409600
-        "5":
-            max-instances: 5
-            max-resources:
-                bandwidth: 500
-                cpu: 5
-                disk: 5120
-                memory: 5120
-            max-traffic: 2.048e+06
-    default-level: 1
 redis:
     addr: ""
     db: 0
@@ -128,8 +83,6 @@ upload:
 other:
     default-language: zh-CN
     max-avatar-size: 1
-    site-name:
-    logo-url:
 zap:
     director: storage/logs
     encode-level: LowercaseLevelEncoder

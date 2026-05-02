@@ -1,70 +1,107 @@
+version: '3.8'
+
 services:
-  init:
-    image: mysql:8.0
-    container_name: oneclickvirt-init
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-oneclickvirt}
-    command: bash -c "sleep 30 && mysql -h mysql -u root ${MYSQL_DATABASE:-oneclickvirt} < /init/complete_init.sql"
-    volumes:
-      - ./complete_init.sql:/init/complete_init.sql
-    depends_on:
-      - mysql
-    networks:
-      - default
-
-  web:
-    build:
-      context: ./web
-      dockerfile: Dockerfile
-    container_name: oneclickvirt-web
-    ports:
-      - "8080:80"
-      - "8443:443"
-    volumes:
-      - ./data/nginx:/etc/nginx/conf.d
-      - ./data/certs:/etc/nginx/certs
-    restart: always
-    depends_on:
-      - init
-    networks:
-      - default
-
-  api:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: oneclickvirt-api
-    ports:
-      - "8890:8890"
-    volumes:
-      - ./data/app/:/app/storage
-      - ./data/config:/app/config
-      - ./server/config.yaml:/app/config.yaml:rw
-    restart: always
-    depends_on:
-      - init
-    networks:
-      - default
-
-  mysql:
+  oneclickvirt-mysql:
     image: mariadb:10.11
     container_name: oneclickvirt-mysql
-    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123456
+      MYSQL_DATABASE: oneclickvirt
+      MYSQL_USER: oneclickvirt
+      MYSQL_PASSWORD: virtuser123456
     ports:
       - "3307:3306"
-    environment:
-        MYSQL_ALLOW_EMPTY_PASSWORD:  "yes"
-        MYSQL_DATABASE: ${MYSQL_DATABASE:-oneclickvirt}
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./data/mysql:/var/lib/mysql
-      - ./deploy/my.cnf/my.cnf:/etc/mysql/conf.d/custom.cnf
+    restart: unless-stopped
     networks:
-      - default
+      - oneclickvirt
+
+  oneclickvirt-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: oneclickvirt:fixed
+    container_name: oneclickvirt-init
+    depends_on:
+      - oneclickvirt-mysql
+    environment:
+      DB_HOST: oneclickvirt-mysql
+      DB_PORT: 3306
+      DB_NAME: oneclickvirt
+      DB_USER: oneclickvirt
+      DB_PASS: virtuser123456
+      REDIS_HOST: oneclickvirt-redis
+      REDIS_PORT: 6379
+      REDIS_PASS:
+      TG_BOT_TOKEN: 8118138315:AAETEX9LyK5aIGRhx28QPvDNogiRF1flWcI
+      QQ_APP_ID:
+      QQ_APP_KEY:
+      GO_ENV: production
+    command: /app/scripts/init.sh
+    restart: "no"
+
+  oneclickvirt-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: oneclickvirt:fixed
+    container_name: oneclickvirt-api
+    depends_on:
+      - oneclickvirt-mysql
+      - oneclickvirt-redis
+    environment:
+      DB_HOST: oneclickvirt-mysql
+      DB_PORT: 3306
+      DB_NAME: oneclickvirt
+      DB_USER: oneclickvirt
+      DB_PASS: virtuser123456
+      REDIS_HOST: oneclickvirt-redis
+      REDIS_PORT: 6379
+      REDIS_PASS:
+      TG_BOT_TOKEN: 8118138315:AAETEX9LyK5aIGRhx28QPvDNogiRF1flWcI
+      QQ_APP_ID:
+      QQ_APP_KEY:
+      GO_ENV: production
+      CONTAINER_NAME: oneclickvirt-api
+    ports:
+      - "8890:8890"
+    restart: unless-stopped
+    networks:
+      - oneclickvirt
+
+  oneclickvirt-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: oneclickvirt:fixed
+    container_name: oneclickvirt-web
+    depends_on:
+      - oneclickvirt-api
+    environment:
+      GO_ENV: production
+      CONTAINER_NAME: oneclickvirt-web
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    networks:
+      - oneclickvirt
+
+  oneclickvirt-redis:
+    image: redis:latest
+    container_name: oneclickvirt-redis
+    command: redis-server --requirepass ""
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - oneclickvirt
 
 volumes:
   mysql_data:
+  redis_data:
 
 networks:
-  default:
-    driver: bridge
+  oneclickvirt:

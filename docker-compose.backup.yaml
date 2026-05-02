@@ -1,0 +1,70 @@
+services:
+  init:
+    image: mysql:8.0
+    container_name: oneclickvirt-init
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-oneclickvirt}
+    command: bash -c "sleep 30 && mysql -h mysql -u root ${MYSQL_DATABASE:-oneclickvirt} < /init/complete_init.sql"
+    volumes:
+      - ./complete_init.sql:/init/complete_init.sql
+    depends_on:
+      - mysql
+    networks:
+      - default
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: oneclickvirt-web
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certs:/etc/nginx/certs
+    restart: always
+    depends_on:
+      - init
+    networks:
+      - default
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: oneclickvirt-api
+    ports:
+      - "8890:8890"
+    volumes:
+      - ./data/app/:/app/storage
+      - ./data/config:/app/config
+      - ./server/config.yaml:/app/config.yaml:rw
+    restart: always
+    depends_on:
+      - init
+    networks:
+      - default
+
+  mysql:
+    image: mariadb:10.11
+    container_name: oneclickvirt-mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+        MYSQL_ALLOW_EMPTY_PASSWORD:  "yes"
+        MYSQL_DATABASE: ${MYSQL_DATABASE:-oneclickvirt}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
+      - ./deploy/my.cnf/my.cnf:/etc/mysql/conf.d/custom.cnf
+    networks:
+      - default
+
+volumes:
+  mysql_data:
+
+networks:
+  default:
+    driver: bridge

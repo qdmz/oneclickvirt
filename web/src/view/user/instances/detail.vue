@@ -2,8 +2,8 @@
   <div class="instance-detail">
     <!-- 页面头部 -->
     <div class="page-header">
-      <el-button 
-        type="text" 
+      <el-button
+        type="text"
         class="back-btn"
         @click="$router.back()"
       >
@@ -11,6 +11,31 @@
         {{ t('user.instanceDetail.backToList') }}
       </el-button>
     </div>
+
+    <!-- ==================== 调试信息 ==================== -->
+    <el-alert
+      v-if="showDebugInfo"
+      type="info"
+      :closable="false"
+      style="margin: 20px 0; font-size: 12px;"
+    >
+      <template #title>
+        <span style="font-weight: bold;">调试信息:</span>
+      </template>
+      <div v-if="debugData">
+        <p><strong>实例ID:</strong> {{ debugData.id }}</p>
+        <p><strong>实例名称:</strong> {{ debugData.name }}</p>
+        <p><strong>状态:</strong> {{ debugData.status }}</p>
+        <p><strong>权限:</strong> 创建VM={{ instanceTypePermissions?.canCreateVM }} 创建容={{ instanceTypePermissions?.canCreateContainer }}</p>
+        <p><strong>操作:</strong> 启动={{ canStart }} 停止={{ canStop }} 重启={{ canRestart }} 重置={{ instanceTypePermissions?.canResetInstance }} 删除={{ instanceTypePermissions?.canDeleteInstance }}</p>
+      </div>
+    </el-alert>
+    <p style="margin-top: 10px;">
+      <el-button type="primary" size="small" @click="showDebugInfo = !showDebugInfo">
+        {{ showDebugInfo ? '隐藏调试信息' : '显示调试信息' }}
+      </el-button>
+    </p>
+    <!-- ==================== /调试信息 ==================== -->
 
     <!-- 实例概览卡片 -->
     <el-card class="overview-card">
@@ -28,14 +53,14 @@
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
               <p>{{ instance.relatedTask.statusMessage || `正在${getTaskTypeText(instance.relatedTask.taskType)}...` }}</p>
-              <el-progress 
-                :percentage="instance.relatedTask.progress" 
+              <el-progress
+                :percentage="instance.relatedTask.progress"
                 :status="instance.relatedTask.progress === 100 ? 'success' : undefined"
                 style="margin-top: 10px;"
               />
             </div>
-            <el-button 
-              type="primary" 
+            <el-button
+              type="primary"
               size="small"
               @click="viewTaskDetail(instance.relatedTask.id)"
             >
@@ -44,7 +69,7 @@
           </div>
         </template>
       </el-alert>
-      
+
       <!-- Provider离线警告 -->
       <el-alert
         v-if="instance.providerStatus && (instance.providerStatus === 'inactive' || instance.providerStatus === 'partial')"
@@ -55,7 +80,7 @@
         show-icon
         style="margin-bottom: 20px;"
       />
-      
+
       <!-- 实例不可用警告 -->
       <el-alert
         v-if="instance.status === 'unavailable'"
@@ -66,9 +91,9 @@
         show-icon
         style="margin-bottom: 20px;"
       />
-      
+
       <div class="server-overview">
-        <!-- 左侧：实例基本信息 -->
+        <!-- 左侧:实例基本信息 -->
         <div class="server-basic-info">
           <div class="server-header">
             <div class="server-name-section">
@@ -82,7 +107,7 @@
                 >
                   {{ instance.instance_type === 'vm' ? t('user.instanceDetail.vm') : t('user.instanceDetail.container') }}
                 </el-tag>
-                <el-tag 
+                <el-tag
                   v-if="instance.providerType"
                   :type="getProviderTypeColor(instance.providerType)"
                   size="small"
@@ -94,7 +119,7 @@
               </div>
             </div>
             <div class="server-status">
-              <el-tag 
+              <el-tag
                 :type="getStatusType(instance.status)"
                 effect="dark"
                 size="large"
@@ -103,12 +128,12 @@
               </el-tag>
             </div>
           </div>
-          
+
           <!-- 实例控制按钮 - 移到名称下方 -->
           <div class="control-actions">
-            <el-button 
+            <el-button
               v-if="instance.status === 'stopped'"
-              type="success" 
+              type="success"
               size="small"
               :loading="actionLoading"
               @click="performAction('start')"
@@ -116,9 +141,9 @@
               <el-icon><VideoPlay /></el-icon>
               {{ t('user.instanceDetail.start') }}
             </el-button>
-            <el-button 
+            <el-button
               v-if="instance.status === 'running'"
-              type="warning" 
+              type="warning"
               size="small"
               :loading="actionLoading"
               @click="performAction('stop')"
@@ -126,7 +151,7 @@
               <el-icon><VideoPause /></el-icon>
               {{ t('user.instanceDetail.stop') }}
             </el-button>
-            <el-button 
+            <el-button
               v-if="instance.status === 'running' && instance.canRestart !== false"
               size="small"
               :loading="actionLoading"
@@ -135,7 +160,7 @@
               <el-icon><Refresh /></el-icon>
               {{ t('user.instanceDetail.restart') }}
             </el-button>
-            <el-button 
+            <el-button
               v-if="instanceTypePermissions.canResetInstance"
               type="info"
               size="small"
@@ -145,7 +170,7 @@
               <el-icon><Refresh /></el-icon>
               {{ t('user.instanceDetail.resetSystem') }}
             </el-button>
-            <el-button 
+            <el-button
               v-if="instance.status === 'running'"
               type="primary"
               size="small"
@@ -155,7 +180,7 @@
               {{ t('user.instanceDetail.resetPassword') }}
             </el-button>
             <!-- Web SSH按钮 -->
-            <el-button 
+            <el-button
               v-if="instance.status === 'running' && instance.password"
               type="primary"
               size="small"
@@ -165,20 +190,40 @@
               {{ t('user.instanceDetail.webSSH') }}
             </el-button>
             <!-- 删除按钮 - 根据权限显示 -->
-            <el-button 
+            <el-button
               v-if="instanceTypePermissions.canDeleteInstance"
               type="danger"
               size="small"
               :loading="actionLoading"
               @click="performAction('delete')"
+              @click.native.prevent="console.log('删除按钮点击')"
             >
               <el-icon><Delete /></el-icon>
               {{ t('user.instanceDetail.delete') }}
             </el-button>
+
+            <!-- 报告问题按钮 -->
+            <el-button
+              type="info"
+              size="small"
+              @click="showReportDialog = true"
+            >
+              {{ t('user.instanceDetail.reportProblem') }}
+            </el-button>
+
+            <!-- 调试/隐藏调试按钮 -->
+            <el-button
+              type="warning"
+              size="small"
+              @click="showDebugInfo = !showDebugInfo"
+            >
+              <el-icon><Monitor /></el-icon>
+              {{ showDebugInfo ? '隐藏调试' : '显示调试' }}
+            </el-button>
           </div>
         </div>
 
-        <!-- 右侧：硬件信息 -->
+        <!-- 右侧:硬件信息 -->
         <div class="server-hardware">
           <h3>{{ t('user.instanceDetail.hardware') }}</h3>
           <div class="hardware-grid">
@@ -222,79 +267,79 @@
                 <div class="connection-item">
                   <span class="label">{{ t('user.instanceDetail.publicIPv4') }}</span>
                   <div class="value-with-action">
-                    <span 
-                      class="value ip-value" 
+                    <span
+                      class="value ip-value"
                       :title="instance.publicIP || t('user.instanceDetail.none')"
                     >
                       {{ truncateIP(instance.publicIP) || t('user.instanceDetail.none') }}
                     </span>
-                    <el-button 
+                    <el-button
                       v-if="instance.publicIP"
-                      size="small" 
-                      text 
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.publicIP)"
                     >
                       {{ t('user.instanceDetail.copy') }}
                     </el-button>
                   </div>
                 </div>
-                <div 
+                <div
                   v-if="instance.privateIP"
                   class="connection-item"
                 >
                   <span class="label">{{ t('user.instanceDetail.privateIPv4') }}</span>
                   <div class="value-with-action">
-                    <span 
-                      class="value ip-value" 
+                    <span
+                      class="value ip-value"
                       :title="instance.privateIP"
                     >
                       {{ truncateIP(instance.privateIP) }}
                     </span>
-                    <el-button 
-                      size="small" 
-                      text 
+                    <el-button
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.privateIP)"
                     >
                       {{ t('user.instanceDetail.copy') }}
                     </el-button>
                   </div>
                 </div>
-                <div 
+                <div
                   v-if="instance.ipv6Address"
                   class="connection-item"
                 >
                   <span class="label">{{ t('user.instanceDetail.ipv6') }}</span>
                   <div class="value-with-action">
-                    <span 
-                      class="value ip-value" 
+                    <span
+                      class="value ip-value"
                       :title="instance.ipv6Address"
                     >
                       {{ truncateIP(instance.ipv6Address) }}
                     </span>
-                    <el-button 
-                      size="small" 
-                      text 
+                    <el-button
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.ipv6Address)"
                     >
                       {{ t('user.instanceDetail.copy') }}
                     </el-button>
                   </div>
                 </div>
-                <div 
+                <div
                   v-if="instance.publicIPv6"
                   class="connection-item"
                 >
                   <span class="label">{{ t('user.instanceDetail.ipv6') }}</span>
                   <div class="value-with-action">
-                    <span 
-                      class="value ip-value" 
+                    <span
+                      class="value ip-value"
                       :title="instance.publicIPv6"
                     >
                       {{ truncateIP(instance.publicIPv6) }}
                     </span>
-                    <el-button 
-                      size="small" 
-                      text 
+                    <el-button
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.publicIPv6)"
                     >
                       {{ t('user.instanceDetail.copy') }}
@@ -305,10 +350,10 @@
                   <span class="label">{{ t('user.instanceDetail.sshPort') }}</span>
                   <div class="value-with-action">
                     <span class="value">{{ instance.sshPort || 22 }}</span>
-                    <el-button 
+                    <el-button
                       v-if="instance.sshPort"
-                      size="small" 
-                      text 
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.sshPort.toString())"
                     >
                       {{ t('user.instanceDetail.copy') }}
@@ -319,10 +364,10 @@
                   <span class="label">{{ t('user.instanceDetail.username') }}</span>
                   <div class="value-with-action">
                     <span class="value">{{ instance.username || 'root' }}</span>
-                    <el-button 
+                    <el-button
                       v-if="instance.username"
-                      size="small" 
-                      text 
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.username)"
                     >
                       {{ t('user.instanceDetail.copy') }}
@@ -336,16 +381,16 @@
                   <span class="label">{{ t('user.instanceDetail.password') }}</span>
                   <div class="value-with-action">
                     <span class="value">{{ showPassword ? instance.password : '••••••••' }}</span>
-                    <el-button 
-                      size="small" 
-                      text 
+                    <el-button
+                      size="small"
+                      text
                       @click="togglePassword"
                     >
                       {{ showPassword ? t('user.instanceDetail.hide') : t('user.instanceDetail.show') }}
                     </el-button>
-                    <el-button 
-                      size="small" 
-                      text 
+                    <el-button
+                      size="small"
+                      text
                       @click="copyToClipboard(instance.password)"
                     >
                       {{ t('user.instanceDetail.copy') }}
@@ -389,7 +434,7 @@
                   class="info-item"
                   style="display: none"
                 >
-                  <span class="label">IPv4映射类型（兼容）</span>
+                  <span class="label">IPv4映射类型(兼容)</span>
                   <el-tag
                     size="small"
                     :type="instance.ipv4MappingType === 'dedicated' ? 'success' : 'primary'"
@@ -428,7 +473,7 @@
                 {{ t('user.instances.search') }}
               </el-button>
             </div>
-            
+
             <el-table
               v-if="portMappings && portMappings.length > 0"
               :data="portMappings"
@@ -497,15 +542,15 @@
                       v-if="row.isSSH"
                       class="ssh-command"
                     >
-                      <span 
-                        class="command-text" 
+                      <span
+                        class="command-text"
                         :title="`ssh ${instance.username || 'root'}@${instance.publicIP} -p ${row.hostPort}`"
                       >
                         {{ formatSSHCommand(instance.username, instance.publicIP, row.hostPort) }}
                       </span>
-                      <el-button 
-                        size="small" 
-                        text 
+                      <el-button
+                        size="small"
+                        text
                         @click="copyToClipboard(`ssh ${instance.username || 'root'}@${instance.publicIP} -p ${row.hostPort}`)"
                       >
                         {{ t('user.instanceDetail.copy') }}
@@ -515,15 +560,15 @@
                       v-else
                       class="port-access"
                     >
-                      <span 
-                        class="command-text" 
+                      <span
+                        class="command-text"
                         :title="`${instance.publicIP}:${row.hostPort}`"
                       >
                         {{ formatIPPort(instance.publicIP, row.hostPort) }}
                       </span>
-                      <el-button 
-                        size="small" 
-                        text 
+                      <el-button
+                        size="small"
+                        text
                         @click="copyToClipboard(`${instance.publicIP}:${row.hostPort}`)"
                       >
                         {{ t('user.instanceDetail.copy') }}
@@ -533,8 +578,8 @@
                 </template>
               </el-table-column>
             </el-table>
-            
-            <div 
+
+            <div
               v-else
               class="no-ports"
             >
@@ -556,11 +601,11 @@
                   <div class="usage-header">
                     <span class="usage-label">{{ t('user.trafficOverview.currentMonthUsage') }}</span>
                     <span class="usage-info">
-                      {{ formatTraffic(monitoring.trafficData?.currentMonth || 0) }} / 
+                      {{ formatTraffic(monitoring.trafficData?.currentMonth || 0) }} /
                       {{ formatTraffic(monitoring.trafficData?.totalLimit || 102400) }}
                     </span>
                   </div>
-                  <el-progress 
+                  <el-progress
                     :percentage="monitoring.trafficData?.usagePercent || 0"
                     :color="getTrafficProgressColor(monitoring.trafficData?.usagePercent || 0)"
                     :show-text="false"
@@ -584,15 +629,15 @@
                   show-icon
                   style="margin: 20px 0;"
                 />
-                
+
                 <div
                   v-if="monitoring.trafficData?.history?.length"
                   class="traffic-breakdown"
                 >
                   <h4>{{ t('user.trafficOverview.historicalStats') }}</h4>
                   <div class="history-list">
-                    <div 
-                      v-for="item in monitoring.trafficData.history.slice(0, 6)" 
+                    <div
+                      v-for="item in monitoring.trafficData.history.slice(0, 6)"
                       :key="`${item.year}-${item.month}`"
                       class="history-item"
                     >
@@ -651,16 +696,16 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, watch, computed } from
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  ArrowLeft, 
-  VideoPlay, 
-  VideoPause, 
-  Refresh, 
+import {
+  ArrowLeft,
+  VideoPlay,
+  VideoPause,
+  Refresh,
   Delete,
   Monitor
 } from '@element-plus/icons-vue'
-import { 
-  getUserInstanceDetail, 
+import {
+  getUserInstanceDetail,
   performInstanceAction,
   getInstanceMonitoring,
   getUserInstancePorts,
@@ -677,10 +722,31 @@ const router = useRouter()
 const { t } = useI18n()
 const sshStore = useSSHStore()
 
+// 调试数据
+const debugData = computed(() => ({
+  id: instance.value?.id,
+  name: instance.value?.name,
+  status: instance.value?.status,
+  instanceType: instance.value?.instance_type,
+  canCreateVM: instanceTypePermissions.value.canCreateVM,
+  canCreateContainer: instanceTypePermissions.value.canCreateContainer,
+  canDeleteInstance: instanceTypePermissions.value.canDeleteInstance,
+  canResetInstance: instanceTypePermissions.value.canResetInstance,
+  canStart: instance.value?.status === 'stopped',
+  canStop: instance.value?.status === 'running' || instance.value?.status === 'unavailable',
+  canRestart: instance.value?.status === 'running'
+}))
+
+// 按钮权限计算属性
+const canStart = computed(() => instance.value?.status === 'stopped')
+const canStop = computed(() => instance.value?.status === 'running' || instance.value?.status === 'unavailable')
+const canRestart = computed(() => instance.value?.status === 'running')
+
 const loading = ref(false)
 const actionLoading = ref(false)
 const showPassword = ref(false)
 const showTrafficDetail = ref(false)
+const showDebugInfo = ref(false)
 const portMappings = ref([])
 const activeTab = ref('overview') // 默认显示概览标签页
 const trafficChartRef = ref(null) // TrafficHistoryChart 组件引用
@@ -838,7 +904,7 @@ const viewTaskDetail = (taskId) => {
 const loadInstanceDetail = async (skipPermissionUpdate = false) => {
   // 检查实例ID是否有效
   if (!route.params.id || route.params.id === 'undefined') {
-    console.error('实例ID无效，返回实例列表')
+    console.error('实例ID无效,返回实例列表')
     ElMessage.error(t('user.instances.instanceInvalid'))
     router.push('/user/instances')
     return false
@@ -848,13 +914,13 @@ const loadInstanceDetail = async (skipPermissionUpdate = false) => {
     loading.value = true
     const response = await getUserInstanceDetail(route.params.id)
     if (response.code === 0 || response.code === 200) {
-      // 后端返回的字段名是 type，前端需要映射为 instance_type
+      // 后端返回的字段名是 type,前端需要映射为 instance_type
       const data = response.data
       if (data.type && !data.instance_type) {
         data.instance_type = data.type
       }
       Object.assign(instance.value, data)
-      // 如果不跳过权限更新，则更新权限（用于页面初始化时已并行加载权限的情况）
+      // 如果不跳过权限更新,则更新权限(用于页面初始化时已并行加载权限的情况)
       if (!skipPermissionUpdate) {
         updateInstancePermissions()
       }
@@ -876,12 +942,12 @@ const refreshPortMappings = async () => {
   if (!route.params.id) {
     return
   }
-  
+
   try {
     const response = await getUserInstancePorts(route.params.id)
     if (response.code === 0 || response.code === 200) {
       portMappings.value = response.data.list || []
-      // 更新实例的公网IP信息（从端口映射API获取更准确的数据）
+      // 更新实例的公网IP信息(从端口映射API获取更准确的数据)
       if (response.data.publicIP) {
         instance.value.publicIP = response.data.publicIP
       }
@@ -891,7 +957,7 @@ const refreshPortMappings = async () => {
     }
   } catch (error) {
     console.error('获取端口映射失败:', error)
-    // 不显示错误信息，因为某些实例可能没有端口映射
+    // 不显示错误信息,因为某些实例可能没有端口映射
   }
 }
 
@@ -899,7 +965,7 @@ const refreshPortMappings = async () => {
 const refreshMonitoring = async () => {
   // 检查实例ID是否有效
   if (!route.params.id || route.params.id === 'undefined') {
-    console.warn('实例ID无效，跳过监控数据获取')
+    console.warn('实例ID无效,跳过监控数据获取')
     return
   }
 
@@ -907,15 +973,15 @@ const refreshMonitoring = async () => {
     const response = await getInstanceMonitoring(route.params.id)
     if (response.code === 0 || response.code === 200) {
       Object.assign(monitoring, response.data)
-      
-      // 如果流量已限制，显示警告
+
+      // 如果流量已限制,显示警告
       if (monitoring.trafficData?.isLimited) {
         ElMessage.warning(t('user.instanceDetail.trafficLimitWarning'))
       }
     }
   } catch (error) {
     console.error('获取监控数据失败:', error)
-    // 如果监控API失败，使用默认值
+    // 如果监控API失败,使用默认值
     monitoring.trafficData = {
       currentMonth: 0,
       totalLimit: 102400,
@@ -925,7 +991,7 @@ const refreshMonitoring = async () => {
     }
     ElMessage.error(t('user.instanceDetail.getMonitoringFailed'))
   }
-  
+
   // 刷新流量历史图表
   if (trafficChartRef.value && trafficChartRef.value.refresh) {
     trafficChartRef.value.refresh()
@@ -945,8 +1011,8 @@ const loadInstanceTypePermissions = async () => {
         canDeleteVM: data.canDeleteVM || false,
         canResetContainer: data.canResetContainer || false,
         canResetVM: data.canResetVM || false,
-        canDeleteInstance: false, // 初始化，后续根据实例类型动态设置
-        canResetInstance: false  // 初始化，后续根据实例类型动态设置
+        canDeleteInstance: false, // 初始化,后续根据实例类型动态设置
+        canResetInstance: false  // 初始化,后续根据实例类型动态设置
       }
       return true
     }
@@ -981,7 +1047,7 @@ const updateInstancePermissions = () => {
 
 // 执行实例操作
 const performAction = async (action) => {
-  // 防止重复操作：如果正在执行操作，直接返回
+  // 防止重复操作:如果正在执行操作,直接返回
   if (actionLoading.value) {
     ElMessage.warning(t('user.instanceDetail.operationInProgress'))
     return
@@ -995,11 +1061,11 @@ const performAction = async (action) => {
     'delete': t('user.instanceDetail.actionDelete')
   }[action]
 
-  const confirmText = action === 'delete' 
+  const confirmText = action === 'delete'
     ? `${t('user.instanceDetail.confirm')}${t('user.instanceDetail.delete')}${t('user.instances.title')} "${instance.value.name}" ${t('common.questionMark')}${t('user.profile.deleteConfirmNote')}`
     : `${t('user.instanceDetail.confirm')}${actionText}${t('user.instances.title')} "${instance.value.name}" ${t('common.questionMark')}`
 
-  // 如果是启动操作且流量已限制，特殊提示
+  // 如果是启动操作且流量已限制,特殊提示
   if (action === 'start' && monitoring.trafficData?.isLimited) {
     const trafficLimitConfirm = await ElMessageBox.confirm(
       `${t('user.instances.title')} "${instance.value.name}" ${t('user.instanceDetail.trafficLimitWarning')}${t('common.comma')}${t('user.instances.title')}${t('user.instanceDetail.actionStart')}${t('common.period')}`,
@@ -1010,7 +1076,7 @@ const performAction = async (action) => {
         type: 'warning'
       }
     ).catch(() => false)
-    
+
     if (!trafficLimitConfirm) return
     return
   }
@@ -1026,9 +1092,9 @@ const performAction = async (action) => {
       }
     )
 
-    // 设置加载状态，防止重复点击
+    // 设置加载状态,防止重复点击
     actionLoading.value = true
-    
+
     const response = await performInstanceAction({
       instanceId: instance.value.id,
       action: action
@@ -1036,9 +1102,9 @@ const performAction = async (action) => {
 
     if (response.code === 0 || response.code === 200) {
       ElMessage.success(`${actionText}${t('user.tasks.request')}${t('user.tasks.submitted')}${t('common.comma')}${t('user.tasks.processing')}${t('common.ellipsis')}`)
-      
+
       if (action === 'delete' || action === 'reset') {
-        // 删除和重置系统后返回列表页，避免显示过期数据
+        // 删除和重置系统后返回列表页,避免显示过期数据
         if (action === 'reset') {
           ElMessage.info(t('user.instanceDetail.resetSystemNotice'))
         }
@@ -1062,7 +1128,7 @@ const performAction = async (action) => {
     // 操作失败或取消时立即恢复按钮
     actionLoading.value = false
   }
-  // 成功执行非删除/重置操作时，不立即重置loading，等待3秒后再重置
+  // 成功执行非删除/重置操作时,不立即重置loading,等待3秒后再重置
 }
 
 // 打开SSH终端
@@ -1071,18 +1137,18 @@ const openSSHTerminal = () => {
     ElMessage.error(t('user.instanceDetail.instanceNotFound'))
     return
   }
-  
+
   if (instance.value.status !== 'running') {
     ElMessage.warning(t('user.instanceDetail.instanceNotRunning'))
     return
   }
-  
+
   if (!instance.value.password) {
     ElMessage.warning(t('user.instanceDetail.noPassword'))
     return
   }
-  
-  // 创建或显示SSH连接（由全局管理器处理）
+
+  // 创建或显示SSH连接(由全局管理器处理)
   if (!sshStore.hasConnection(instance.value.id)) {
     sshStore.createConnection(instance.value.id, instance.value.name)
   } else {
@@ -1092,7 +1158,7 @@ const openSSHTerminal = () => {
 
 // 显示重置密码对话框
 const showResetPasswordDialog = async () => {
-  // 防止重复操作：如果正在执行操作，直接返回
+  // 防止重复操作:如果正在执行操作,直接返回
   if (actionLoading.value) {
     ElMessage.warning(t('user.instanceDetail.operationInProgress'))
     return
@@ -1109,7 +1175,7 @@ const showResetPasswordDialog = async () => {
       }
     )
 
-    // 设置加载状态，防止重复点击
+    // 设置加载状态,防止重复点击
     actionLoading.value = true
 
     try {
@@ -1117,9 +1183,9 @@ const showResetPasswordDialog = async () => {
 
       if (response.code === 0 || response.code === 200) {
         const taskId = response.data.taskId
-        
+
         ElMessage.success(`${t('user.instanceDetail.resetPassword')}${t('user.tasks.taskCreated')}${t('common.leftParen')}${t('user.tasks.taskID')}: ${taskId}${t('common.rightParen')}${t('common.comma')}${t('user.tasks.checkProgress')}${t('user.tasks.taskList')}${t('common.inLocation')}`)
-        
+
         // 强制等待3秒后恢复按钮
         setTimeout(() => {
           actionLoading.value = false
@@ -1136,7 +1202,7 @@ const showResetPasswordDialog = async () => {
       actionLoading.value = false
     }
   } catch (error) {
-    // 用户取消操作，不需要设置loading状态
+    // 用户取消操作,不需要设置loading状态
   }
 }
 
@@ -1151,8 +1217,8 @@ const truncateIP = (ip, maxLength = 25) => {
   if (!ip || ip.length <= maxLength) {
     return ip
   }
-  
-  // 只在末尾省略，保留前面部分
+
+  // 只在末尾省略,保留前面部分
   return ip.substring(0, maxLength - 3) + '...'
 }
 
@@ -1162,8 +1228,8 @@ const formatSSHCommand = (username, ip, port) => {
   if (fullCommand.length <= 40) {
     return fullCommand
   }
-  
-  // 如果命令太长，截断IP地址部分
+
+  // 如果命令太长,截断IP地址部分
   const truncatedIP = truncateIP(ip, 20)
   return `ssh ${username || 'root'}@${truncatedIP} -p ${port}`
 }
@@ -1174,8 +1240,8 @@ const formatIPPort = (ip, port) => {
   if (fullAddress.length <= 30) {
     return fullAddress
   }
-  
-  // 如果地址太长，截断IP地址部分
+
+  // 如果地址太长,截断IP地址部分
   const truncatedIP = truncateIP(ip, 20)
   return `${truncatedIP}:${port}`
 }
@@ -1185,7 +1251,7 @@ const copyToClipboard = async (text) => {
     ElMessage.warning(t('user.instanceDetail.nothingToCopy'))
     return
   }
-  
+
   try {
     // 优先使用 Clipboard API
     if (navigator.clipboard && window.isSecureContext) {
@@ -1193,8 +1259,8 @@ const copyToClipboard = async (text) => {
       ElMessage.success(t('user.instanceDetail.copiedToClipboard'))
       return
     }
-    
-    // 降级方案：使用传统的 document.execCommand
+
+    // 降级方案:使用传统的 document.execCommand
     const textArea = document.createElement('textarea')
     textArea.value = text
     textArea.style.position = 'fixed'
@@ -1203,7 +1269,7 @@ const copyToClipboard = async (text) => {
     document.body.appendChild(textArea)
     textArea.focus()
     textArea.select()
-    
+
     try {
       // @ts-ignore - execCommand 已废弃但作为降级方案仍需使用
       const successful = document.execCommand('copy')
@@ -1299,7 +1365,7 @@ const getTrafficLimitType = () => {
   switch (limitType) {
     case 'provider':
     case 'both':
-      return 'error'  // Provider流量限制更严重，显示为错误
+      return 'error'  // Provider流量限制更严重,显示为错误
     case 'user':
       return 'warning'  // 用户流量限制显示为警告
     default:
@@ -1316,8 +1382,8 @@ watch(() => route.params.id, async (newId, oldId) => {
         loadInstanceDetail(true),
         loadInstanceTypePermissions()
       ])
-      
-      // 两个请求都成功后，统一更新权限并刷新其他数据
+
+      // 两个请求都成功后,统一更新权限并刷新其他数据
       if (detailSuccess && permissionsSuccess) {
         updateInstancePermissions()
         refreshMonitoring()
@@ -1329,18 +1395,18 @@ watch(() => route.params.id, async (newId, oldId) => {
   }
 })
 
-// 标志位，防止 watch 循环触发
+// 标志位,防止 watch 循环触发
 let isUpdatingFromRoute = false
 
 // 监听路由 query 参数变化来切换标签页
 watch(() => route.query.tab, (newTab, oldTab) => {
-  // 如果tab没有实际变化，直接返回
+  // 如果tab没有实际变化,直接返回
   if (newTab === oldTab) {
     return
   }
-  
+
   if (newTab && ['overview', 'ports', 'stats'].includes(newTab)) {
-    // 如果当前标签已经是目标标签，不需要更新
+    // 如果当前标签已经是目标标签,不需要更新
     if (activeTab.value === newTab) {
       return
     }
@@ -1351,7 +1417,7 @@ watch(() => route.query.tab, (newTab, oldTab) => {
       isUpdatingFromRoute = false
     })
   } else {
-    // 如果没有tab参数，默认显示overview
+    // 如果没有tab参数,默认显示overview
     if (activeTab.value !== 'overview') {
       isUpdatingFromRoute = true
       activeTab.value = 'overview'
@@ -1364,16 +1430,16 @@ watch(() => route.query.tab, (newTab, oldTab) => {
 
 // 切换标签页时更新 URL query 参数
 watch(activeTab, (newTab, oldTab) => {
-  // 如果标签没有实际变化，直接返回
+  // 如果标签没有实际变化,直接返回
   if (newTab === oldTab) {
     return
   }
-  
-  // 如果是从路由更新触发的，不再更新路由，避免循环
+
+  // 如果是从路由更新触发的,不再更新路由,避免循环
   if (isUpdatingFromRoute) {
     return
   }
-  
+
   if (newTab) {
     // 只在 query 参数真正不同时才更新
     if (route.query.tab !== newTab) {
@@ -1388,22 +1454,22 @@ watch(activeTab, (newTab, oldTab) => {
 let monitoringTimer = null
 
 onMounted(async () => {
-  // 等待下一个tick，确保路由参数已经加载
+  // 等待下一个tick,确保路由参数已经加载
   await nextTick()
-  
-  // 使用 Promise.all 并行加载实例详情和权限配置，确保两者都完成
+
+  // 使用 Promise.all 并行加载实例详情和权限配置,确保两者都完成
   try {
     const [detailSuccess, permissionsSuccess] = await Promise.all([
       loadInstanceDetail(true), // 跳过实例详情加载时的权限更新
       loadInstanceTypePermissions()
     ])
-    
-    // 两个请求都成功后，再统一更新权限，确保按钮渲染一致
+
+    // 两个请求都成功后,再统一更新权限,确保按钮渲染一致
     if (detailSuccess && permissionsSuccess) {
       updateInstancePermissions()
       refreshMonitoring()
       refreshPortMappings()
-      
+
       // 定时刷新监控数据
       monitoringTimer = setInterval(refreshMonitoring, 30000)
     }
@@ -1832,42 +1898,42 @@ onUnmounted(() => {
   .instance-detail {
     padding: 16px;
   }
-  
+
   .server-overview {
     flex-direction: column;
     gap: 24px;
   }
-  
+
   .server-header {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
   }
-  
+
   .connection-grid,
   .info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .ports-header {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
   }
-  
+
   .ports-summary {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .monitoring-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .hardware-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .history-item {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -1877,17 +1943,17 @@ onUnmounted(() => {
   .ip-value {
     max-width: 150px;
   }
-  
+
   .command-text {
     max-width: 200px;
   }
-  
+
   .connection-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .value-with-action {
     width: 100%;
     justify-content: space-between;
@@ -1939,7 +2005,7 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* 最小化SSH终端样式 - 右下角悬浮（使用Teleport到body） */
+/* 最小化SSH终端样式 - 右下角悬浮(使用Teleport到body) */
 .ssh-minimized-container {
   position: fixed;
   bottom: 20px;

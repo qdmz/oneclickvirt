@@ -1,0 +1,35 @@
+services:
+  oneclickvirt-web:
+    image: oneclickvirt:fixed
+    container_name: oneclickvirt-web
+    depends_on:
+      oneclickvirt-mysql:
+        condition: service_healthy
+      oneclickvirt-redis:
+        condition: service_started
+      oneclickvirt-api:
+        condition: service_started
+    environment:
+      - DB_HOST=oneclickvirt-mysql
+      - DB_PORT=3306
+      - DB_NAME=oneclickvirt
+      - DB_USER=oneclickvirt
+      - DB_PASS=virtuser123456
+      - REDIS_HOST=oneclickvirt-redis
+      - REDIS_PORT=6379
+      - REDIS_PASS=
+      - TG_BOT_TOKEN=8118138315:AAETEX9LyK5aIGRhx28QPvDNogiRF1flWcI
+      - QQ_APP_ID=
+      - QQ_APP_KEY=
+      - GO_ENV=production
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    networks:
+      - oneclickvirt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

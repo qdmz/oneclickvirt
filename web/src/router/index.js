@@ -116,16 +116,6 @@ const routes = [
         }
       },
       {
-        path: 'apply',
-        name: 'UserApply',
-        component: () => import('@/view/user/apply/index.vue'),
-        meta: {
-          title: '申请领取',
-          requiresAuth: true,
-          roles: ['user', 'admin']
-        }
-      },
-      {
         path: 'tasks',
         name: 'UserTasks',
         component: () => import('@/view/user/tasks/index.vue'),
@@ -200,6 +190,16 @@ const routes = [
         component: () => import('@/view/user/api-keys/index.vue'),
         meta: {
           title: 'API 密钥管理',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'cart',
+        name: 'UserCart',
+        component: () => import('@/view/user/cart.vue'),
+        meta: {
+          title: '购物车',
           requiresAuth: true,
           roles: ['user', 'admin']
         }
