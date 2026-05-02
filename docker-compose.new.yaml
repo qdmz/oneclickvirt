@@ -38,7 +38,7 @@ services:
       QQ_APP_ID:
       QQ_APP_KEY:
       GO_ENV: production
-    command: /app/scripts/init.sh
+    command: /app/init.sh
     restart: "no"
 
   oneclickvirt-api:
@@ -63,9 +63,8 @@ services:
       QQ_APP_ID:
       QQ_APP_KEY:
       GO_ENV: production
-      CONTAINER_NAME: oneclickvirt-api
     ports:
-      - "8890:8890"
+      - "8890:8080"
     restart: unless-stopped
     networks:
       - oneclickvirt
@@ -80,9 +79,8 @@ services:
       - oneclickvirt-api
     environment:
       GO_ENV: production
-      CONTAINER_NAME: oneclickvirt-web
     ports:
-      - "8081:80"
+      - "8080:80"
     restart: unless-stopped
     networks:
       - oneclickvirt

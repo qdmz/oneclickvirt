@@ -288,12 +288,15 @@ RUN echo 'user www-data;' > /etc/nginx/nginx.conf && \
 # Create base supervisor directory
 RUN mkdir -p /etc/supervisor/conf.d
 
-# Copy autoinstall.sh script
-COPY autoinstall.sh /autoinstall.sh
-RUN chmod +x /autoinstall.sh
+# Copy autoinstall.sh script to appropriate location
+COPY autoinstall.sh /app/autoinstall.sh
+RUN chmod +x /app/autoinstall.sh
+
+# Ensure entrypoint script is also copied if exists
+# COPY entrypoint.sh /app/entrypoint.sh || true
 
 # Expose ports
 EXPOSE 80 443
 
 # Start the application using autoinstall.sh
-CMD ["/autoinstall.sh"]
+ENTRYPOINT ["/app/autoinstall.sh"]

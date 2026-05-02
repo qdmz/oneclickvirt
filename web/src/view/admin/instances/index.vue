@@ -6,32 +6,28 @@
           <span>{{ $t('admin.instances.title') }}</span>
           <div class="header-actions">
             <el-button
-              v-if="selectedInstances.length > 0"
-              type="success"
-              @click="batchStartInstances"
-            >
-              {{ $t('admin.instances.batchStart') }} ({{ selectedInstances.length }})
-            </el-button>
-            <el-button
-              v-if="selectedInstances.length > 0"
-              type="warning"
-              @click="batchStopInstances"
-            >
-              {{ $t('admin.instances.batchStop') }} ({{ selectedInstances.length }})
-            </el-button>
-            <el-button
-              v-if="selectedInstances.length > 0"
-              type="danger"
-              @click="batchDeleteInstances"
-            >
-              {{ $t('admin.instances.batchDelete') }} ({{ selectedInstances.length }})
-            </el-button>
-            <el-button
               type="primary"
               :loading="loading"
               @click="loadInstances"
             >
               {{ $t('common.refresh') }}
+            </el-button>
+
+            <!-- 新增：创建实例按钮 -->
+            <el-button
+              type="success"
+              @click="showCreateDialog"
+            >
+              <el-icon><Plus /></el-icon>
+              {{ $t('admin.instances.createInstance') }}
+            </el-button>
+
+            <el-button
+              v-if="selectedInstances.length > 0"
+              type="success"
+              @click="batchStartInstances"
+            >
+              {{ $t('admin.instances.batchStart') }} ({{ selectedInstances.length }})
             </el-button>
           </div>
         </div>
@@ -286,6 +282,20 @@
         />
       </div>
     </el-card>
+
+    <!-- 创建实例表单 -->
+    <el-dialog
+      v-model="createDialogVisible"
+      :title="$t('admin.instances.createInstance')"
+      width="70%"
+      destroy-on-close
+    >
+      <create-form
+        ref="createFormRef"
+        @created="handleCreateSuccess"
+        @cancel="createDialogVisible = false"
+      />
+    </el-dialog>
 
     <!-- 实例详情对话框 -->
     <el-dialog
@@ -568,11 +578,17 @@ import {
   Refresh, 
   RefreshRight, 
   Lock, 
-  Delete 
+  Delete,
+  Plus
 } from '@element-plus/icons-vue'
 import { getAllInstances, deleteInstance as deleteInstanceApi, adminInstanceAction, resetInstancePassword, transferInstanceOwnership, getUserList } from '@/api/admin'
+import CreateForm from './create-form.vue'
 import { useI18n } from 'vue-i18n'
 import { useSSHStore } from '@/pinia/modules/ssh'
+
+// 创建实例相关
+const createDialogVisible = ref(false)
+const createFormRef = ref(null)
 
 const { t } = useI18n()
 const sshStore = useSSHStore()
@@ -671,6 +687,18 @@ const handleSizeChange = (val) => {
 const handleCurrentChange = (val) => {
   pagination.value.page = val
   loadInstances()
+}
+
+// 显示创建实例对话框
+const showCreateDialog = () => {
+  createDialogVisible.value = true
+}
+
+// 处理创建成功
+const handleCreateSuccess = (formData) => {
+  createDialogVisible.value = false
+  loadInstances()
+  createFormRef.value?.resetForm()
 }
 
 const viewInstanceDetail = (instance) => {

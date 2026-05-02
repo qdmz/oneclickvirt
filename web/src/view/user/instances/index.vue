@@ -102,11 +102,12 @@
 
       <!-- 实例列表 -->
       <div class="instances-grid">
-        <div 
+        <div
           v-for="instance in instances" 
           :key="instance.id" 
           class="instance-card"
           @click="viewInstanceDetail(instance)"
+          @click.stop
         >
           <div class="instance-header">
             <div class="instance-info">
