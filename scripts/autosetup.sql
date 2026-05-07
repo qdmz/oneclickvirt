@@ -46,7 +46,12 @@ CREATE TABLE IF NOT EXISTS `system_images` (
 ALTER TABLE redemption_codes ADD COLUMN IF NOT EXISTS `used_count` int DEFAULT 0 COMMENT '已使用次数' AFTER `max_uses`;
 
 -- ============================================
--- 3. 修复 product_purchases 表外键问题
+-- 3. 修复 tasks 表缺失的 deleted_at 字段
+-- ============================================
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS `deleted_at` datetime(3) DEFAULT NULL AFTER `updated_at`;
+
+-- ============================================
+-- 4. 修复 product_purchases 表外键问题
 -- ============================================
 ALTER TABLE product_purchases DROP INDEX IF EXISTS `idx_product_purchases_order_id`;
 ALTER TABLE product_purchases MODIFY COLUMN `order_id` bigint unsigned DEFAULT NULL;
