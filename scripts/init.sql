@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `ticket_replies` (
 -- ============================================
 -- 1. 创建默认角色
 -- ============================================
-INSERT INTO `roles` (`name`, `code`, `description`, `status`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `roles` (`name`, `code`, `description`, `status`, `created_at`, `updated_at`) VALUES
 ('admin', 'admin', '系统管理员角色', 1, NOW(), NOW()),
 ('user', 'user', '普通用户角色', 1, NOW(), NOW());
 
@@ -253,11 +253,11 @@ INSERT INTO `roles` (`name`, `code`, `description`, `status`, `created_at`, `upd
 -- 2. 创建默认管理员账户
 -- 默认密码: TestPass12!#
 -- ============================================
-INSERT INTO `users` (`uuid`, `username`, `password`, `nickname`, `email`, `phone`, `status`, `level`, `level_expire_at`, `user_type`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `users` (`uuid`, `username`, `password`, `nickname`, `email`, `phone`, `status`, `level`, `level_expire_at`, `user_type`, `created_at`, `updated_at`) VALUES
 ('admin-uuid-001', 'admin', 'TestPass12!#', '管理员', 'admin@example.com', '13800138000', 1, 5, '2099-12-31 23:59:59', 'admin', NOW(), NOW());
 
 -- 创建用户角色关联
-INSERT INTO `user_roles` (`user_id`, `role_id`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `user_roles` (`user_id`, `role_id`, `created_at`, `updated_at`) VALUES
 (1, 1, NOW(), NOW());
 
 -- ============================================
@@ -271,11 +271,11 @@ INSERT INTO `announcements` (`title`, `content`, `content_html`, `type`, `status
 -- ============================================
 -- 4. 创建默认产品套餐
 -- ============================================
-INSERT INTO `products` (`name`, `description`, `price`, `billing_cycle`, `cpu_limit`, `memory_limit`, `disk_limit`, `bandwidth_limit`, `instance_limit`, `features`, `status`, `sort_order`, `is_enabled`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `period`, `allow_repeat`, `created_at`, `updated_at`) VALUES
-('入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 0, 'monthly', 1, 512, 10240, 100, 1, '{}', 1, 1, 1, 1, 512, 10240, 100, 0, 30, 1, NOW(), NOW()),
-('标准套餐', '适合小型团队的标准套餐，包含更多资源', 990, 'monthly', 2, 1024, 20480, 200, 3, '{}', 1, 2, 1, 2, 1024, 20480, 200, 0, 30, 1, NOW(), NOW()),
-('专业套餐', '适合中型团队的专业套餐，包含完整功能', 2990, 'monthly', 4, 2048, 40960, 500, 5, '{}', 1, 3, 1, 4, 2048, 40960, 500, 0, 30, 1, NOW(), NOW()),
-('企业套餐', '适合大型团队的企业套餐，包含无限资源', 9990, 'monthly', 8, 4096, 102400, 1000, 10, '{}', 1, 4, 1, 8, 4096, 102400, 1000, 0, 30, 1, NOW(), NOW());
+INSERT INTO `products` (`name`, `description`, `level`, `price`, `period`, `cpu`, `memory`, `disk`, `bandwidth`, `traffic`, `max_instances`, `is_enabled`, `sort_order`, `features`, `allow_repeat`, `stock`, `sold_count`, `created_at`, `updated_at`) VALUES
+('入门套餐', '适合个人用户的基础套餐，包含基本的虚拟化功能', 1, 0, 30, 1, 512, 10240, 100, 0, 1, 1, 1, '{}', 1, -1, 0, NOW(), NOW()),
+('标准套餐', '适合小型团队的标准套餐，包含更多资源', 2, 990, 30, 2, 1024, 20480, 200, 0, 3, 1, 2, '{}', 1, -1, 0, NOW(), NOW()),
+('专业套餐', '适合中型团队的专业套餐，包含完整功能', 3, 2990, 30, 4, 2048, 40960, 500, 0, 5, 1, 3, '{}', 1, -1, 0, NOW(), NOW()),
+('企业套餐', '适合大型团队的企业套餐，包含无限资源', 4, 9990, 30, 8, 4096, 102400, 1000, 0, 10, 1, 4, '{}', 1, -1, 0, NOW(), NOW());
 
 -- ============================================
 -- 5. 创建默认系统配置
@@ -293,7 +293,7 @@ INSERT INTO `system_configs` (`key`, `value`, `description`, `created_at`, `upda
 -- ============================================
 -- 6. 创建默认站点配置
 -- ============================================
-INSERT INTO `site_configs` (`key`, `value`, `type`, `group`, `description`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `site_configs` (`key`, `value`, `type`, `group`, `description`, `created_at`, `updated_at`) VALUES
 ('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
 ('site_icon_url', '/favicon.ico', 'string', 'basic', '网站图标URL', NOW(), NOW()),
 ('site_logo_url', '/logo.png', 'string', 'basic', '网站Logo URL', NOW(), NOW()),
@@ -304,13 +304,13 @@ INSERT INTO `site_configs` (`key`, `value`, `type`, `group`, `description`, `cre
 -- ============================================
 -- 7. 创建默认域名配置
 -- ============================================
-INSERT INTO `domain_configs` (`max_domains_per_user`, `max_domains_per_agent_user`, `default_ttl`, `auto_ssl`, `allowed_suffixes`, `dns_type`, `dns_config_path`, `nginx_config_path`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `domain_configs` (`max_domains_per_user`, `max_domains_per_agent_user`, `default_ttl`, `auto_ssl`, `allowed_suffixes`, `dns_type`, `dns_config_path`, `nginx_config_path`, `created_at`, `updated_at`) VALUES
 (3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/etc/nginx/conf.d/oneclickvirt-domains', NOW(), NOW());
 
 -- ============================================
 -- 8. 新增系统配置项 (email verify + real name + agent)
 -- ============================================
-INSERT INTO `system_configs` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES
+INSERT IGNORE INTO `system_configs` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES
 ('enable_email_verification', 'false', '是否开启邮箱验证（注册后需验证邮箱）', NOW(), NOW()),
 ('email_activation_expire_hours', '24', '邮箱激活链接过期时间（小时）', NOW(), NOW()),
 ('enable_real_name', 'false', '是否开启实名认证', NOW(), NOW()),
