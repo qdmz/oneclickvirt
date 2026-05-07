@@ -68,16 +68,9 @@ setup_mysql() {
         export DEBIAN_FRONTEND=noninteractive
         systemctl enable mariadb
         systemctl restart mariadb
-        
-        # 等待MariaDB启动
         sleep 3
-        
-        # 安全初始化MariaDB，设置root密码
         mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('oneclickvirt123'); FLUSH PRIVILEGES;"
-        
-        # 创建数据库
         mysql -u root -poneclickvirt123 -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-        
         echo "MariaDB 配置完成"
 ENDSSH
 }
@@ -98,52 +91,19 @@ clone_code() {
 ENDSSH
 }
 
-# 6. 初始化数据库
-init_database() {
-    echo "[6/8] 初始化数据库..."
+# 6. 创建必要目录
+create_dirs() {
+    echo "[6/8] 创建必要目录..."
     ssh_exec << 'ENDSSH'
-        cd /opt/oneclickvirt
-        
-        # 先创建基础表结构（users表需要先存在）
-        mysql -u root -poneclickvirt123 -e "
-        CREATE TABLE IF NOT EXISTS users (
-          id INT NOT NULL AUTO_INCREMENT,
-          uuid VARCHAR(36) NOT NULL,
-          username VARCHAR(64) NOT NULL UNIQUE,
-          password VARCHAR(255) NOT NULL,
-          nickname VARCHAR(64) DEFAULT NULL,
-          email VARCHAR(128) DEFAULT NULL,
-          phone VARCHAR(32) DEFAULT NULL,
-          avatar VARCHAR(255) DEFAULT NULL,
-          status INT DEFAULT 1,
-          level INT DEFAULT 1,
-          level_expire_at DATETIME DEFAULT NULL,
-          user_type VARCHAR(20) DEFAULT 'user',
-          balance DECIMAL(10,2) DEFAULT 0.00,
-          total_spent DECIMAL(10,2) DEFAULT 0.00,
-          total_orders INT DEFAULT 0,
-          last_login_at DATETIME DEFAULT NULL,
-          last_login_ip VARCHAR(64) DEFAULT NULL,
-          created_at DATETIME(3) DEFAULT NULL,
-          updated_at DATETIME(3) DEFAULT NULL,
-          deleted_at DATETIME(3) DEFAULT NULL,
-          PRIMARY KEY (id),
-          UNIQUE KEY uuid (uuid),
-          UNIQUE KEY username (username),
-          KEY status (status),
-          KEY user_type (user_type)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        "
-        
-        # 执行完整初始化脚本
-        mysql -u root -poneclickvirt123 oneclickvirt < scripts/init.sql
-        
-        echo "数据库初始化完成"
+        mkdir -p /opt/oneclickvirt/storage/logs
+        mkdir -p /opt/oneclickvirt/storage/uploads
+        mkdir -p /opt/oneclickvirt/storage/avatars
+        echo "目录创建完成"
 ENDSSH
 }
 
-# 7. 编译并启动服务
-build_and_start() {
+# 7. 编译后端
+build_backend() {
     echo "[7/8] 编译后端..."
     ssh_exec << 'ENDSSH'
         export PATH=$PATH:/usr/local/go/bin
@@ -174,56 +134,47 @@ server:
 CONFIG
         
         # 停止旧进程
-        [ -f /var/run/oneclickvirt.pid ] && kill $(cat /var/run/oneclickvirt.pid) 2>/dev/null || true
         pkill -f oneclickvirt 2>/dev/null || true
         
-        # 启动后端服务
+        # 启动后端
         nohup ./oneclickvirt > /var/log/oneclickvirt.log 2>&1 &
         echo $! > /var/run/oneclickvirt.pid
         sleep 3
         
-        # 检查后端是否启动成功
-        if ps aux | grep -v grep | grep oneclickvirt > /dev/null; then
-            echo "后端服务启动成功"
+        if netstat -tlnp 2>/dev/null | grep -q 30002; then
+            echo "后端服务启动成功 (端口30002)"
         else
             echo "后端服务启动失败，查看日志:"
-            cat /var/log/oneclickvirt.log
+            tail -20 /var/log/oneclickvirt.log
         fi
 ENDSSH
 }
 
-# 8. 编译前端
+# 8. 编译前端 (注意：项目里前端目录叫 web，不是 front)
 build_frontend() {
     echo "[8/8] 编译前端..."
     ssh_exec << 'ENDSSH'
+        cd /opt/oneclickvirt/web
+        
         # 安装pnpm并编译前端
-        cd /opt/oneclickvirt/front
         npm install -g pnpm
         pnpm install
         pnpm build
         
         # 停止旧前端进程
-        pkill -f "serve.*dist" 2>/dev/null || true
+        pkill -f "serve.*30005" 2>/dev/null || true
         
         # 使用npx serve托管前端
         nohup npx serve -s dist -l 30005 > /var/log/oneclickvirt-front.log 2>&1 &
         echo $! > /var/run/oneclickvirt-front.pid
         sleep 3
         
-        # 检查前端是否启动成功
-        if ps aux | grep -v grep | grep "serve.*30005" > /dev/null; then
-            echo "前端服务启动成功"
+        if netstat -tlnp 2>/dev/null | grep -q 30005; then
+            echo "前端服务启动成功 (端口30005)"
         else
             echo "前端服务启动失败，查看日志:"
-            cat /var/log/oneclickvirt-front.log
+            tail -20 /var/log/oneclickvirt-front.log
         fi
-        
-        echo ""
-        echo "=========================================="
-        echo "服务状态检查"
-        echo "=========================================="
-        ps aux | grep -E "oneclickvirt|serve.*30005" | grep -v grep
-        netstat -tlnp 2>/dev/null | grep -E "30002|30005" || ss -tlnp | grep -E "30002|30005"
 ENDSSH
 }
 
@@ -234,8 +185,8 @@ main() {
     install_node
     setup_mysql
     clone_code
-    init_database
-    build_and_start
+    create_dirs
+    build_backend
     build_frontend
     
     echo ""
