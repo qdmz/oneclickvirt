@@ -1,7 +1,7 @@
 #!/bin/bash
 # OneClickVirt 一键部署脚本（本地执行版）
 # 使用方法: bash deploy.sh
-# 
+#
 # 部署配置
 DB_PASS="oneclickvirt123"
 BACKEND_PORT="30002"
@@ -13,14 +13,14 @@ echo "OneClickVirt 一键部署脚本"
 echo "=========================================="
 
 # 1. 创建必要目录
-echo "[1/7] 创建必要目录..."
+echo "[1/8] 创建必要目录..."
 mkdir -p /opt/oneclickvirt/storage/logs
 mkdir -p /opt/oneclickvirt/storage/uploads
 mkdir -p /opt/oneclickvirt/storage/avatars
 echo "目录创建完成"
 
 # 2. 配置 MariaDB
-echo "[2/7] 配置 MariaDB..."
+echo "[2/8] 配置 MariaDB..."
 systemctl enable mariadb
 systemctl restart mariadb
 sleep 3
@@ -29,7 +29,7 @@ mysql -u root -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARAC
 echo "MariaDB 配置完成"
 
 # 3. 拉取代码（如果目录不存在）
-echo "[3/7] 拉取代码..."
+echo "[3/8] 拉取代码..."
 if [ ! -d "/opt/oneclickvirt/.git" ]; then
     rm -rf /opt/oneclickvirt
     git clone https://github.com/qdmz/oneclickvirt.git /opt/oneclickvirt
@@ -38,184 +38,135 @@ cd /opt/oneclickvirt
 git pull origin main
 echo "代码拉取完成"
 
-# 4. 初始化数据库
-echo "[4/7] 初始化数据库..."
+# 4. 初始化数据库（使用 scripts/init.sql）
+echo "[4/8] 初始化数据库..."
 cd /opt/oneclickvirt
 
-# 先创建users表（依赖其他表）
-mysql -u root -p"$DB_PASS" oneclickvirt << 'EOF'
-CREATE TABLE IF NOT EXISTS users (
-  id INT NOT NULL AUTO_INCREMENT,
-  uuid VARCHAR(36) NOT NULL,
-  username VARCHAR(64) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  nickname VARCHAR(64) DEFAULT NULL,
-  email VARCHAR(128) DEFAULT NULL,
-  phone VARCHAR(32) DEFAULT NULL,
-  avatar VARCHAR(255) DEFAULT NULL,
-  status INT DEFAULT 1,
-  level INT DEFAULT 1,
-  level_expire_at DATETIME DEFAULT NULL,
-  user_type VARCHAR(20) DEFAULT 'user',
-  balance DECIMAL(10,2) DEFAULT 0.00,
-  total_spent DECIMAL(10,2) DEFAULT 0.00,
-  total_orders INT DEFAULT 0,
-  last_login_at DATETIME DEFAULT NULL,
-  last_login_ip VARCHAR(64) DEFAULT NULL,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  deleted_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY uuid (uuid),
-  KEY status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+# 导入完整的 init.sql
+mysql -u root -p"$DB_PASS" oneclickvirt < /opt/oneclickvirt/scripts/init.sql 2>&1 || true
 
-INSERT INTO users (uuid, username, password, nickname, email, phone, status, level, level_expire_at, user_type, created_at, updated_at) VALUES
-('admin-001', 'admin', 'TestPass12!#', '管理员', 'admin@example.com', '13800138000', 1, 5, '2099-12-31 23:59:59', 'admin', NOW(), NOW());
+# 运行 autosetup 修复脚本（如果存在）
+if [ -f "/opt/oneclickvirt/scripts/autosetup.sql" ]; then
+    echo "运行自动修复脚本..."
+    mysql -u root -p"$DB_PASS" oneclickvirt < /opt/oneclickvirt/scripts/autosetup.sql 2>&1 || true
+fi
 
-CREATE TABLE IF NOT EXISTS roles (
-  id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(64) NOT NULL,
-  code VARCHAR(64) NOT NULL,
-  description TEXT,
-  status INT DEFAULT 1,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY code (code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO roles (name, code, description, status, created_at, updated_at) VALUES
-('admin', 'admin', '系统管理员角色', 1, NOW(), NOW()),
-('user', 'user', '普通用户角色', 1, NOW(), NOW());
-
-CREATE TABLE IF NOT EXISTS user_roles (
-  id INT NOT NULL AUTO_INCREMENT,
-  user_id INT NOT NULL,
-  role_id INT NOT NULL,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY user_id (user_id),
-  KEY role_id (role_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO user_roles (user_id, role_id, created_at, updated_at) VALUES (1, 1, NOW(), NOW());
-
-CREATE TABLE IF NOT EXISTS products (
-  id INT NOT NULL AUTO_INCREMENT,
-  uuid VARCHAR(36) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  price DECIMAL(10,2) DEFAULT 0.00,
-  cpu_limit INT DEFAULT 1,
-  memory_limit INT DEFAULT 512,
-  disk_limit INT DEFAULT 10240,
-  bandwidth_limit INT DEFAULT 100,
-  instance_limit INT DEFAULT 1,
-  features TEXT,
-  status INT DEFAULT 1,
-  sort_order INT DEFAULT 0,
-  is_enabled INT DEFAULT 1,
-  cpu INT DEFAULT 1,
-  memory INT DEFAULT 512,
-  disk INT DEFAULT 10240,
-  bandwidth INT DEFAULT 100,
-  traffic INT DEFAULT 0,
-  period INT DEFAULT 30,
-  allow_repeat INT DEFAULT 1,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  deleted_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO products (uuid, name, description, price, cpu_limit, memory_limit, disk_limit, bandwidth_limit, instance_limit, status, sort_order, is_enabled, cpu, memory, disk, bandwidth, period, allow_repeat, created_at, updated_at) VALUES
-(UUID(), '入门套餐', '适合个人用户', 0, 1, 512, 10240, 100, 1, 1, 1, 1, 1, 512, 10240, 100, 30, 1, NOW(), NOW()),
-(UUID(), '标准套餐', '适合小型团队', 990, 2, 1024, 20480, 200, 3, 1, 2, 1, 2, 1024, 20480, 200, 30, 1, NOW(), NOW());
-
-CREATE TABLE IF NOT EXISTS system_configs (
-  id INT NOT NULL AUTO_INCREMENT,
-  \`key\` VARCHAR(128) NOT NULL,
-  value TEXT,
-  description TEXT,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY \`key\` (\`key\`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO system_configs (\`key\`, value, description, created_at, updated_at) VALUES
-('site_name', 'OneClickVirt', '网站名称', NOW(), NOW()),
-('enable_registration', 'true', '是否开启注册', NOW(), NOW()),
-('default_user_level', '1', '默认用户等级', NOW(), NOW());
-
-CREATE TABLE IF NOT EXISTS site_configs (
-  id INT NOT NULL AUTO_INCREMENT,
-  \`key\` VARCHAR(128) NOT NULL,
-  value TEXT,
-  type VARCHAR(32) DEFAULT 'string',
-  \`group\` VARCHAR(32) DEFAULT 'basic',
-  description TEXT,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY \`key\` (\`key\`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO site_configs (\`key\`, value, type, \`group\`, description, created_at, updated_at) VALUES
-('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW());
-
-CREATE TABLE IF NOT EXISTS announcements (
-  id INT NOT NULL AUTO_INCREMENT,
-  uuid VARCHAR(36) NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  content TEXT,
-  content_html TEXT,
-  type VARCHAR(32) DEFAULT NULL,
-  status INT DEFAULT 1,
-  priority INT DEFAULT 0,
-  is_sticky INT DEFAULT 0,
-  start_at DATETIME(3) DEFAULT NULL,
-  end_at DATETIME(3) DEFAULT NULL,
-  sort_order INT DEFAULT 0,
-  created_at DATETIME(3) DEFAULT NULL,
-  updated_at DATETIME(3) DEFAULT NULL,
-  deleted_at DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY (id),
-  UNIQUE KEY uuid (uuid),
-  KEY type (type),
-  KEY status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-INSERT INTO announcements (uuid, title, content, content_html, type, status, priority, is_sticky, created_at, updated_at) VALUES
-(UUID(), '欢迎使用', '欢迎使用虚拟化管理平台', '<p>欢迎使用</p>', 'homepage', 1, 10, 1, NOW(), NOW());
-EOF
 echo "数据库初始化完成"
 
 # 5. 编译后端
-echo "[5/7] 编译后端..."
+echo "[5/8] 编译后端..."
 cd /opt/oneclickvirt/server
 
-# 创建配置文件
+# 创建正确的配置文件格式 (匹配 config.Server 结构)
 cat > config.yaml << CONFIG
-app:
-  port: $BACKEND_PORT
-  mode: debug
+system:
+  addr: $BACKEND_PORT
+  env: public
+  db-type: mysql
+  use-multipoint: false
+  use-redis: false
 
-database:
-  host: localhost
-  port: 3306
-  user: root
-  password: $DB_PASS
-  name: oneclickvirt
-  charset: utf8mb4
+jwt:
+  expires-time: "7d"
+  buffer-time: "1d"
+  issuer: "oneclickvirt"
 
-server:
-  domain: $DOMAIN
-  backend_port: $BACKEND_PORT
-  frontend_port: $FRONTEND_PORT
+zap:
+  level: "info"
+  prefix: "[oneclickvirt]"
+  format: "console"
+  director: "logs"
+  encode-level: "LowercaseColorLevelEncoder"
+  stacktrace-key: "stacktrace"
+  show-line: true
+  log-in-console: true
+
+mysql:
+  path: "127.0.0.1"
+  port: "3306"
+  config: "charset=utf8mb4&parseTime=True&loc=Local"
+  db-name: "oneclickvirt"
+  username: "root"
+  password: "$DB_PASS"
+  prefix: ""
+  singular: false
+  engine: "InnoDB"
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: "info"
+  log-zap: false
+  max-lifetime: 3600
+  auto-create: true
+
+auth:
+  enable-email: false
+  enable-telegram: false
+  enable-qq: false
+  enable-oauth2: false
+  enable-public-registration: false
+
+quota:
+  default-level: 1
+  instance-type-permissions:
+    min-level-for-container: 1
+    min-level-for-vm: 1
+    min-level-for-delete-container: 1
+    min-level-for-delete-vm: 1
+    min-level-for-reset-container: 1
+    min-level-for-reset-vm: 1
+  level-limits:
+    1:
+      max-instances: 1
+      max-resources:
+        cpu: 1
+        memory: 1025
+        disk: 1
+    2:
+      max-instances: 3
+      max-resources:
+        cpu: 2
+        memory: 1024
+        disk: 20
+    3:
+      max-instances: 5
+      max-resources:
+        cpu: 4
+        memory: 2048
+        disk: 40
+    4:
+      max-instances: 10
+      max-resources:
+        cpu: 8
+        memory: 4096
+        disk: 80
+    5:
+      max-instances: 20
+      max-resources:
+        cpu: 16
+        memory: 8192
+        disk: 160
+
+invite-code:
+  enabled: false
+  required: false
+
+captcha:
+  enabled: false
+  width: 120
+  height: 40
+  length: 4
+  expire-time: 5
+
+cors:
+  mode: "allow-all"
+  whitelist:
+    - "http://localhost:8080"
+    - "http://127.0.0.1:8080"
+
+redis:
+  addr: "127.0.0.1:6379"
+  password: ""
+  db: 0
 CONFIG
 
 # 编译
@@ -230,15 +181,16 @@ nohup ./oneclickvirt > /var/log/oneclickvirt.log 2>&1 &
 echo $! > /var/run/oneclickvirt.pid
 sleep 3
 
-if netstat -tlnp 2>/dev/null | grep -q $BACKEND_PORT || ss -tlnp 2>/dev/null | grep -q $BACKEND_PORT; then
+# 检查后端端口
+if netstat -tlnp 2>/dev/null | grep -q ":$BACKEND_PORT" || ss -tlnp 2>/dev/null | grep -q ":$BACKEND_PORT"; then
     echo "后端服务启动成功 (端口$BACKEND_PORT)"
 else
     echo "后端服务启动失败，查看日志:"
-    tail -20 /var/log/oneclickvirt.log
+    tail -30 /var/log/oneclickvirt.log
 fi
 
 # 6. 编译前端
-echo "[6/7] 编译前端..."
+echo "[6/8] 编译前端..."
 cd /opt/oneclickvirt/web
 
 # 安装pnpm并编译前端
@@ -247,28 +199,40 @@ pnpm install
 pnpm build
 
 # 停止旧前端进程
+pkill -f "node.*proxy-server" 2>/dev/null || true
 pkill -f "serve.*$FRONTEND_PORT" 2>/dev/null || true
 
-# 使用npx serve托管前端
-nohup npx serve -s dist -l $FRONTEND_PORT > /var/log/oneclickvirt-front.log 2>&1 &
+# 使用代理服务器启动前端（支持API转发）
+export FRONTEND_PORT=$FRONTEND_PORT
+export BACKEND_PORT=$BACKEND_PORT
+export BACKEND_HOST=127.0.0.1
+nohup node proxy-server.js > /var/log/oneclickvirt-front.log 2>&1 &
 echo $! > /var/run/oneclickvirt-front.pid
 sleep 3
 
-if netstat -tlnp 2>/dev/null | grep -q $FRONTEND_PORT || ss -tlnp 2>/dev/null | grep -q $FRONTEND_PORT; then
+if netstat -tlnp 2>/dev/null | grep -q ":$FRONTEND_PORT" || ss -tlnp 2>/dev/null | grep -q ":$FRONTEND_PORT"; then
     echo "前端服务启动成功 (端口$FRONTEND_PORT)"
 else
     echo "前端服务启动失败，查看日志:"
-    tail -20 /var/log/oneclickvirt-front.log
+    tail -30 /var/log/oneclickvirt-front.log
 fi
 
-# 7. 服务状态检查
-echo "[7/7] 服务状态检查..."
+# 7. 启动 API 文档服务（可选，端口30003）
+echo "[7/8] 启动Swagger文档服务..."
+cd /opt/oneclickvirt/server
+pkill -f "node.*swagger" 2>/dev/null || true
+nohup npx swagger serve swagger/swagger.yaml -p 30003 --no-open > /var/log/oneclickvirt-swagger.log 2>&1 &
+echo $! > /var/run/oneclickvirt-swagger.pid
+sleep 2
+
+# 8. 服务状态检查
+echo "[8/8] 服务状态检查..."
 echo ""
 echo "=========================================="
 echo "服务状态"
 echo "=========================================="
-ps aux | grep -E "oneclickvirt|serve.*$FRONTEND_PORT" | grep -v grep
-netstat -tlnp 2>/dev/null | grep -E "$BACKEND_PORT|$FRONTEND_PORT" || ss -tlnp | grep -E "$BACKEND_PORT|$FRONTEND_PORT"
+ps aux | grep -E "oneclickvirt|proxy-server" | grep -v grep
+netstat -tlnp 2>/dev/null | grep -E "$BACKEND_PORT|$FRONTEND_PORT|30003" || ss -tlnp | grep -E "$BACKEND_PORT|$FRONTEND_PORT|30003"
 
 echo ""
 echo "=========================================="
@@ -276,6 +240,7 @@ echo "部署完成!"
 echo "=========================================="
 echo "前端地址: http://$DOMAIN:$FRONTEND_PORT"
 echo "后端地址: http://$DOMAIN:$BACKEND_PORT"
+echo "API文档:  http://$DOMAIN:30003/docs"
 echo ""
 echo "管理员账号:"
 echo "  用户名: admin"
