@@ -29,27 +29,18 @@ check_deps() {
     fi
 }
 
-# SSH 执行远程命令
-ssh_cmd() {
-    sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SERVER_IP "$1"
-}
-
 # SSH 执行远程命令(多行)
 ssh_exec() {
     sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SERVER_IP "$@"
-}
-
-# SCP 上传文件
-scp_push() {
-    sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no -P $SSH_PORT "$1" $SSH_USER@$SERVER_IP:"$2"
 }
 
 # 1. 安装基础依赖
 install_deps() {
     echo "[2/8] 安装基础依赖..."
     ssh_exec << 'ENDSSH'
+        export DEBIAN_FRONTEND=noninteractive
         apt-get update
-        apt-get install -y curl wget git build-essential mysql-server nginx
+        apt-get install -y curl wget git build-essential mariadb-server nginx
 ENDSSH
 }
 
@@ -57,14 +48,14 @@ ENDSSH
 install_go() {
     echo "[3/8] 安装 Go..."
     ssh_exec << 'ENDSSH'
+        export PATH=$PATH:/usr/local/go/bin
         if ! command -v go &> /dev/null; then
             wget -q https://go.dev/dl/go1.22.0.linux-amd64.tar.gz -O /tmp/go.tar.gz
             rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tar.gz
             echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
             export PATH=$PATH:/usr/local/go/bin
         fi
-        export PATH=$PATH:/usr/local/go/bin
-        go version
+        /usr/local/go/bin/go version
 ENDSSH
 }
 
@@ -81,19 +72,22 @@ install_node() {
 ENDSSH
 }
 
-# 4. 配置 MySQL
+# 4. 配置 MariaDB
 setup_mysql() {
-    echo "[5/8] 配置 MySQL..."
+    echo "[5/8] 配置 MariaDB..."
     ssh_exec << 'ENDSSH'
-        systemctl enable mysql
-        systemctl start mysql
+        export DEBIAN_FRONTEND=noninteractive
+        systemctl enable mariadb
+        systemctl start mariadb
         
-        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'oneclickvirt123';"
+        # 设置root密码
+        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'oneclickvirt123';"
         mysql -e "FLUSH PRIVILEGES;"
         
+        # 创建数据库
         mysql -u root -poneclickvirt123 -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
         
-        echo "MySQL 配置完成"
+        echo "MariaDB 配置完成"
 ENDSSH
 }
 
@@ -122,16 +116,16 @@ init_database() {
 ENDSSH
 }
 
-# 7. 编译后端
-build_backend() {
+# 7. 编译并启动服务
+build_and_start() {
     echo "[8/8] 编译并启动服务..."
     ssh_exec << 'ENDSSH'
         export PATH=$PATH:/usr/local/go/bin
         
         # 编译后端
         cd /opt/oneclickvirt/server
-        go mod download
-        go build -o oneclickvirt .
+        /usr/local/go/bin/go mod download
+        /usr/local/go/bin/go build -o oneclickvirt .
         
         # 创建配置文件
         cat > config.yaml << 'CONFIG'
@@ -153,20 +147,35 @@ server:
   frontend_port: 30005
 CONFIG
         
+        # 停止旧进程
+        [ -f /var/run/oneclickvirt.pid ] && kill $(cat /var/run/oneclickvirt.pid) 2>/dev/null || true
+        [ -f /var/run/oneclickvirt-front.pid ] && kill $(cat /var/run/oneclickvirt-front.pid) 2>/dev/null || true
+        
         # 启动后端服务
         nohup ./oneclickvirt > /var/log/oneclickvirt.log 2>&1 &
         echo $! > /var/run/oneclickvirt.pid
+        sleep 2
         
-        # 编译前端
+        # 安装pnpm并编译前端
         cd /opt/oneclickvirt/front
-        npm install
-        npm run build
+        npm install -g pnpm
+        pnpm install
+        pnpm build
         
-        # 使用 serve 托管前端
+        # 使用npx serve托管前端
         nohup npx serve -s dist -l 30005 > /var/log/oneclickvirt-front.log 2>&1 &
         echo $! > /var/run/oneclickvirt-front.pid
+        sleep 2
         
-        echo "服务启动完成"
+        echo ""
+        echo "=========================================="
+        echo "服务状态检查"
+        echo "=========================================="
+        ps aux | grep oneclickvirt | grep -v grep
+        netstat -tlnp | grep -E '30002|30005' || ss -tlnp | grep -E '30002|30005'
+        
+        echo ""
+        echo "服务启动完成!"
         echo "后端端口: 30002"
         echo "前端端口: 30005"
         echo "访问地址: http://tianchong.ypvps.com:30005"
@@ -182,7 +191,7 @@ main() {
     setup_mysql
     clone_code
     init_database
-    build_backend
+    build_and_start
     
     echo ""
     echo "=========================================="
