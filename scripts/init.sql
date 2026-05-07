@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS `redemption_codes` (
   `value` decimal(10,2) NOT NULL,
   `uses` int DEFAULT 0,
   `max_uses` int DEFAULT 1,
+  `used_count` int DEFAULT 0 COMMENT '已使用次数',
   `expires_at` datetime DEFAULT NULL,
   `status` int DEFAULT 1,
   `created_at` datetime(3) DEFAULT NULL,
@@ -202,6 +203,45 @@ CREATE TABLE IF NOT EXISTS `product_purchases` (
   KEY `idx_product_purchases_product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 创建工单相关表
+CREATE TABLE IF NOT EXISTS `tickets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `type` varchar(20) NOT NULL DEFAULT 'question',
+  `priority` varchar(20) NOT NULL DEFAULT 'medium',
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `assigned_to` bigint unsigned DEFAULT NULL,
+  `instance_id` bigint unsigned DEFAULT NULL,
+  `tags` varchar(255) DEFAULT NULL,
+  `resolution_notes` text,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `closed_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `user_id` (`user_id`),
+  INDEX `status` (`status`),
+  INDEX `assigned_to` (`assigned_to`),
+  INDEX `instance_id` (`instance_id`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `ticket_replies` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `content` text NOT NULL,
+  `is_admin` tinyint(1) DEFAULT 0,
+  `created_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `ticket_id` (`ticket_id`),
+  INDEX `user_id` (`user_id`),
+  INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================
 -- 1. 创建默认角色
 -- ============================================
@@ -304,4 +344,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   wallet_transactions - 钱包交易记录表
 --   kyc_verifications - 实名认证记录表
 --   product_purchases - 产品购买记录表
+--   tickets          - 工单表
+--   ticket_replies   - 工单回复表
 -- ============================================

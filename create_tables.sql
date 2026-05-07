@@ -893,6 +893,7 @@ CREATE TABLE IF NOT EXISTS `redemption_codes` (
   `value` decimal(10,2) DEFAULT '0.00',
   `product_id` int DEFAULT NULL,
   `uses` int DEFAULT '0',
+  `used_count` int DEFAULT '0' COMMENT '已使用次数',
   `max_uses` int DEFAULT '1',
   `expires_at` datetime(3) DEFAULT NULL,
   `status` varchar(32) DEFAULT 'active',
@@ -931,6 +932,50 @@ CREATE TABLE IF NOT EXISTS `invite_code_usages` (
   PRIMARY KEY (`id`),
   KEY `code_id` (`code_id`),
   KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ============================================
+-- 41. 创建 tickets 表 (工单系统)
+-- ============================================
+CREATE TABLE IF NOT EXISTS `tickets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `type` varchar(20) NOT NULL DEFAULT 'question',
+  `priority` varchar(20) NOT NULL DEFAULT 'medium',
+  `status` varchar(20) NOT NULL DEFAULT 'open',
+  `assigned_to` bigint unsigned DEFAULT NULL,
+  `instance_id` bigint unsigned DEFAULT NULL,
+  `tags` varchar(255) DEFAULT NULL,
+  `resolution_notes` text,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `closed_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `status` (`status`),
+  KEY `assigned_to` (`assigned_to`),
+  KEY `instance_id` (`instance_id`),
+  KEY `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ============================================
+-- 42. 创建 ticket_replies 表 (工单回复)
+-- ============================================
+CREATE TABLE IF NOT EXISTS `ticket_replies` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `content` text NOT NULL,
+  `is_admin` tinyint(1) DEFAULT 0,
+  `created_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ticket_id` (`ticket_id`),
+  KEY `user_id` (`user_id`),
+  KEY `deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
