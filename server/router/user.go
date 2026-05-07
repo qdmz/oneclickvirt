@@ -130,5 +130,11 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.PUT("/user/api-keys/:id", apiKeyController.UpdateAPIKey)
 		UserGroup.DELETE("/user/api-keys/:id", apiKeyController.DeleteAPIKey)
 		UserGroup.PUT("/user/api-keys/:id/revoke", apiKeyController.RevokeAPIKey)
+
+		// 工单管理
+		UserGroup.POST("/user/tickets", user.CreateTicket)
+		UserGroup.GET("/user/tickets", user.GetUserTickets)
+		UserGroup.GET("/user/tickets/:id", user.GetTicketDetail)
+		UserGroup.POST("/user/tickets/:id/reply", user.ReplyTicket)
 	}
 }

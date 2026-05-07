@@ -217,5 +217,12 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		AdminGroup.GET("/email/config", emailApi.GetEmailConfig)
 		AdminGroup.PUT("/email/config", emailApi.UpdateEmailConfig)
 		AdminGroup.POST("/email/test", emailApi.SendTestEmail)
+
+		// 工单管理
+		AdminGroup.GET("/tickets", admin.GetAllTickets)
+		AdminGroup.GET("/tickets/:id", admin.GetTicketDetail)
+		AdminGroup.PUT("/tickets/:id", admin.UpdateTicket)
+		AdminGroup.POST("/tickets/:id/reply", admin.AdminReplyTicket)
+		AdminGroup.POST("/tickets/:id/close", admin.CloseTicket)
 	}
 }

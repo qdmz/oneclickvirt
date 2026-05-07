@@ -17,6 +17,7 @@ import (
 	resourceModel "oneclickvirt/model/resource"
 	siteModel "oneclickvirt/model/site"
 	systemModel "oneclickvirt/model/system"
+	ticketModel "oneclickvirt/model/ticket"
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
 	kycModel "oneclickvirt/model/kyc"
@@ -192,6 +193,10 @@ func RegisterTables(db *gorm.DB) {
 
 		// KYC real name verification
 		&kycModel.KYCRecord{}, // 实名认证记录表
+
+		// 工单系统表
+		&ticketModel.Ticket{},        // 工单表
+		&ticketModel.TicketReply{},   // 工单回复表
 	)
 	if err != nil {
 		global.APP_LOG.Error("register table failed", zap.Error(err))
