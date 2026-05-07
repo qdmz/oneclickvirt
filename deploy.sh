@@ -38,12 +38,21 @@ cd /opt/oneclickvirt
 git pull origin main
 echo "代码拉取完成"
 
-# 4. 初始化数据库（使用 scripts/init.sql）
+# 4. 初始化数据库（使用 complete_init.sql - 支持重复运行）
 echo "[4/8] 初始化数据库..."
 cd /opt/oneclickvirt
 
+# 创建数据库
+mysql -u root -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
 # 导入完整的 init.sql
 mysql -u root -p"$DB_PASS" oneclickvirt < /opt/oneclickvirt/scripts/init.sql 2>&1 || true
+
+# 使用 complete_init.sql 导入默认数据（INSERT IGNORE 防止重复）
+if [ -f "/opt/oneclickvirt/complete_init.sql" ]; then
+    echo "导入默认数据..."
+    mysql -u root -p"$DB_PASS" oneclickvirt < /opt/oneclickvirt/complete_init.sql 2>&1 || true
+fi
 
 # 运行 autosetup 修复脚本（如果存在）
 if [ -f "/opt/oneclickvirt/scripts/autosetup.sql" ]; then
