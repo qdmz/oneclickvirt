@@ -6,18 +6,53 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ============================================
--- 1. 修复 redemption_codes 表缺失字段
+-- 1. 创建 system_images 表（完整的表结构）
+-- ============================================
+CREATE TABLE IF NOT EXISTS `system_images` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  `deleted_at` datetime(3) DEFAULT NULL,
+  `name` varchar(128) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `url` varchar(512) NOT NULL,
+  `status` varchar(16) DEFAULT 'active',
+  `provider_type` varchar(32) NOT NULL COMMENT '支持类型: proxmox, lxd, incus, docker',
+  `instance_type` varchar(16) NOT NULL COMMENT '实例类型: vm, container',
+  `architecture` varchar(16) NOT NULL COMMENT 'CPU架构: amd64, arm64, s390x',
+  `checksum` varchar(128) DEFAULT NULL,
+  `size` bigint DEFAULT 0,
+  `os_type` varchar(32) DEFAULT NULL COMMENT '操作系统: ubuntu, centos, debian, alpine',
+  `os_version` varchar(32) DEFAULT NULL,
+  `tags` varchar(255) DEFAULT NULL,
+  `min_memory_mb` int DEFAULT 0,
+  `min_disk_mb` int DEFAULT 0,
+  `use_cdn` tinyint(1) DEFAULT 1,
+  `created_by` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  KEY `name` (`name`),
+  KEY `status` (`status`),
+  KEY `provider_type` (`provider_type`),
+  KEY `instance_type` (`instance_type`),
+  KEY `architecture` (`architecture`),
+  KEY `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- 2. 修复 redemption_codes 表缺失字段
 -- ============================================
 ALTER TABLE redemption_codes ADD COLUMN IF NOT EXISTS `used_count` int DEFAULT 0 COMMENT '已使用次数' AFTER `max_uses`;
 
 -- ============================================
--- 2. 修复 product_purchases 表外键问题
+-- 3. 修复 product_purchases 表外键问题
 -- ============================================
 ALTER TABLE product_purchases DROP INDEX IF EXISTS `idx_product_purchases_order_id`;
 ALTER TABLE product_purchases MODIFY COLUMN `order_id` bigint unsigned DEFAULT NULL;
 
 -- ============================================
--- 3. 确保 users 表有 balance, total_spent, total_orders 字段
+-- 4. 确保 users 表有 balance, total_spent, total_orders 字段
 -- ============================================
 ALTER TABLE users ADD COLUMN IF NOT EXISTS `balance` decimal(10,2) DEFAULT 0.00 AFTER `user_type`;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS `total_spent` decimal(10,2) DEFAULT 0.00 AFTER `balance`;
@@ -26,7 +61,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS `last_login_at` datetime DEFAULT NULL
 ALTER TABLE users ADD COLUMN IF NOT EXISTS `last_login_ip` varchar(64) DEFAULT NULL AFTER `last_login_at`;
 
 -- ============================================
--- 4. 确保 wallets 表存在
+-- 5. 确保 wallets 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `wallets` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -41,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `wallets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 5. 确保 wallet_transactions 表存在
+-- 6. 确保 wallet_transactions 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `wallet_transactions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -60,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `wallet_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 6. 确保 tickets 表存在
+-- 7. 确保 tickets 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `tickets` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -87,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 7. 确保 ticket_replies 表存在
+-- 8. 确保 ticket_replies 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `ticket_replies` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -104,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `ticket_replies` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 8. 确保 commissions 表存在
+-- 9. 确保 commissions 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `commissions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -123,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `commissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 9. 确保 agent_sub_users 表存在
+-- 10. 确保 agent_sub_users 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `agent_sub_users` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -140,14 +175,14 @@ CREATE TABLE IF NOT EXISTS `agent_sub_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 10. 为现有用户创建钱包
+-- 11. 为现有用户创建钱包
 -- ============================================
 INSERT INTO `wallets` (`user_id`, `balance`)
 SELECT `id`, 0 FROM `users` WHERE `id` NOT IN (SELECT `user_id` FROM `wallets`)
 ON DUPLICATE KEY UPDATE `balance` = COALESCE(`wallets`.`balance`, 0);
 
 -- ============================================
--- 11. 确保 system_configs 有必要的配置
+-- 12. 确保 system_configs 有必要的配置
 -- ============================================
 INSERT INTO `system_configs` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES
 ('enable_agent', 'true', '是否开启代理商功能', NOW(), NOW()),
@@ -157,7 +192,7 @@ INSERT INTO `system_configs` (`key`, `value`, `description`, `created_at`, `upda
 ON DUPLICATE KEY UPDATE `updated_at` = NOW();
 
 -- ============================================
--- 12. 确保 site_configs 有必要的配置
+-- 13. 确保 site_configs 有必要的配置
 -- ============================================
 INSERT INTO `site_configs` (`key`, `value`, `type`, `group`, `description`, `created_at`, `updated_at`) VALUES
 ('site_name', 'OneClickVirt', 'string', 'basic', '网站名称', NOW(), NOW()),
@@ -165,7 +200,7 @@ INSERT INTO `site_configs` (`key`, `value`, `type`, `group`, `description`, `cre
 ON DUPLICATE KEY UPDATE `updated_at` = NOW();
 
 -- ============================================
--- 13. 确保 domain_configs 表存在
+-- 14. 确保 domain_configs 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `domain_configs` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -187,7 +222,7 @@ SELECT 3, 5, 300, 0, '', 'dnsmasq', '/etc/dnsmasq.d/oneclickvirt-hosts.conf', '/
 WHERE NOT EXISTS (SELECT 1 FROM `domain_configs` LIMIT 1);
 
 -- ============================================
--- 14. 确保 kyc_verifications 表存在
+-- 15. 确保 kyc_verifications 表存在
 -- ============================================
 CREATE TABLE IF NOT EXISTS `kyc_verifications` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -202,6 +237,21 @@ CREATE TABLE IF NOT EXISTS `kyc_verifications` (
   UNIQUE KEY `user_id` (`user_id`),
   INDEX `status` (`status`),
   INDEX `deleted_at` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- 16. 确保 redemption_code_usages 表存在
+-- ============================================
+CREATE TABLE IF NOT EXISTS `redemption_code_usages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `code_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `order_id` bigint unsigned DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `code_id` (`code_id`),
+  INDEX `user_id` (`user_id`),
+  INDEX `order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

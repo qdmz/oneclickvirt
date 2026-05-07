@@ -24,8 +24,11 @@ echo "[2/8] 配置 MariaDB..."
 systemctl enable mariadb
 systemctl restart mariadb
 sleep 3
-mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$DB_PASS'); FLUSH PRIVILEGES;"
-mysql -u root -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 设置 root 密码（如果已设置会失败，但不影响后续操作）
+mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$DB_PASS');" 2>/dev/null || true
+mysql -u root -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || \
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS oneclickvirt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
 echo "MariaDB 配置完成"
 
 # 3. 拉取代码（如果目录不存在）
