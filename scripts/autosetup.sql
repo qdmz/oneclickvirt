@@ -46,9 +46,10 @@ CREATE TABLE IF NOT EXISTS `system_images` (
 ALTER TABLE redemption_codes ADD COLUMN IF NOT EXISTS `used_count` int DEFAULT 0 COMMENT '已使用次数' AFTER `max_uses`;
 
 -- ============================================
--- 3. 修复 tasks 表缺失的 deleted_at 字段
+-- 3. 修复 tasks 表缺失的字段
 -- ============================================
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS `deleted_at` datetime(3) DEFAULT NULL AFTER `updated_at`;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS `cancel_reason` varchar(512) DEFAULT '' AFTER `status`;
 
 -- ============================================
 -- 4. 修复 providers 表缺失的 api_key, api_secret, auth_config 字段
