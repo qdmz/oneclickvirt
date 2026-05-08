@@ -267,6 +267,14 @@ CREATE TABLE IF NOT EXISTS `redemption_code_usages` (
   INDEX `order_id` (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- 17. 修复 instance_traffic_histories 表缺失的 year, month, day, hour 字段
+-- ============================================
+ALTER TABLE instance_traffic_histories ADD COLUMN IF NOT EXISTS `year` int DEFAULT NULL AFTER `total_traffic`;
+ALTER TABLE instance_traffic_histories ADD COLUMN IF NOT EXISTS `month` int DEFAULT NULL AFTER `year`;
+ALTER TABLE instance_traffic_histories ADD COLUMN IF NOT EXISTS `day` int DEFAULT NULL AFTER `month`;
+ALTER TABLE instance_traffic_histories ADD COLUMN IF NOT EXISTS `hour` int DEFAULT NULL AFTER `day`;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================
