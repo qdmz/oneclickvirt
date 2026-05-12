@@ -4,7 +4,7 @@
 
 ## 📖 项目简介
 
-OneClickVirt 是一个现代化的虚拟服务管理平台，支持多种虚拟化技术（Docker、LXD、Incus、Proxmox VE），提供完整的产品管理、用户管理、代理商管理、域名绑定、订单管理、实名认证和资源监控功能。
+OneClickVirt 是一个现代化的虚拟服务管理平台，支持多种虚拟化技术（Docker、LXD、Incus、Proxmox VE），提供完整的产品管理、用户管理、代理商管理、域名绑定、订单管理、实名认证、工单系统和资源监控功能。
 
 ## 🚀 快速开始
 
@@ -34,16 +34,11 @@ docker-compose -f docker-compose.yaml up -d
 
 #### 数据初始化
 
-首次部署时，访问网站会自动跳转到初始化页面，按照提示设置管理员账户。
+首次部署时，访问网站会自动跳转到初始化页面，按照提示设置管理员账户和普通用户账户。
 
-也可以手动初始化：
-```bash
-docker exec -i oneclickvirt mysql -uroot oneclickvirt < scripts/init.sql
-```
-
-默认管理员账户：
-- **用户名**: `admin`
-- **密码**: `admin123456`
+初始化完成后：
+- **管理员账户**: `admin / Admin123!@#`
+- **普通用户**: 初始化时自定义的用户名和密码
 
 > ⚠️ 首次登录后请立即修改密码！
 
@@ -69,6 +64,7 @@ docker exec -i oneclickvirt mysql -uroot oneclickvirt < scripts/init.sql
 - ✅ **代理商系统管理** — 代理商审核、佣金调整、子用户管理
 - ✅ **域名绑定管理** — DNS 内部解析配置、Nginx 反代、用户域名配额
 - ✅ **实名认证管理** — 查看认证记录、手动审核
+- ✅ **工单管理** — 查看所有工单、回复用户、更新工单状态（开启/处理中/已解决/已关闭）
 - ✅ **智简魔方集成** — 支持智简魔方 API 管理，可通过智简魔方创建和管理实例
 
 ### 代理商功能
@@ -87,9 +83,11 @@ docker exec -i oneclickvirt mysql -uroot oneclickvirt < scripts/init.sql
 - ✅ SSH Web 终端连接
 - ✅ 端口映射查看
 - ✅ **邮件注册激活** — 注册后邮箱验证激活
-- ✅ **密码找回** — 通过邮件重置密码
+- ✅ **密码找回/重置** — 通过邮件重置密码
 - ✅ **域名绑定** — 绑定自定义域名到虚拟机内部 IP:端口
 - ✅ **实名认证** — 支付宝实名认证（姓名+身份证号）
+- ✅ **工单系统** — 创建工单（咨询/故障/功能建议/投诉）、回复工单、查看处理进度
+- ✅ **实例申请** — 快速申请创建虚拟机或容器实例
 - ✅ **深色/浅色主题切换**
 
 ## 📁 项目结构
@@ -112,6 +110,7 @@ oneclickvirt/
 │   │   ├── agent/             # 代理商/子用户/佣金模型
 │   │   ├── domain/            # 域名绑定/域名配置模型
 │   │   ├── kyc/               # 实名认证模型
+│   │   ├── ticket/            # 工单/工单回复模型
 │   │   ├── auth/              # 认证/角色模型
 │   │   ├── order/             # 订单模型
 │   │   ├── wallet/            # 钱包模型
@@ -121,6 +120,7 @@ oneclickvirt/
 │   │   ├── agent/             # 代理商服务
 │   │   ├── domain/            # 域名服务（DNS/Nginx）
 │   │   ├── email/             # 邮件服务（SMTP）
+│   │   ├── ticket/            # 工单服务
 │   │   └── kyc/               # 实名认证服务（支付宝 API）
 │   ├── provider/              # 虚拟化提供商
 │   │   ├── docker/            # Docker 支持
@@ -145,7 +145,7 @@ oneclickvirt/
 │   │   │   │   ├── users/         # 用户管理
 │   │   │   │   └── ...
 │   │   │   ├── agent/         # 代理商页面（仪表盘/子用户/佣金/钱包/资料）
-│   │   │   └── user/          # 用户页面（实例/订单/钱包/域名/实名认证）
+│   │   │   └── user/          # 用户页面（实例/订单/钱包/域名/实名认证/工单/申请实例）
 │   │   ├── components/        # 公共组件
 │   │   ├── style/             # 全局样式 + 深色/浅色主题系统
 │   │   ├── pinia/             # 状态管理
@@ -213,6 +213,23 @@ oneclickvirt/
 | `domains` | 域名绑定 |
 | `domain_configs` | 域名系统配置 |
 | `kyc_records` | 实名认证记录 |
+| `tickets` | 工单表 |
+| `ticket_replies` | 工单回复表 |
+
+## 🔄 v1.520 更新日志
+
+### 新增功能
+- 🎫 **完整工单系统** — 用户可创建/查看/回复工单，管理员可管理所有工单、回复、更新状态（开启/处理中/已解决/已关闭）
+- 📝 **实例申请页面** — `/user/apply` 路由，支持快速申请创建虚拟机或容器实例
+- 🔑 **密码重置页面** — `/reset-password` 路由，支持通过邮件链接重置密码
+
+### 修复问题
+- 🔧 修复初始化时 `AutoMigrateTables()` 缺失 20+ 个表的问题（OAuth2/Product/Wallet/Order/Ticket 等）
+- 🔧 修复 `SeedSystemImages()` 被重复调用的冗余问题
+- 🔧 修复普通用户初始化状态从禁用改为默认启用
+- 🔧 统一 `MinLevelForVM` 配置值为 3（config.go 与 seed.go 一致）
+- 🔧 修复 `/user/apply` 路由未注册导致 404 的问题
+- 🔧 添加 Vite `allowedHosts` 配置支持 `*.monkeycode-ai.online` 域名
 
 ## 🔒 安全措施
 
