@@ -206,6 +206,14 @@ const userRoutes = computed(() => {
           }
         },
         {
+          path: '/user/tickets',
+          name: 'UserTickets',
+          meta: {
+            title: t('sidebar.tickets'),
+            icon: 'ChatDotRound'
+          }
+        },
+        {
           path: '/agent/dashboard',
           name: 'AgentDashboard',
           meta: {
@@ -421,6 +429,14 @@ const userRoutes = computed(() => {
         meta: {
           title: t('sidebar.performanceMonitoring'),
           icon: 'Histogram'
+        }
+      },
+      {
+        path: '/admin/tickets',
+        name: 'AdminTickets',
+        meta: {
+          title: t('sidebar.ticketManagement'),
+          icon: 'ChatDotRound'
         }
       }
     ]

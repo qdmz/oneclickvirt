@@ -222,6 +222,26 @@ const routes = [
           requiresAuth: true,
           roles: ['user', 'admin']
         }
+      },
+      {
+        path: 'tickets',
+        name: 'UserTickets',
+        component: () => import('@/view/user/tickets/index.vue'),
+        meta: {
+          title: '工单列表',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'tickets/:id',
+        name: 'UserTicketDetail',
+        component: () => import('@/view/user/tickets/detail.vue'),
+        meta: {
+          title: '工单详情',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
       }
     ]
   },
@@ -441,6 +461,26 @@ const routes = [
         component: () => import('@/view/admin/kyc/index.vue'),
         meta: {
           title: '实名管理',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'tickets',
+        name: 'AdminTickets',
+        component: () => import('@/view/admin/tickets/index.vue'),
+        meta: {
+          title: '工单管理',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'tickets/:id',
+        name: 'AdminTicketDetail',
+        component: () => import('@/view/admin/tickets/detail.vue'),
+        meta: {
+          title: '工单详情',
           requiresAuth: true,
           roles: ['admin']
         }

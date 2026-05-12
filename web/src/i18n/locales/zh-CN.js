@@ -32,6 +32,7 @@ import userApply from './zh-CN/user/apply.js'
 import userKyc from './zh-CN/user/kyc.js'
 import userPurchase from './zh-CN/user/purchase.js'
 import userWallet from './zh-CN/user/wallet.js'
+import userTickets from './zh-CN/user/tickets.js'
 
 // 管理员模块
 import adminDashboard from './zh-CN/admin/dashboard.js'
@@ -48,6 +49,7 @@ import adminPortMapping from './zh-CN/admin/portMapping.js'
 import adminOauth2 from './zh-CN/admin/oauth2.js'
 import adminPerformance from './zh-CN/admin/performance.js'
 import adminKyc from './zh-CN/admin/kyc.js'
+import adminTickets from './zh-CN/admin/tickets.js'
 
 export default {
   common,
@@ -73,7 +75,8 @@ export default {
     apply: userApply,
     kyc: userKyc,
     purchase: userPurchase,
-    wallet: userWallet
+    wallet: userWallet,
+    tickets: userTickets
   },
   admin: {
     dashboard: adminDashboard,
@@ -89,7 +92,8 @@ export default {
     portMapping: adminPortMapping,
     oauth2: adminOauth2,
     performance: adminPerformance,
-    kyc: adminKyc
+    kyc: adminKyc,
+    tickets: adminTickets
   },
   validation,
   message,

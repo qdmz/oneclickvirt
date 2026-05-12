@@ -9,13 +9,24 @@ import (
 
 	"oneclickvirt/global"
 	adminModel "oneclickvirt/model/admin"
-	"oneclickvirt/model/auth"
+	agentModel "oneclickvirt/model/agent"
+	authModel "oneclickvirt/model/auth"
 	"oneclickvirt/model/config"
+	domainModel "oneclickvirt/model/domain"
+	kycModel "oneclickvirt/model/kyc"
+	monitoringModel "oneclickvirt/model/monitoring"
+	oauth2Model "oneclickvirt/model/oauth2"
+	orderModel "oneclickvirt/model/order"
 	permissionModel "oneclickvirt/model/permission"
-	"oneclickvirt/model/provider"
-	"oneclickvirt/model/resource"
-	"oneclickvirt/model/system"
+	productModel "oneclickvirt/model/product"
+	providerModel "oneclickvirt/model/provider"
+	redemptionModel "oneclickvirt/model/redemption"
+	resourceModel "oneclickvirt/model/resource"
+	siteModel "oneclickvirt/model/site"
+	systemModel "oneclickvirt/model/system"
+	ticketModel "oneclickvirt/model/ticket"
 	userModel "oneclickvirt/model/user"
+	walletModel "oneclickvirt/model/wallet"
 	"oneclickvirt/utils"
 
 	configManager "oneclickvirt/config"
@@ -128,42 +139,91 @@ func (s *InitService) AutoMigrateTables() error {
 	// 执行表结构迁移
 	err := global.APP_DB.AutoMigrate(
 		// 用户相关表
-		&userModel.User{},     // 用户基础信息表
-		&auth.Role{},          // 角色管理表
-		&userModel.UserRole{}, // 用户角色关联表
+		&userModel.User{},       // 用户基础信息表
+		&authModel.Role{},       // 角色管理表
+		&userModel.UserRole{},   // 用户角色关联表
+		&userModel.APIKey{},     // API 密钥表
+
+		// OAuth2相关表
+		&oauth2Model.OAuth2Provider{}, // OAuth2提供商配置表
 
 		// 实例相关表
-		&provider.Instance{}, // 虚拟机/容器实例表
-		&provider.Provider{}, // 服务提供商配置表
-		&provider.Port{},     // 端口映射表
-		&adminModel.Task{},   // 用户任务表
+		&providerModel.Instance{}, // 虚拟机/容器实例表
+		&providerModel.Provider{}, // 服务提供商配置表
+		&providerModel.Port{},     // 端口映射表
+		&adminModel.Task{},        // 用户任务表
 
 		// 资源管理表
-		&resource.ResourceReservation{}, // 资源预留表
+		&resourceModel.ResourceReservation{}, // 资源预留表
 
 		// 认证相关表
 		&userModel.VerifyCode{},    // 验证码表（邮箱/短信）
 		&userModel.PasswordReset{}, // 密码重置令牌表
 
 		// 系统配置表
-		&adminModel.SystemConfig{}, // 系统配置表
-		&system.Announcement{},     // 系统公告表
-		&system.SystemImage{},      // 系统镜像模板表
-		&system.Captcha{},          // 图形验证码表
+		&adminModel.SystemConfig{},  // 系统配置表
+		&systemModel.Announcement{}, // 系统公告表
+		&systemModel.SystemImage{},  // 系统镜像模板表
+		&systemModel.Captcha{},      // 图形验证码表
+		&systemModel.JWTSecret{},    // JWT密钥表
 
 		// 邀请码相关表
-		&system.InviteCode{},      // 邀请码表
-		&system.InviteCodeUsage{}, // 邀请码使用记录表
+		&systemModel.InviteCode{},      // 邀请码表
+		&systemModel.InviteCodeUsage{}, // 邀请码使用记录表
 
 		// 权限管理表
 		&permissionModel.UserPermission{}, // 用户权限组合表
 
 		// 审计日志表
-		&adminModel.AuditLog{},      // 操作审计日志表
-		&provider.PendingDeletion{}, // 待删除资源表
+		&adminModel.AuditLog{},           // 操作审计日志表
+		&providerModel.PendingDeletion{}, // 待删除资源表
 
 		// 管理员配置任务表
-		&adminModel.ConfigurationTask{}, // 管理员配置任务表
+		&adminModel.ConfigurationTask{},  // 管理员配置任务表
+		&adminModel.TrafficMonitorTask{}, // 流量监控操作任务表
+
+		// 监控数据表
+		&monitoringModel.PmacctTrafficRecord{},    // pmacct流量记录表
+		&monitoringModel.PmacctMonitor{},          // pmacct监控配置表
+		&monitoringModel.InstanceTrafficHistory{}, // 实例流量历史表
+		&monitoringModel.ProviderTrafficHistory{}, // Provider流量历史表
+		&monitoringModel.UserTrafficHistory{},     // 用户流量历史表
+		&monitoringModel.PerformanceMetric{},      // 性能指标历史表
+
+		// 站点配置表
+		&siteModel.SiteConfig{}, // 站点配置表
+
+		// 产品相关表
+		&productModel.Product{},         // 产品配置表
+		&productModel.ProductPurchase{}, // 产品购买记录表
+
+		// 钱包相关表
+		&walletModel.UserWallet{},        // 用户钱包表
+		&walletModel.WalletTransaction{}, // 钱包交易记录表
+
+		// 订单相关表
+		&orderModel.Order{},         // 订单表
+		&orderModel.PaymentRecord{}, // 支付记录表
+
+		// 兑换码相关表
+		&redemptionModel.RedemptionCode{},      // 兑换码表
+		&redemptionModel.RedemptionCodeUsage{}, // 兑换码使用记录表
+
+		// 域名绑定表
+		&domainModel.Domain{},       // 域名绑定表
+		&domainModel.DomainConfig{}, // 域名配置表
+
+		// 代理商相关表
+		&agentModel.Agent{},           // 代理商表
+		&agentModel.SubUserRelation{}, // 代理商子用户关系表
+		&agentModel.Commission{},      // 佣金记录表
+
+		// KYC 实名验证表
+		&kycModel.KYCRecord{}, // 实名认证记录表
+
+		// 工单系统表
+		&ticketModel.Ticket{},      // 工单表
+		&ticketModel.TicketReply{}, // 工单回复表
 	)
 
 	if err != nil {

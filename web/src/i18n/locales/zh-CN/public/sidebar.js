@@ -29,5 +29,7 @@ export default {
   redemptionCodeManagement: '兑换码管理',
   kycManagement: '实名管理',
   domainConfiguration: '域名配置',
-  agentDashboard: '代理商中心'
+  agentDashboard: '代理商中心',
+  tickets: '工单中心',
+  ticketManagement: '工单管理'
 }
