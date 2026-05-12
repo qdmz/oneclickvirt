@@ -266,6 +266,7 @@ go run main.go
 After system initialization, the following default accounts will be generated:
 
 * Administrator account: `admin / Admin123!@#`
+* Normal user: Custom username and password during initialization (enabled by default)
 
 > Tip: Please change the default passwords immediately after first login.
 
@@ -276,16 +277,35 @@ After system initialization, the following default accounts will be generated:
 - ✅ **Instance Ownership Transfer** - Transfer instances between users
 - ✅ **Third-party Payment Integration** - Support for Epay and Mapay payment gateways
 - ✅ **Enhanced Payment Configuration** - Comprehensive payment interface management
+- ✅ **Ticket Management** - View all tickets, reply to users, update ticket status (Open/Pending/Resolved/Closed)
 
 ### User Features  
 - ✅ **Multiple Payment Methods** - Support for Alipay, WeChat Pay, Balance, Epay, and Mapay
 - ✅ **Improved Wallet System** - Enhanced wallet management and recharge options
 - ✅ **Order Management** - Complete order lifecycle management
+- ✅ **Ticket System** - Create tickets (Question/Issue/Feature/Complaint), reply to tickets, track progress
+- ✅ **Instance Application** - Quick application to create VM or container instances
+- ✅ **Password Reset** - Reset password via email link
 
 ### Security Enhancements
 - **Payment Signature Verification** - MD5 signature validation for payment callbacks
 - **Permission Downgrade Mechanism** - Secure permission control for user impersonation
 - **Operation Audit Logs** - Comprehensive logging of sensitive operations
+
+## 🔄 v1.520 Changelog
+
+### New Features
+- 🎫 **Complete Ticket System** — Users can create/view/reply tickets, admins can manage all tickets, reply, update status (Open/Pending/Resolved/Closed)
+- 📝 **Instance Application Page** — `/user/apply` route for quick VM/container instance creation
+- 🔑 **Password Reset Page** — `/reset-password` route supporting email link password reset
+
+### Bug Fixes
+- 🔧 Fixed `AutoMigrateTables()` missing 20+ tables during initialization (OAuth2/Product/Wallet/Order/Ticket etc.)
+- 🔧 Fixed redundant duplicate call to `SeedSystemImages()`
+- 🔧 Fixed normal user initialization status from disabled to enabled by default
+- 🔧 Unified `MinLevelForVM` config value to 3 (config.go and seed.go consistent)
+- 🔧 Fixed `/user/apply` route not registered causing 404
+- 🔧 Added Vite `allowedHosts` configuration for `*.monkeycode-ai.online` domain
 
 ## Configuration File
 
