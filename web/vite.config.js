@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: parseInt(env.VITE_CLI_PORT) || 8080,
       open: true,
+      allowedHosts: ['.monkeycode-ai.online'],
       proxy: {
         '/api': {
           target: 'http://localhost:8890',

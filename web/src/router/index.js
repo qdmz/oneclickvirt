@@ -58,6 +58,15 @@ const routes = [
     }
   },
   {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/view/reset-password/index.vue'),
+    meta: {
+      title: '重置密码',
+      requiresAuth: false
+    }
+  },
+  {
     path: '/admin/login',
     name: 'AdminLogin',
     component: () => import('@/view/admin/login/index.vue'),
@@ -190,6 +199,16 @@ const routes = [
         component: () => import('@/view/user/api-keys/index.vue'),
         meta: {
           title: 'API 密钥管理',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'apply',
+        name: 'UserApply',
+        component: () => import('@/view/user/apply/index.vue'),
+        meta: {
+          title: '申请实例',
           requiresAuth: true,
           roles: ['user', 'admin']
         }
