@@ -79,7 +79,7 @@ func getDefaultConfig() config.Server {
 			DefaultLevel: 1,
 			InstanceTypePermissions: config.InstanceTypePermissions{
 				MinLevelForContainer:       1,
-				MinLevelForVM:              1,
+				MinLevelForVM:              3,
 				MinLevelForDeleteContainer: 1,
 				MinLevelForDeleteVM:        1,
 				MinLevelForResetContainer:  1,

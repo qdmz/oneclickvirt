@@ -29,5 +29,7 @@ export default {
   redemptionCodeManagement: 'Redemption Code Management',
   kycManagement: 'KYC Management',
   domainConfiguration: 'Domain Configuration',
-  agentDashboard: 'Agent Dashboard'
+  agentDashboard: 'Agent Dashboard',
+  tickets: 'Tickets',
+  ticketManagement: 'Ticket Management'
 }

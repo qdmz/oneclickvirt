@@ -299,12 +299,9 @@ func InitSystem(c *gin.Context) {
 		return
 	}
 
-	// Step 2: 初始化系统种子数据
+	// Step 2: 初始化系统种子数据（包含系统镜像初始化）
 	// 这些操作会自动在各自的短事务中完成
 	source.InitSeedData()
-
-	// Step 3: 初始化系统镜像
-	source.SeedSystemImages()
 
 	// 创建业务系统初始化标志文件
 	initFlagPath := "./storage/.system_initialized"
