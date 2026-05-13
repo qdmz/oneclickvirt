@@ -310,20 +310,20 @@ func (s *InitService) UpdateDatabaseConfig(dbConfig config.DatabaseConfig) error
 	if dbConfig.Type == "mysql" || dbConfig.Type == "mariadb" {
 		mysqlUpdates := map[string]interface{}{
 			"mysql.path":           dbConfig.Host,
-			"mysql.port":           strconv.Itoa(dbConfig.Port),
+			"mysql.port":           dbConfig.Port,
 			"mysql.db-name":        dbConfig.Database,
 			"mysql.username":       dbConfig.Username,
 			"mysql.password":       dbConfig.Password,
 			"mysql.config":         "charset=utf8mb4&parseTime=True&loc=Local",
 			"mysql.prefix":         "",
-			"mysql.singular":       "false",
+			"mysql.singular":       false,
 			"mysql.engine":         "InnoDB",
-			"mysql.max-idle-conns": "10",
-			"mysql.max-open-conns": "100",
+			"mysql.max-idle-conns": 10,
+			"mysql.max-open-conns": 100,
 			"mysql.log-mode":       "error",
-			"mysql.log-zap":        "false",
-			"mysql.max-lifetime":   "3600",
-			"mysql.auto-create":    "true",
+			"mysql.log-zap":        false,
+			"mysql.max-lifetime":   3600,
+			"mysql.auto-create":    true,
 		}
 
 		for key, value := range mysqlUpdates {
