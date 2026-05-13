@@ -36,21 +36,21 @@ jwt:
     issuer: oneclickvirt
     signing-key: "oneclickvirt-secret-key-2025"
 mysql:
-    auto-create: "true"
+    auto-create: true
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: oneclickvirt
+    db-name: oneclickvirt1
     engine: InnoDB
     log-mode: error
-    log-zap: "false"
-    max-idle-conns: "10"
-    max-lifetime: "3600"
-    max-open-conns: "100"
-    password: ""
-    path: mysql
-    port: "3306"
+    log-zap: false
+    max-idle-conns: 10
+    max-lifetime: 3600
+    max-open-conns: 100
+    password: "AVNS_uWxIwkqiO2cC9YjCan9"
+    path: mysql-qdmz-qdmz-8a34.k.aivencloud.com
+    port: 23388
     prefix: ""
-    singular: "false"
-    username: root
+    singular: false
+    username: avnadmin
 quota:
     instance-type-permissions:
         min-level-for-container: 1
