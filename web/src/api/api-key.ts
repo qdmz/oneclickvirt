@@ -10,7 +10,7 @@ export function createAPIKey(data: {
   expiresAt?: string
 }) {
   return request({
-    url: '/api/v1/user/api-keys',
+    url: '/v1/user/api-keys',
     method: 'post',
     data
   })
@@ -19,7 +19,7 @@ export function createAPIKey(data: {
 // 获取 API 密钥列表
 export function getAPIKeys() {
   return request({
-    url: '/api/v1/user/api-keys',
+    url: '/v1/user/api-keys',
     method: 'get'
   })
 }
@@ -27,7 +27,7 @@ export function getAPIKeys() {
 // 获取 API 密钥详情
 export function getAPIKey(id: number) {
   return request({
-    url: `/api/v1/user/api-keys/${id}`,
+    url: `/v1/user/api-keys/${id}`,
     method: 'get'
   })
 }
@@ -38,7 +38,7 @@ export function updateAPIKey(id: number, data: {
   status?: string
 }) {
   return request({
-    url: `/api/v1/user/api-keys/${id}`,
+    url: `/v1/user/api-keys/${id}`,
     method: 'put',
     data
   })
@@ -47,7 +47,7 @@ export function updateAPIKey(id: number, data: {
 // 删除 API 密钥
 export function deleteAPIKey(id: number) {
   return request({
-    url: `/api/v1/user/api-keys/${id}`,
+    url: `/v1/user/api-keys/${id}`,
     method: 'delete'
   })
 }
@@ -55,7 +55,7 @@ export function deleteAPIKey(id: number) {
 // 撤销 API 密钥
 export function revokeAPIKey(id: number) {
   return request({
-    url: `/api/v1/user/api-keys/${id}/revoke`,
+    url: `/v1/user/api-keys/${id}/revoke`,
     method: 'put'
   })
 }
@@ -63,7 +63,7 @@ export function revokeAPIKey(id: number) {
 // 获取 API 密钥统计信息
 export function getAPIKeyStats() {
   return request({
-    url: '/api/v1/user/api-keys/stats',
+    url: '/v1/user/api-keys/stats',
     method: 'get'
   })
 }

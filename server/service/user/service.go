@@ -195,3 +195,8 @@ func (s *Service) ResetInstancePassword(userID uint, instanceID uint) (uint, err
 func (s *Service) GetInstanceNewPassword(userID uint, instanceID uint, taskID uint) (string, int64, error) {
 	return s.instance.GetInstanceNewPassword(userID, instanceID, taskID)
 }
+
+// GetInstanceLogs 获取实例日志
+func (s *Service) GetInstanceLogs(userID uint, instanceID uint, lines int) (string, error) {
+	return s.instance.GetInstanceLogs(userID, instanceID, lines)
+}

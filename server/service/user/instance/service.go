@@ -659,3 +659,21 @@ func (s *Service) GetInstanceNewPassword(userID uint, instanceID uint, taskID ui
 
 	return newPassword, resetTime, nil
 }
+
+// GetInstanceLogs 获取实例日志
+func (s *Service) GetInstanceLogs(userID uint, instanceID uint, lines int) (string, error) {
+	// 验证实例所有权
+	if !s.HasInstanceAccess(userID, instanceID) {
+		return "", errors.New("无权限访问此实例")
+	}
+
+	// 获取实例信息
+	var instance providerModel.Instance
+	if err := global.APP_DB.First(&instance, instanceID).Error; err != nil {
+		return "", fmt.Errorf("实例不存在: %w", err)
+	}
+
+	// TODO: 实现实际的日志获取逻辑，通过SSH连接到Provider获取实例控制台日志
+	// 目前返回占位信息
+	return fmt.Sprintf("实例 %s (ID: %d) 的日志获取功能正在开发中，请求行数: %d", instance.Name, instanceID, lines), nil
+}

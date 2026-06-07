@@ -457,7 +457,14 @@ func PurchaseProduct(c *gin.Context) {
 		PaymentMethod: params.PaymentMethod,
 		ProductData:   productData,
 		ExpiredAt:    func() *time.Time { t := time.Now().Add(30 * time.Minute); return &t }(), // 30分钟过期
-		ExpireAt:      func() *time.Time { t := time.Now().Add(30 * time.Minute); return &t }(), // 30分钟过期（兼容）
+	}
+
+	// 创建订单
+	if err := tx.Create(&order).Error; err != nil {
+		tx.Rollback()
+		global.APP_LOG.Error("创建订单失败", zap.Error(err))
+		c.JSON(500, gin.H{"code": 500, "message": "创建订单失败"})
+		return
 	}
 
 	// 如果是余额支付,立即处理
@@ -515,16 +522,8 @@ func PurchaseProduct(c *gin.Context) {
 		// 更新订单状态
 		order.Status = orderModel.OrderStatusPaid
 		now := time.Now()
-		order.PaymentTime = &now
+		order.PaidAt = &now
 		order.PaidAmount = float64(product.Price)
-	}
-
-	// 创建订单
-	if err := tx.Create(&order).Error; err != nil {
-		tx.Rollback()
-		global.APP_LOG.Error("创建订单失败", zap.Error(err))
-		c.JSON(500, gin.H{"code": 500, "message": "创建订单失败"})
-		return
 	}
 
 	// 如果已支付,升级用户等级并更新资源配额
@@ -667,7 +666,7 @@ func GetPurchaseOrderStatus(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if order.Status == orderModel.OrderStatusPending && order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
+	if order.Status == orderModel.OrderStatusPending && order.ExpiredAt != nil && time.Now().After(*order.ExpiredAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 	}
@@ -679,7 +678,7 @@ func GetPurchaseOrderStatus(c *gin.Context) {
 			"orderNo":  order.OrderNo,
 			"status":   order.Status,
 			"amount":   order.Amount,
-			"paidTime": order.PaymentTime,
+			"paidTime": order.PaidAt,
 		},
 	})
 }
@@ -748,7 +747,7 @@ func GetPurchaseEpayQR(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
+	if order.ExpiredAt != nil && time.Now().After(*order.ExpiredAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
@@ -791,7 +790,7 @@ func GetPurchaseEpayQR(c *gin.Context) {
 			"qrCode":   payURL,
 			"orderNo":  order.OrderNo,
 			"amount":   order.Amount,
-			"expireAt": order.ExpireAt,
+			"expireAt": order.ExpiredAt,
 		},
 	})
 }
@@ -825,7 +824,7 @@ func GetPurchaseMapayQR(c *gin.Context) {
 	}
 
 	// 检查订单是否过期
-	if order.ExpireAt != nil && time.Now().After(*order.ExpireAt) {
+	if order.ExpiredAt != nil && time.Now().After(*order.ExpiredAt) {
 		order.Status = orderModel.OrderStatusExpired
 		global.APP_DB.Save(&order)
 		c.JSON(400, gin.H{"code": 400, "message": "订单已过期"})
@@ -867,7 +866,7 @@ func GetPurchaseMapayQR(c *gin.Context) {
 			"qrCode":   payURL,
 			"orderNo":  order.OrderNo,
 			"amount":   order.Amount,
-			"expireAt": order.ExpireAt,
+			"expireAt": order.ExpiredAt,
 		},
 	})
 }

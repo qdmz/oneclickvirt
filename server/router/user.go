@@ -24,6 +24,7 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.GET("/user/info", user.GetUserInfo)
 		UserGroup.GET("/user/dashboard", user.GetUserDashboard)
 		UserGroup.GET("/user/limits", user.GetUserLimits)
+		UserGroup.PUT("/user/nickname", user.UpdateNickname)
 
 		// 实例管理
 		UserGroup.GET("/user/instances", user.GetUserInstances)
@@ -37,6 +38,19 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.GET("/user/instances/:id/ports", user.GetInstancePorts)
 		UserGroup.GET("/user/instances/:id/ssh", user.SSHWebSocket) // WebSocket SSH连接
 		UserGroup.POST("/user/instances/action", user.InstanceAction)
+		UserGroup.GET("/user/instances/:id/logs", user.GetInstanceLogs)
+
+		// 容器管理
+		UserGroup.GET("/user/containers", user.GetUserContainers)
+		UserGroup.POST("/user/containers", user.CreateUserContainer)
+		UserGroup.POST("/user/containers/:id/action", user.ControlUserContainer)
+		UserGroup.DELETE("/user/containers/:id", user.DeleteUserContainer)
+
+		// 虚拟机管理
+		UserGroup.GET("/user/vms", user.GetUserVMs)
+		UserGroup.POST("/user/vms", user.CreateUserVM)
+		UserGroup.POST("/user/vms/:id/action", user.ControlUserVM)
+		UserGroup.DELETE("/user/vms/:id", user.DeleteUserVM)
 
 		// 端口映射
 		UserGroup.GET("/user/port-mappings", user.GetUserPortMappings)
