@@ -122,7 +122,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 	// 更新订单状态
 	order.Status = orderModel.OrderStatusPaid
 	now := time.Now()
-	order.PaymentTime = &now
+	order.PaidAt = &now
 	order.PaidAmount = order.Amount
 
 	if err := tx.Save(&order).Error; err != nil {
