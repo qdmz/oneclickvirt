@@ -78,7 +78,6 @@ func (z *ZJMFProvider) Connect(ctx context.Context, config provider.NodeConfig) 
 		Host:       config.Host,
 		Port:       config.Port,
 		APIEnabled: true,
-		APIURL:     z.apiURL,
 		APIKey:     z.apiKey,
 		APISecret:  z.secretKey,
 		SSHEnabled: false,
@@ -171,7 +170,7 @@ func (z *ZJMFProvider) generateSignature(params map[string]string) string {
 type ZJMFAPIResponse struct {
 	Status string      `json:"status"`
 	Msg    string      `json:"msg"`
-	Data   interface{} `json:"data"
+	Data   interface{} `json:"data"`
 }
 
 func (z *ZJMFProvider) doRequest(action string, params map[string]interface{}) (*ZJMFAPIResponse, error) {
@@ -300,11 +299,21 @@ func (z *ZJMFProvider) CreateInstanceWithProgress(ctx context.Context, config pr
 		billingCycle = config.BillingCycle
 	}
 
+	// 生成默认用户名和密码（如果未在元数据中指定）
+	username := "root"
+	if u, ok := config.Metadata["username"]; ok && u != "" {
+		username = u
+	}
+	password := utils.GeneratePassword(16)
+	if p, ok := config.Metadata["password"]; ok && p != "" {
+		password = p
+	}
+
 	params := map[string]interface{}{
 		"product_id":   config.ProductID,
 		"hostname":     hostname,
-		"username":     config.Username,
-		"password":     config.Password,
+		"username":     username,
+		"password":     password,
 		"billing_cycle": billingCycle,
 	}
 
@@ -457,14 +466,18 @@ func (z *ZJMFProvider) ListImages(ctx context.Context) ([]provider.Image, error)
 			continue
 		}
 
+		metadata := make(map[string]string)
+		metadata["type"] = cast.ToString(itemMap["type"])
+		metadata["os"] = cast.ToString(itemMap["os"])
+		metadata["arch"] = cast.ToString(itemMap["arch"])
+		metadata["url"] = cast.ToString(itemMap["url"])
+		metadata["license"] = cast.ToString(itemMap["license"])
+
 		image := provider.Image{
-			ID:      cast.ToString(itemMap["id"]),
-			Name:    cast.ToString(itemMap["name"]),
-			Type:    cast.ToString(itemMap["type"]),
-			OS:      cast.ToString(itemMap["os"]),
-			Arch:    cast.ToString(itemMap["arch"]),
-			URL:     cast.ToString(itemMap["url"]),
-			License: cast.ToString(itemMap["license"]),
+			ID:   cast.ToString(itemMap["id"]),
+			Name: cast.ToString(itemMap["name"]),
+			Tag:  cast.ToString(itemMap["os"]),
+			Metadata: metadata,
 		}
 
 		images = append(images, image)
