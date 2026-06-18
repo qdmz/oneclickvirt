@@ -160,6 +160,41 @@ func hasRepeatingPattern(password string, maxRepeat int) bool {
 	return false
 }
 
+// GeneratePassword 生成指定长度的随机密码（包含大小写字母和数字，不含特殊字符）
+// 适用于需要密码的场景，如实例密码、临时密码等
+func GeneratePassword(length int) string {
+	if length < 8 {
+		length = 8
+	}
+
+	const (
+		uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		lowercase = "abcdefghijklmnopqrstuvwxyz"
+		digits    = "0123456789"
+	)
+
+	all := uppercase + lowercase + digits
+	password := make([]byte, length)
+
+	// 确保每种类型至少有一个
+	password[0] = lowercase[secureRandInt(len(lowercase))]
+	password[1] = uppercase[secureRandInt(len(uppercase))]
+	password[2] = digits[secureRandInt(len(digits))]
+
+	// 填充其余位置
+	for i := 3; i < length; i++ {
+		password[i] = all[secureRandInt(len(all))]
+	}
+
+	// 打乱顺序
+	for i := len(password) - 1; i > 0; i-- {
+		j := secureRandInt(i + 1)
+		password[i], password[j] = password[j], password[i]
+	}
+
+	return string(password)
+}
+
 // GenerateStrongPassword 生成符合策略的强密码（包含数字、大小写英文字母和特殊字符）
 func GenerateStrongPassword(length int) string {
 	if length < 8 {

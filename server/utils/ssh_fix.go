@@ -7,6 +7,7 @@ package utils
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -75,7 +76,7 @@ func IsPortOpen(host string, port int, timeout time.Duration) bool {
 		return false
 	}
 
-	address := fmt.Sprintf("%s:%d", host, port)
+	address := net.JoinHostPort(host, strconv.Itoa(port))
 	conn, err := net.DialTimeout("tcp", address, timeout)
 	if err != nil {
 		return false
