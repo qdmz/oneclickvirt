@@ -72,15 +72,12 @@ services:
 
   oneclickvirt-web:
     build:
-      context: .
+      context: ./web
       dockerfile: Dockerfile
-    image: oneclickvirt:fixed
+    image: oneclickvirt-web:latest
     container_name: oneclickvirt-web
     depends_on:
       - oneclickvirt-api
-    environment:
-      GO_ENV: production
-      CONTAINER_NAME: oneclickvirt-web
     ports:
       - "8081:80"
     restart: unless-stopped
