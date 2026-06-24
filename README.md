@@ -32,6 +32,8 @@ go run main.go
 docker-compose -f docker-compose.yaml up -d
 ```
 
+> **v1.540 更新**：web 服务已改为独立 nginx Dockerfile + nginx.conf 反向代理配置，支持 API 路由、WebSocket、Swagger 和 SPA 路由 fallback。
+
 #### 数据初始化
 
 首次部署时，访问网站会自动跳转到初始化页面，按照提示设置管理员账户和普通用户账户。
@@ -65,7 +67,7 @@ docker-compose -f docker-compose.yaml up -d
 - **域名绑定管理** — DNS 内部解析配置、Nginx 反代、用户域名配额
 - **实名认证管理** — 查看认证记录、手动审核
 - **工单管理** — 查看所有工单、回复用户、更新工单状态（开启/处理中/已解决/已关闭）
-- **智简魔方集成** — 支持智简魔方 API 管理，可通过智简魔方创建和管理实例
+- **智简魔方集成** — 支持智简魔方 API 管理，可通过智简魔方创建和管理实例（v1.540 修复了结构体标签、Metadata 传递、Image 字段匹配等问题）
 
 ### 代理商功能
 - 代理商申请与入驻
@@ -164,10 +166,15 @@ oneclickvirt/
 │   │   ├── traffic/               # 流量服务（聚合/限速/历史/同步）
 │   │   └── user/                  # 用户服务（实例/通知/资料/节点/资源）
 │   ├── provider/                  # 虚拟化提供商（统一接口）
+│   │   └── zjmf/                  # 智简魔方 provider（API 管理、实例创建）
 │   ├── router/                    # 路由定义
-│   ├── scripts/                   # 数据库脚本
+│   ├── scripts/                   # 数据库脚本（添加 //go:build ignore 避免多 main 冲突）
+│   ├── cmd/                       # 独立工具脚本（可单独编译运行）
+│   │   ├── check-config/main.go   # 检查站点配置
+│   │   ├── init-contact-phone/main.go  # 初始化联系电话
+│   │   └── reset-products/main.go # 重置产品数据
 │   ├── source/                    # 数据种子
-│   ├── utils/                     # 工具函数
+│   ├── utils/                     # 工具函数（含 GeneratePassword 随机密码生成）
 │   ├── config.yaml                # 配置文件
 │   ├── go.mod                     # Go 模块依赖
 │   └── main.go                    # 入口
@@ -302,6 +309,41 @@ oneclickvirt/
 | `kyc_records` | 实名认证记录 |
 | `tickets` | 工单表 |
 | `ticket_replies` | 工单回复表 |
+
+## v1.540 更新日志 (2026-06-18)
+
+### 修复
+- 修复 zjmf provider 结构体标签缺失闭合反引号导致的级联编译错误
+- 移除不存在的 `APIURL` 字段引用
+- 修复 `config.Username`/`config.Password` 改为通过 `Metadata` 传递
+- 修复 `provider.Image` 结构体字段不匹配问题
+- 修复 `ssh_fix.go` IPv6 地址格式（改用 `net.JoinHostPort`）
+- 修复 `scripts` 目录多 main 函数冲突
+
+### 新增
+- 新增 `utils.GeneratePassword()` 函数，用于实例自动创建随机密码（含大小写字母和数字）
+- 新增 `server/cmd/` 目录存放独立工具脚本：
+  - `check-config` — 检查站点配置（支持 SQLite 数据库）
+  - `init-contact-phone` — 初始化联系电话配置
+  - `reset-products` — 重置产品数据
+- 新增 `web/nginx.conf` — nginx 反向代理配置（支持 API 路由、WebSocket、Swagger、SPA fallback 到 index.html）
+
+### 优化
+- web 服务改用独立 `web/Dockerfile`（基于 `nginx:stable-alpine`），去除臃肿的 all-in-one 镜像
+- 同步修复 `docker-compose.web.yml` 和 `web.service.yml` 构建上下文
+- `go.mod` 中 `cast` 从 indirect 转为直接依赖
+
+### 文件变更
+- 新增: `server/cmd/check-config/main.go`
+- 新增: `server/cmd/init-contact-phone/main.go`
+- 新增: `server/cmd/reset-products/main.go`
+- 新增: `server/utils/password.go`
+- 新增: `web/nginx.conf`
+- 修改: `server/provider/zjmf/zjmf.go`
+- 修改: `server/utils/ssh_fix.go`
+- 修改: `docker-compose.yaml`, `docker-compose.web.yml`, `web.service.yml`
+- 修改: `web/Dockerfile`
+- 修改: `server/go.mod`
 
 ## v1.530 更新日志
 

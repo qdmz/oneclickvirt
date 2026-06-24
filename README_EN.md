@@ -123,6 +123,8 @@ cd oneclickvirt
 docker-compose up -d --build || docker compose up -d --build
 ```
 
+> **v1.540 Update**: Web service now uses standalone `web/Dockerfile` with `web/nginx.conf` reverse proxy configuration, supporting API routes, WebSocket, Swagger, and SPA fallback.
+
 **Default Configuration:**
 
 - Frontend service: `http://localhost:8888`
@@ -278,6 +280,7 @@ After system initialization, the following default accounts will be generated:
 - ✅ **Third-party Payment Integration** - Support for Epay and Mapay payment gateways
 - ✅ **Enhanced Payment Configuration** - Comprehensive payment interface management
 - ✅ **Ticket Management** - View all tickets, reply to users, update ticket status (Open/Pending/Resolved/Closed)
+- ✅ **ZJMF Integration** - Support ZJMF API management for instance creation and management (v1.540 fixed struct tags, Metadata passing, Image field matching)
 
 ### User Features  
 - ✅ **Multiple Payment Methods** - Support for Alipay, WeChat Pay, Balance, Epay, and Mapay
@@ -291,6 +294,41 @@ After system initialization, the following default accounts will be generated:
 - **Payment Signature Verification** - MD5 signature validation for payment callbacks
 - **Permission Downgrade Mechanism** - Secure permission control for user impersonation
 - **Operation Audit Logs** - Comprehensive logging of sensitive operations
+
+## 🔄 v1.540 Changelog (2026-06-18)
+
+### Bug Fixes
+- Fixed zjmf provider struct tag missing closing backtick causing cascade compile errors
+- Removed non-existent `APIURL` field reference
+- Fixed `config.Username`/`config.Password` to pass via `Metadata`
+- Fixed `provider.Image` struct field mismatch
+- Fixed `ssh_fix.go` IPv6 address format (using `net.JoinHostPort`)
+- Fixed multiple main functions conflict in `scripts` directory
+
+### New Features
+- Added `utils.GeneratePassword()` function for generating random passwords for instance creation (contains uppercase, lowercase, and digits)
+- Added `server/cmd/` directory for standalone utility scripts:
+  - `check-config` — Check site configurations (supports SQLite)
+  - `init-contact-phone` — Initialize contact phone configuration
+  - `reset-products` — Reset product data
+- Added `web/nginx.conf` — nginx reverse proxy configuration (supports API routes, WebSocket, Swagger, SPA fallback)
+
+### Improvements
+- Web service now uses standalone `web/Dockerfile` (based on `nginx:stable-alpine`), replacing bulky all-in-one image
+- Synchronized fixes to `docker-compose.web.yml` and `web.service.yml` build contexts
+- `cast` dependency promoted from indirect to direct in `go.mod`
+
+### File Changes
+- Added: `server/cmd/check-config/main.go`
+- Added: `server/cmd/init-contact-phone/main.go`
+- Added: `server/cmd/reset-products/main.go`
+- Added: `server/utils/password.go`
+- Added: `web/nginx.conf`
+- Modified: `server/provider/zjmf/zjmf.go`
+- Modified: `server/utils/ssh_fix.go`
+- Modified: `docker-compose.yaml`, `docker-compose.web.yml`, `web.service.yml`
+- Modified: `web/Dockerfile`
+- Modified: `server/go.mod`
 
 ## 🔄 v1.520 Changelog
 
