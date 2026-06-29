@@ -114,6 +114,8 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.GET("/user/orders/status/:orderNo", user.GetPurchaseOrderStatus)
 		UserGroup.GET("/user/orders/epay-qr/:orderNo", user.GetPurchaseEpayQR)
 		UserGroup.GET("/user/orders/mapay-qr/:orderNo", user.GetPurchaseMapayQR)
+		UserGroup.GET("/user/orders/alipay-qr/:orderNo", user.GetPurchaseAlipayQR)
+		UserGroup.GET("/user/orders/wechat-qr/:orderNo", user.GetPurchaseWechatQR)
 		UserGroup.POST("/user/orders/:id/cancel", user.CancelOrder)
 
 		// 产品管理

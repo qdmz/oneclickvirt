@@ -84,6 +84,22 @@ export const getPurchaseMapayQR = (orderNo) => {
   })
 }
 
+// 获取产品购买支付宝支付二维码
+export const getPurchaseAlipayQR = (orderNo) => {
+  return request({
+    url: `/v1/user/orders/alipay-qr/${orderNo}`,
+    method: 'get'
+  })
+}
+
+// 获取产品购买微信支付二维码
+export const getPurchaseWechatQR = (orderNo) => {
+  return request({
+    url: `/v1/user/orders/wechat-qr/${orderNo}`,
+    method: 'get'
+  })
+}
+
 // 查询充值订单状态
 export const getRechargeOrderStatus = (orderNo) => {
   return request({

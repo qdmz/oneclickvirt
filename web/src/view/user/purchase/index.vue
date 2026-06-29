@@ -242,10 +242,11 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Wallet, ChatDotRound, Coin } from '@element-plus/icons-vue'
-import { getUserProducts, purchaseProduct, getAlipayQR, getWechatQR, getPurchaseOrderStatus, getPurchaseEpayQR, getPurchaseMapayQR } from '@/api/user-payment'
+import { getUserProducts, purchaseProduct, getPurchaseAlipayQR, getPurchaseWechatQR, getPurchaseOrderStatus, getPurchaseEpayQR, getPurchaseMapayQR } from '@/api/user-payment'
 import { getUserProfile } from '@/api/user'
 import { getPaymentConfig } from '@/api/public'
 import { useI18n } from 'vue-i18n'
+import qrcode from 'qrcode'
 
 const { t, locale } = useI18n()
 
@@ -432,7 +433,20 @@ const getPaymentMethodName = (method) => {
 // 购买产品
 const handlePurchase = (product) => {
   selectedProduct.value = product
-  paymentMethod.value = 'alipay'
+  // 根据配置设置默认支付方式
+  if (paymentConfig.value.enableEpay) {
+    paymentMethod.value = 'epay'
+  } else if (paymentConfig.value.enableAlipay) {
+    paymentMethod.value = 'alipay'
+  } else if (paymentConfig.value.enableWechat) {
+    paymentMethod.value = 'wechat'
+  } else if (paymentConfig.value.enableMapay) {
+    paymentMethod.value = 'mapay'
+  } else if (paymentConfig.value.enableBalance) {
+    paymentMethod.value = 'balance'
+  } else {
+    paymentMethod.value = 'balance'
+  }
   paymentDialogVisible.value = true
 }
 
@@ -484,9 +498,9 @@ const getQRCode = async () => {
   try {
     let res
     if (paymentMethod.value === 'alipay') {
-      res = await getAlipayQR(currentOrder.value.orderNo)
+      res = await getPurchaseAlipayQR(currentOrder.value.orderNo)
     } else if (paymentMethod.value === 'wechat') {
-      res = await getWechatQR(currentOrder.value.orderNo)
+      res = await getPurchaseWechatQR(currentOrder.value.orderNo)
     } else if (paymentMethod.value === 'epay') {
       res = await getPurchaseEpayQR(currentOrder.value.orderNo, 'alipay')
     } else if (paymentMethod.value === 'epay_wxpay') {
@@ -498,7 +512,19 @@ const getQRCode = async () => {
     }
 
     if (res.code === 200) {
-      qrCodeUrl.value = res.data.qrCode
+      const rawUrl = res.data.qrCode
+      // 对于 epay_wxpay 和 epay_qqpay，生成二维码图片
+      if (paymentMethod.value === 'epay_wxpay' || paymentMethod.value === 'epay_qqpay') {
+        try {
+          const qrDataUrl = await qrcode.toDataURL(rawUrl, { width: 256, margin: 2 })
+          qrCodeUrl.value = qrDataUrl
+        } catch (err) {
+          console.error('生成二维码失败:', err)
+          qrCodeUrl.value = rawUrl
+        }
+      } else {
+        qrCodeUrl.value = rawUrl
+      }
     } else {
       ElMessage.error(t('user.purchase.getQRCodeFailed'))
     }

@@ -17,6 +17,7 @@ func InitPublicRouter(Router *gin.RouterGroup) {
 		PublicRouter.GET("system-images/available", system.GetAvailableSystemImages)
 		PublicRouter.GET("products", public.GetPublicProducts)
 		PublicRouter.GET("payment-config", public.GetPaymentConfig)
+		PublicRouter.GET("specs", public.GetSpecs)
 
 		// KYC callback
 		PublicRouter.GET("kyc/callback", user.HandleKYCCallback)

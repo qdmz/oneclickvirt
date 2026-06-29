@@ -1,6 +1,6 @@
 module oneclickvirt
 
-go 1.25.0
+go 1.19
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0

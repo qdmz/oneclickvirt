@@ -74,3 +74,11 @@ export const getPaymentConfig = () => {
     method: 'get'
   })
 }
+
+// 获取资源规格配置（公开接口）
+export const getSpecs = () => {
+  return request({
+    url: '/v1/public/specs',
+    method: 'get'
+  })
+}
