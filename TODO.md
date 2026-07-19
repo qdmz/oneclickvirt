@@ -1,4 +1,4 @@
-# ONECLICKVIRT_REDESIGN — 重构 oneclickvirt 项目功能
+# ONECLICKVIRT_REDESIGN — 改造计划
 
 ## 项目信息
 - 仓库：https://github.com/oneclickvirt/oneclickvirt.git
@@ -9,7 +9,7 @@
 ## 用户需求
 
 ### 1. 易支付接口用户充值功能
-- [ ] 实现易支付充值接口（epay/yipay）
+- [ ] 完善易支付充值接口（epay/yipay）
 - [ ] 支持充值订单生成、支付、回调处理
 - [ ] 充值成功后自动充入用户钱包
 
@@ -46,10 +46,6 @@
 - [ ] 已有工单模型和 API，需确认功能完整性
 - [ ] 用户可创建/回复工单
 - [ ] 管理员可管理/回复/关闭工单
-
-## 技术栈
-- 后端：Go 1.25, Gin, GORM, MySQL
-- 前端：Vue 3, Vite, Element Plus, Pinia
 
 ## 关键文件
 - server/model/product/product.go - 产品模型
