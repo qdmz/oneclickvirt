@@ -59,6 +59,43 @@ quota:
         min-level-for-reset-container: 1
         min-level-for-reset-vm: 1
         min-level-for-vm: 1
+    level-limits:
+        "1":
+            max-instances: 1
+            max-resources:
+                cpu: 1
+                disk: 10
+                memory: 1024
+            max-traffic: 0
+        "2":
+            max-instances: 3
+            max-resources:
+                cpu: 2
+                disk: 20
+                memory: 1024
+            max-traffic: 0
+        "3":
+            max-instances: 5
+            max-resources:
+                cpu: 4
+                disk: 40
+                memory: 2048
+            max-traffic: 0
+        "4":
+            max-instances: 10
+            max-resources:
+                cpu: 8
+                disk: 80
+                memory: 4096
+            max-traffic: 0
+        "5":
+            max-instances: 20
+            max-resources:
+                cpu: 16
+                disk: 160
+                memory: 8192
+            max-traffic: 0
+    default-level: 1
 redis:
     addr: ""
     db: 0
