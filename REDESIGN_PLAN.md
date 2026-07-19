@@ -1,54 +1,60 @@
-# ONECLICKVIRT_REDESIGN — 重构计划
+# ONECLICKVIRT_REDESIGN — 改造计划
 
-## 项目概述
-将 oneclickvirt 从"用户等级 + 申请领取"模式改造为"产品购买 + 自动开通"模式
+## 项目信息
+- 仓库：https://github.com/oneclickvirt/oneclickvirt.git
+- 路径：/run/csi/mount-root/nas/4079184d856ecc166ed19d4887083405/workspaces/default/coding_projects/oneclickvirt
+- 后端：Go 1.25+ (Gin + GORM + MySQL)
+- 前端：Vue 3 (Vite + Element Plus)
 
-## 架构调整
+## 用户需求
 
-### 1. 移除用户等级资源限制
-- [ ] 修改 User 模型，移除等级限制相关字段（保留 level 作为显示用途）
-- [ ] 移除 Quota.LevelLimits 配置
-- [ ] 移除实例创建时的等级检查逻辑
-- [ ] 产品直接定义规格（CPU/内存/磁盘/带宽），不再依赖等级
+### 1. 易支付接口用户充值功能
+- [ ] 完善易支付充值接口（epay/yipay）
+- [ ] 支持充值订单生成、支付、回调处理
+- [ ] 充值成功后自动充入用户钱包
 
-### 2. 产品模型重构
-- [ ] 扩展 Product 模型：
-  - 增加 `NodeType` 字段（docker/lxd/incus/proxmox）
-  - 增加 `OS` 字段（默认操作系统）
-  - 增加 `PricePeriod` 字段（日/月/年）
-  - 增加 `AutoProvision` 字段（是否支付后自动开通）
-- [ ] 产品管理 API 增强
+### 2. 虚拟机产品管理
+- [ ] 产品模型重构（产品 = 虚拟机规格 + 价格）
+- [ ] 管理员后台产品 CRUD
+- [ ] 产品包含：名称、CPU、内存、磁盘、带宽、价格、周期、库存
 
-### 3. 在线订购流程
-- [ ] 产品列表页面（用户端）
-- [ ] 产品详情页（规格展示）
-- [ ] 订购流程：选择产品 → 选择周期 → 支付方式 → 生成订单 → 支付 → 自动开通
+### 3. 去掉用户等级资源限制
+- [ ] 移除用户等级等级相关的资源限制逻辑
+- [ ] 实例创建不再基于等级配额
+- [ ] 改为基于产品配置
+
+### 4. 申请领取实例改为在线订购产品
+- [ ] 移除旧的申请/领取流程
+- [ ] 改为产品列表 + 在线订购 + 支付流程
+- [ ] 支付成功后自动创建虚拟机
+
+### 5. 支付成功后自动开通虚拟机
 - [ ] 支付回调自动触发实例创建
+- [ ] 自动分配节点、镜像
+- [ ] 自动设置密码/密钥
 
-### 4. 易支付充值功能
-- [ ] 完善充值订单创建
-- [ ] 易支付接口集成（已有配置）
-- [ ] 充值回调处理
-- [ ] 钱包余额更新
+### 6. noVNC 在线管理
+- [ ] 集成 noVNC WebSocket 代理
+- [ ] 实例详情页添加 VNC 控制台入口
+- [ ] 支持 Proxmox VE 的 VNC 接口
 
-### 5. noVNC 集成
-- [ ] 后端 WebSocket 代理
-- [ ] 前端 noVNC 客户端
-- [ ] 实例详情页 VNC 按钮
+### 7. 管理员后台手动开通虚拟机
+- [ ] 管理员可选择用户 + 产品 + 节点 手动创建实例
+- [ ] 支持批量创建
 
-### 6. 管理员手动开通
-- [ ] 管理员实例创建表单（选择用户 + 产品 + 节点）
-- [ ] 批量创建功能
+### 8. 工单系统
+- [ ] 已有工单模型和 API，需确认功能完整性
+- [ ] 用户可创建/回复工单
+- [ ] 管理员可管理/回复/关闭工单
 
-### 7. 工单系统
-- [ ] 已有工单模型，需检查功能完整性
-- [ ] 确认 API 和前端页面是否完整
-
-## 实施顺序
-1. 后端重构（移除等级限制，产品模型扩展）
-2. 支付流程（易支付充值 + 产品支付）
-3. 自动开通逻辑
-4. 前端页面改造
-5. noVNC 集成
-6. 管理员功能
-7. 测试
+## 关键文件
+- server/model/product/product.go - 产品模型
+- server/model/user/user.go - 用户模型（含等级/配额字段）
+- server/api/v1/user/order.go - 订单 API
+- server/api/v1/user/recharge.go - 充值 API
+- server/api/v1/user/container_vm.go - 容器/虚拟机 API
+- server/router/user.go - 用户路由
+- server/model/provider/provider.go - 节点/实例模型
+- web/src/view/user/apply/ - 申请实例页面
+- web/src/view/user/purchase/ - 购买产品页面
+- web/src/view/admin/products/ - 管理员产品管理
