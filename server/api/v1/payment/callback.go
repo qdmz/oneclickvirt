@@ -7,6 +7,7 @@ import (
 	orderModel "oneclickvirt/model/order"
 	productModel "oneclickvirt/model/product"
 	instanceModel "oneclickvirt/model/provider"
+	systemModel "oneclickvirt/model/system"
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
 	adminModel "oneclickvirt/model/admin"
@@ -260,7 +261,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 		if order.ProductID > 0 {
 			var product productModel.Product
 			if err := tx.First(&product, order.ProductID).Error; err == nil {
-				if product.AutoProvision == 1 {
+				if product.AutoProvision {
 					global.APP_LOG.Info(fmt.Sprintf("产品 %s 启用自动开通，准备创建 VM", product.Name))
 
 					// 获取可用节点
@@ -270,7 +271,7 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 						First(&provider).Error; err == nil {
 
 						// 获取默认系统镜像
-						var image instanceModel.SystemImage
+						var image systemModel.SystemImage
 						if err := tx.Where("provider_id = ? AND status = ?", provider.ID, 1).
 							First(&image).Error; err == nil {
 
@@ -283,30 +284,33 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 								UserID:          order.UserID,
 								Name:            instanceName,
 								Status:          instanceModel.InstanceStatusCreating,
-								Type:            product.VMType,
+								InstanceType:    product.VMType,
 								ProviderID:      provider.ID,
-								ImageID:         image.ID,
+								Image:           image.Name,
 								CPU:             product.CPU,
-								Memory:          product.Memory,
-								Disk:            product.Disk,
+								Memory:          int64(product.Memory),
+								Disk:            int64(product.Disk),
 								Network:         product.Bandwidth,
 								ExpireAt:        &expireTime,
-								OrderID:         &order.ID,
 								IsAutoProvision: true,
+								OrderID:         &order.ID,
 							}
 
 							if err := tx.Create(&instance).Error; err == nil {
 								global.APP_LOG.Info(fmt.Sprintf("已创建实例记录: %s", instanceName))
 
 								// 创建后台任务
+								providerID := provider.ID
 								task := adminModel.Task{
-									UserID:      order.UserID,
-									Type:        "create_vm",
-									Title:       fmt.Sprintf("自动开通虚拟机: %s", instanceName),
-									Description: fmt.Sprintf("创建 %s 类型虚拟机，配置: %d核CPU, %dGB内存, %dGB磁盘",
-										product.VMType, product.CPU, product.Memory/1024, product.Disk/1024),
-									Status:      adminModel.TaskStatusPending,
-									TargetID:    instance.ID,
+									UserID:        order.UserID,
+									Type:          "instance",
+									TaskType:      "create_vm",
+									Status:        adminModel.TaskStatusPending,
+									Description: fmt.Sprintf("自动开通虚拟机: %s - 配置: %d核CPU, %dGB内存, %dGB磁盘",
+										instanceName, product.CPU, product.Memory/1024, product.Disk/1024),
+									InstanceID:    &instance.ID,
+									ProviderID:    &providerID,
+									TimeoutDuration: 1800,
 								}
 								if err := tx.Create(&task).Error; err != nil {
 									global.APP_LOG.Error("创建后台任务失败", zap.Error(err))

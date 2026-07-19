@@ -77,7 +77,7 @@ func (s *TaskService) CleanupTimeoutTasksWithLockRelease(timeoutThreshold time.T
 // executeTaskLogic 执行具体的任务逻辑
 func (s *TaskService) executeTaskLogic(ctx context.Context, task *adminModel.Task) error {
 	switch task.TaskType {
-	case "create":
+	case "create", "create_vm":
 		return s.executeCreateInstanceTask(ctx, task)
 	case "start":
 		return s.executeStartInstanceTask(ctx, task)

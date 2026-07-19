@@ -96,6 +96,16 @@
           width="80"
         />
         <el-table-column
+          label="自动开通"
+          width="100"
+        >
+          <template #default="{ row }">
+            <el-tag :type="row.autoProvision ? 'success' : 'info'" size="small">
+              {{ row.autoProvision ? '是' : '否' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
           prop="sortOrder"
           label="排序"
           width="80"
@@ -350,6 +360,62 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-divider content-position="left">
+          VM 配置
+        </el-divider>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="VM 类型"
+              prop="vmType"
+            >
+              <el-select
+                v-model="form.vmType"
+                placeholder="请选择VM类型"
+                style="width: 100%"
+              >
+                <el-option label="无" value="" />
+                <el-option label="VM" value="vm" />
+                <el-option label="容器" value="container" />
+                <el-option label="Proxmox VM" value="proxmox" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="默认操作系统"
+              prop="os"
+            >
+              <el-input
+                v-model="form.os"
+                placeholder="如 ubuntu, centos 等"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="支付后自动开通"
+              prop="autoProvision"
+            >
+              <el-switch v-model="form.autoProvision" />
+              <span class="ml-2 text-gray-500">启用后支付成功自动创建 VM 实例</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="最低购买等级"
+              prop="requiredLevel"
+            >
+              <el-input-number
+                v-model="form.requiredLevel"
+                :min="1"
+                :max="5"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="特性(JSON)">
           <el-input
             v-model="form.features"
@@ -452,7 +518,11 @@ const form = ref({
   allowRepeat: true,
   stock: -1,
   soldCount: 0,
-  features: '[]'
+  features: '[]',
+  vmType: '',
+  os: '',
+  autoProvision: true,
+  requiredLevel: 1
 })
 
 const rules = {
@@ -527,12 +597,16 @@ const handleAdd = () => {
     bandwidth: 100,
     traffic: 102400,
     maxInstances: 1,
-    isEnabled: true,
+   isEnabled: true,
     sortOrder: 0,
     allowRepeat: true,
     stock: -1,
     soldCount: 0,
-    features: '[]'
+    features: '[]',
+    vmType: '',
+    os: '',
+    autoProvision: true,
+    requiredLevel: 1
   }
   dialogVisible.value = true
 }
@@ -543,8 +617,9 @@ const handleEdit = (row) => {
   form.value = {
     ...row,
     price: row.price / 100,
-    isEnabled: row.isEnabled === 1 || row.isEnabled === true, // 将整数或布尔值转换为布尔值
-    allowRepeat: row.allowRepeat === 1 || row.allowRepeat === true // 将整数或布尔值转换为布尔值
+    isEnabled: row.isEnabled === 1 || row.isEnabled === true,
+    allowRepeat: row.allowRepeat === 1 || row.allowRepeat === true,
+    autoProvision: row.autoProvision === 1 || row.autoProvision === true
   }
   dialogVisible.value = true
 }
@@ -607,7 +682,8 @@ const handleSubmit = async () => {
           ...form.value,
           price: Math.round(form.value.price * 100), // 转换为分
           isEnabled: form.value.isEnabled ? 1 : 0, // 将布尔值转换为整数(1:启用, 0:禁用)
-          allowRepeat: form.value.allowRepeat ? 1 : 0 // 将布尔值转换为整数(1:允许, 0:不允许)
+          allowRepeat: form.value.allowRepeat ? 1 : 0, // 将布尔值转换为整数(1:允许, 0:不允许)
+          autoProvision: form.value.autoProvision ? 1 : 0 // 将布尔值转换为整数(1:启用, 0:禁用)
         }
 
         let res

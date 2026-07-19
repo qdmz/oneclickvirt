@@ -26,6 +26,14 @@ type TrafficStatsPreset struct {
 	AutoResetBatchSize    int // 自动重置批量大小
 }
 
+// 实例状态常量
+const (
+	InstanceStatusCreating = "creating" // 创建中
+	InstanceStatusRunning  = "running"  // 运行中
+	InstanceStatusStopped  = "stopped"  // 已停止
+	InstanceStatusFailed   = "failed"   // 失败
+)
+
 // GetTrafficStatsPreset 根据模式获取预设配置
 func GetTrafficStatsPreset(mode string) TrafficStatsPreset {
 	switch mode {
@@ -362,6 +370,10 @@ type Instance struct {
 	// 关联关系
 	// 添加UserID索引以支持按用户查询
 	UserID uint `json:"userId" gorm:"index:idx_user_id;index:idx_user_status,priority:1"` // 所属用户ID
+
+	// 自动开通标记
+	IsAutoProvision bool `json:"isAutoProvision" gorm:"default:false"` // 是否由支付自动开通
+	OrderID         *uint `json:"orderId"`                             // 关联订单ID
 }
 
 func (i *Instance) BeforeCreate(tx *gorm.DB) error {
