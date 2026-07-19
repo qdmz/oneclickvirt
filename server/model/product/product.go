@@ -25,6 +25,11 @@ type Product struct {
 	AllowRepeat  int       `json:"allowRepeat" gorm:"column:allow_repeat;default:1;comment:是否允许重复购买(1:允许, 0:不允许)"`
 	Stock        int       `json:"stock" gorm:"column:stock;default:-1;comment:库存量(-1表示无限)"`
 	SoldCount    int       `json:"soldCount" gorm:"column:sold_count;default:0;comment:已售数量"`
+	// VM 产品相关字段
+	VMType       string    `json:"vmType" gorm:"column:vm_type;type:varchar(20);default:'';comment:VM类型(vm/container/proxmox)"`
+	OS           string    `json:"os" gorm:"column:os;type:varchar(50);default:'';comment:默认操作系统"`
+	AutoProvision bool     `json:"autoProvision" gorm:"column:auto_provision;default:true;comment:是否支付后自动开通"`
+	RequiredLevel int      `json:"requiredLevel" gorm:"column:required_level;default:1;comment:购买所需最低等级"`
 	CreatedAt    time.Time `json:"createdAt" gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `json:"updatedAt" gorm:"autoUpdateTime"`
 }
