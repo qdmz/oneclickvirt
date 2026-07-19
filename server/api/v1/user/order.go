@@ -427,12 +427,7 @@ func PurchaseProduct(c *gin.Context) {
 		return
 	}
 
-	// 检查用户等级：只能购买等于或大于自己当前等级的产品
-	if user.Level > product.Level {
-		tx.Rollback()
-		c.JSON(400, gin.H{"code": 400, "message": "此产品不符合该用户等级购买请返回重新选择其它等级产品"})
-		return
-	}
+	// 【改造】移除用户等级限制，所有用户都可购买所有产品
 
 	// 生成订单号
 	orderNo := generateOrderNo()
@@ -528,11 +523,12 @@ func PurchaseProduct(c *gin.Context) {
 
 	// 如果已支付,升级用户等级并更新资源配额
 	if order.Status == orderModel.OrderStatusPaid {
-		if err := upgradeUserLevel(tx, userID.(uint), product.Level, expireTime, product); err != nil {
-			tx.Rollback()
-			global.APP_LOG.Error("升级用户等级失败", zap.Error(err))
-			c.JSON(500, gin.H{"code": 500, "message": "升级用户等级失败"})
-			return
+		// 【改造】不再升级用户等级，改为自动创建 VM（如果产品配置了 AutoProvision）
+		if product.AutoProvision == 1 {
+			global.APP_LOG.Info(fmt.Sprintf("产品 %s 启用了自动开通，准备创建 VM", product.Name))
+			// TODO: 调用 VM 创建逻辑（将在下一步实现）
+		} else {
+			global.APP_LOG.Info(fmt.Sprintf("产品 %s 未启用自动开通，跳过 VM 创建", product.Name))
 		}
 
 		// 更新库存和已售数量

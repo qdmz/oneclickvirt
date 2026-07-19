@@ -9,6 +9,7 @@ import (
 	instanceModel "oneclickvirt/model/provider"
 	userModel "oneclickvirt/model/user"
 	walletModel "oneclickvirt/model/wallet"
+	adminModel "oneclickvirt/model/admin"
 	"oneclickvirt/service/cache"
 	"time"
 
@@ -252,6 +253,78 @@ func processPaymentSuccess(orderNo string, paymentMethod string, notifyData map[
 				cacheService := cache.GetUserCacheService()
 				cacheService.InvalidateUserCache(order.UserID)
 				global.APP_LOG.Info(fmt.Sprintf("已清除用户 %d 的Dashboard缓存", order.UserID))
+			}
+		}
+
+		// 【改造】检查产品是否启用自动开通 VM
+		if order.ProductID > 0 {
+			var product productModel.Product
+			if err := tx.First(&product, order.ProductID).Error; err == nil {
+				if product.AutoProvision == 1 {
+					global.APP_LOG.Info(fmt.Sprintf("产品 %s 启用自动开通，准备创建 VM", product.Name))
+
+					// 获取可用节点
+					var provider instanceModel.Provider
+					if err := tx.Where("status = ?", 1).
+						Order("score DESC, load_score ASC").
+						First(&provider).Error; err == nil {
+
+						// 获取默认系统镜像
+						var image instanceModel.SystemImage
+						if err := tx.Where("provider_id = ? AND status = ?", provider.ID, 1).
+							First(&image).Error; err == nil {
+
+							// 生成实例名称
+							instanceName := fmt.Sprintf("vm-%d-%d", order.UserID, time.Now().Unix())
+
+							// 创建实例记录
+							expireTime := time.Now().AddDate(0, 0, product.Period)
+							instance := instanceModel.Instance{
+								UserID:          order.UserID,
+								Name:            instanceName,
+								Status:          instanceModel.InstanceStatusCreating,
+								Type:            product.VMType,
+								ProviderID:      provider.ID,
+								ImageID:         image.ID,
+								CPU:             product.CPU,
+								Memory:          product.Memory,
+								Disk:            product.Disk,
+								Network:         product.Bandwidth,
+								ExpireAt:        &expireTime,
+								OrderID:         &order.ID,
+								IsAutoProvision: true,
+							}
+
+							if err := tx.Create(&instance).Error; err == nil {
+								global.APP_LOG.Info(fmt.Sprintf("已创建实例记录: %s", instanceName))
+
+								// 创建后台任务
+								task := adminModel.Task{
+									UserID:      order.UserID,
+									Type:        "create_vm",
+									Title:       fmt.Sprintf("自动开通虚拟机: %s", instanceName),
+									Description: fmt.Sprintf("创建 %s 类型虚拟机，配置: %d核CPU, %dGB内存, %dGB磁盘",
+										product.VMType, product.CPU, product.Memory/1024, product.Disk/1024),
+									Status:      adminModel.TaskStatusPending,
+									TargetID:    instance.ID,
+								}
+								if err := tx.Create(&task).Error; err != nil {
+									global.APP_LOG.Error("创建后台任务失败", zap.Error(err))
+								} else {
+									global.APP_LOG.Info(fmt.Sprintf("已创建后台任务: %d", task.ID))
+								}
+							} else {
+								global.APP_LOG.Error("创建实例记录失败", zap.Error(err))
+							}
+						} else {
+							global.APP_LOG.Warn(fmt.Sprintf("未找到节点 %d 的可用镜像", provider.ID))
+						}
+					} else {
+						global.APP_LOG.Warn("未找到可用节点，无法自动创建 VM")
+					}
+				} else {
+					global.APP_LOG.Info(fmt.Sprintf("产品 %s 未启用自动开通，跳过 VM 创建", product.Name))
+				}
 			}
 		}
 	} else {
