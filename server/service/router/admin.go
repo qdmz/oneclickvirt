@@ -7,6 +7,7 @@ import (
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/system"
 	"oneclickvirt/api/v1/traffic"
+	"oneclickvirt/api/v1/user"
 	"oneclickvirt/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -218,6 +219,32 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		NormalAdminGroup.GET("/group-info", admin.GetAdminGroupInfo)
 		NormalAdminGroup.PUT("/group-info", admin.UpdateAdminGroupInfo)
 
+		// 工单管理（普通管理员可访问）
+		NormalAdminGroup.GET("/tickets", admin.GetAdminTicketList)
+		NormalAdminGroup.GET("/tickets/:id", admin.GetAdminTicketDetail)
+		NormalAdminGroup.POST("/tickets/:id/reply", admin.AdminReplyTicket)
+		NormalAdminGroup.PUT("/tickets/:id/status", admin.UpdateTicketStatus)
+		NormalAdminGroup.POST("/tickets/:id/assign", admin.AssignTicket)
+		NormalAdminGroup.GET("/tickets/stats", admin.GetTicketStats)
+
+		// 站点配置管理（普通管理员可访问）
+		NormalAdminGroup.GET("/site-config", admin.GetAdminSiteConfig)
+		NormalAdminGroup.PUT("/site-config", admin.UpdateSiteConfig)
+		NormalAdminGroup.POST("/site-config/upload-image", admin.UploadSiteImage)
+
+		// 产品管理（普通管理员可访问）
+		NormalAdminGroup.GET("/products", admin.GetAdminProductList)
+		NormalAdminGroup.POST("/products", admin.CreateAdminProduct)
+		NormalAdminGroup.GET("/products/:id", admin.GetAdminProductDetail)
+		NormalAdminGroup.PUT("/products/:id", admin.UpdateAdminProduct)
+		NormalAdminGroup.DELETE("/products/:id", admin.DeleteAdminProduct)
+		NormalAdminGroup.PUT("/products/:id/status", admin.UpdateProductStatus)
+
+		// 订单管理（普通管理员可访问）
+		NormalAdminGroup.GET("/orders", admin.GetAdminOrderList)
+		NormalAdminGroup.GET("/orders/:id", admin.GetAdminOrderDetail)
+		NormalAdminGroup.PUT("/orders/:id/status", admin.UpdateOrderStatus)
+		NormalAdminGroup.POST("/orders/:id/provision", admin.ManualProvision)
 	}
 
 	// 超级管理员专用路由（仅admin用户类型，排除normal_admin）
@@ -331,5 +358,8 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		SuperAdminGroup.GET("/api-tokens", auth.AdminGetApiTokenList)
 		SuperAdminGroup.DELETE("/api-tokens/:id", auth.AdminDeleteApiToken)
 		SuperAdminGroup.POST("/api-tokens/batch-delete", auth.AdminBatchDeleteApiTokens)
+
+		// 用户余额记录管理（超管可查看任意用户的余额记录）
+		SuperAdminGroup.GET("/users/:userId/balance-logs", user.AdminGetUserBalanceLogs)
 	}
 }

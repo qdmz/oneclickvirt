@@ -188,6 +188,38 @@ const userRoutes = computed(() => {
           title: 'sidebar.apiTokenManagement',
           icon: 'Key'
         }
+      },
+      {
+        path: '/user/store',
+        name: 'UserStore',
+        meta: {
+          title: 'sidebar.store',
+          icon: 'Shop'
+        }
+      },
+      {
+        path: '/user/orders',
+        name: 'UserOrders',
+        meta: {
+          title: 'sidebar.orders',
+          icon: 'Document'
+        }
+      },
+      {
+        path: '/user/tickets',
+        name: 'UserTickets',
+        meta: {
+          title: 'sidebar.tickets',
+          icon: 'Service'
+        }
+      },
+      {
+        path: '/user/wallet',
+        name: 'UserWallet',
+        meta: {
+          title: 'sidebar.wallet',
+          icon: 'Wallet'
+        }
       }
     ],
     // 管理员路由
@@ -360,6 +392,52 @@ const userRoutes = computed(() => {
         ]
       },
       {
+        path: '/admin/_store',
+        name: 'AdminMenuStore',
+        alwaysShow: true,
+        meta: {
+          title: 'sidebar.groupStore',
+          icon: 'ShoppingBag'
+        },
+        children: [
+          {
+            path: '/admin/products',
+            name: 'AdminProducts',
+            meta: {
+              title: 'sidebar.productManagement',
+              icon: 'Goods'
+            }
+          },
+          {
+            path: '/admin/orders',
+            name: 'AdminOrders',
+            meta: {
+              title: 'sidebar.orderManagement',
+              icon: 'DocumentChecked'
+            }
+          }
+        ]
+      },
+      {
+        path: '/admin/_tickets',
+        name: 'AdminMenuTickets',
+        alwaysShow: true,
+        meta: {
+          title: 'sidebar.groupTickets',
+          icon: 'ChatDotSquare'
+        },
+        children: [
+          {
+            path: '/admin/tickets',
+            name: 'AdminTickets',
+            meta: {
+              title: 'sidebar.ticketManagement',
+              icon: 'Service'
+            }
+          }
+        ]
+      },
+      {
         path: '/admin/_system',
         name: 'AdminMenuSystem',
         alwaysShow: true,
@@ -374,6 +452,14 @@ const userRoutes = computed(() => {
             meta: {
               title: 'sidebar.systemConfiguration',
               icon: 'Setting'
+            }
+          },
+          {
+            path: '/admin/site-config',
+            name: 'AdminSiteConfig',
+            meta: {
+              title: 'sidebar.siteConfig',
+              icon: 'Monitor'
             }
           },
           {

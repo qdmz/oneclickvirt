@@ -34,6 +34,10 @@ import userDomain from './zh-CN/user/domain.js'
 import userKyc from './zh-CN/user/kyc.js'
 import userCheckin from './zh-CN/user/checkin.js'
 import userApiTokens from './zh-CN/user/apiTokens.js'
+import userStore from './zh-CN/user/store.js'
+import userOrders from './zh-CN/user/orders.js'
+import userTickets from './zh-CN/user/tickets.js'
+import userWallet from './zh-CN/user/wallet.js'
 
 // 管理员模块
 import adminDashboard from './zh-CN/admin/dashboard.js'
@@ -57,6 +61,10 @@ import adminKyc from './zh-CN/admin/kyc.js'
 import adminGroup from './zh-CN/admin/group.js'
 import adminApiTokens from './zh-CN/admin/apiTokens.js'
 import adminSnapshots from './zh-CN/admin/snapshots.js'
+import adminProducts from './zh-CN/admin/products.js'
+import adminOrders from './zh-CN/admin/orders.js'
+import adminTickets from './zh-CN/admin/tickets.js'
+import adminSiteConfig from './zh-CN/admin/siteConfig.js'
 
 export default {
   common,
@@ -83,7 +91,11 @@ export default {
     domain: userDomain,
     kyc: userKyc,
     checkin: userCheckin,
-    apiTokens: userApiTokens
+    apiTokens: userApiTokens,
+    store: userStore,
+    orders: userOrders,
+    tickets: userTickets,
+    wallet: userWallet
   },
   admin: {
     dashboard: adminDashboard,
@@ -106,7 +118,11 @@ export default {
     kyc: adminKyc,
     group: adminGroup,
     apiTokens: adminApiTokens,
-    snapshots: adminSnapshots
+    snapshots: adminSnapshots,
+    products: adminProducts,
+    orders: adminOrders,
+    tickets: adminTickets,
+    siteConfig: adminSiteConfig
   },
   validation,
   message,

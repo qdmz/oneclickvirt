@@ -34,3 +34,5 @@ test/.DS_Store*
 .back/DS_Store*
 data
 .idea
+*.exe
+*.test

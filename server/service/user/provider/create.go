@@ -171,7 +171,7 @@ func (s *Service) CreateUserInstance(userID uint, req userModel.CreateInstanceRe
 	// 包含：全局等级限制 + Provider节点等级限制（取最小值）
 	// 验证：CPU、内存、磁盘、带宽规格是否超过限制
 	// 实例数量限制在事务内验证（防止并发问题）
-	if err := s.validateUserSpecPermissions(userID, req.ProviderId, cpuSpec, memorySpec, diskSpec, bandwidthSpec); err != nil {
+	if err := s.validateUserSpecPermissions(userID, req.ProviderId, cpuSpec, memorySpec, diskSpec, bandwidthSpec, req.OrderID); err != nil {
 		global.APP_LOG.Error("用户等级限制验证失败",
 			zap.Uint("userID", userID),
 			zap.Uint("providerId", req.ProviderId),
@@ -252,36 +252,42 @@ func (s *Service) createInstanceWithMinimalTransaction(userID uint, req *userMod
 			return fmt.Errorf("用户账户已被禁用")
 		}
 
-		// 2. 验证用户全局实例数量限制
-		levelLimits, err := userquota.ResolveLevelLimit(currentUser.Level)
-		if err != nil {
-			return err
-		}
+		// 2. 验证用户全局实例数量限制（产品订单创建跳过等级配额）
+		if req.OrderID == 0 {
+			levelLimits, err := userquota.ResolveLevelLimit(currentUser.Level)
+			if err != nil {
+				return err
+			}
 
-		currentInstances, _, err := quotaService.GetCurrentResourceUsageInTx(tx, userID)
-		if err != nil {
-			return fmt.Errorf("获取当前实例数量失败: %v", err)
-		}
+			currentInstances, _, err := quotaService.GetCurrentResourceUsageInTx(tx, userID)
+			if err != nil {
+				return fmt.Errorf("获取当前实例数量失败: %v", err)
+			}
 
-		if currentInstances >= levelLimits.MaxInstances {
-			return fmt.Errorf("实例数量已达上限：当前 %d/%d", currentInstances, levelLimits.MaxInstances)
-		}
+			if currentInstances >= levelLimits.MaxInstances {
+				return fmt.Errorf("实例数量已达上限：当前 %d/%d", currentInstances, levelLimits.MaxInstances)
+			}
 
-		quotaReq := resources.ResourceRequest{
-			UserID:       userID,
-			ProviderID:   req.ProviderId,
-			CPU:          cpuSpec.Cores,
-			Memory:       int64(memorySpec.SizeMB),
-			Disk:         int64(diskSpec.SizeMB),
-			Bandwidth:    bandwidthSpec.SpeedMbps,
-			InstanceType: systemImage.InstanceType,
-		}
-		quotaResult, err := quotaService.ValidateInTransaction(tx, quotaReq)
-		if err != nil {
-			return fmt.Errorf("用户配额验证失败: %v", err)
-		}
-		if !quotaResult.Allowed {
-			return fmt.Errorf("用户配额不足: %s", quotaResult.Reason)
+			quotaReq := resources.ResourceRequest{
+				UserID:       userID,
+				ProviderID:   req.ProviderId,
+				CPU:          cpuSpec.Cores,
+				Memory:       int64(memorySpec.SizeMB),
+				Disk:         int64(diskSpec.SizeMB),
+				Bandwidth:    bandwidthSpec.SpeedMbps,
+				InstanceType: systemImage.InstanceType,
+			}
+			quotaResult, err := quotaService.ValidateInTransaction(tx, quotaReq)
+			if err != nil {
+				return fmt.Errorf("用户配额验证失败: %v", err)
+			}
+			if !quotaResult.Allowed {
+				return fmt.Errorf("用户配额不足: %s", quotaResult.Reason)
+			}
+		} else {
+			global.APP_LOG.Info("产品订单实例创建，跳过事务内等级配额验证",
+				zap.Uint("userID", userID),
+				zap.Uint("orderID", req.OrderID))
 		}
 
 		resourceService := &resources.ResourceService{}
@@ -411,9 +417,8 @@ func (s *Service) createInstanceWithMinimalTransaction(userID uint, req *userMod
 		}
 
 		global.APP_LOG.Debug("事务内实例数量验证通过",
-			zap.Uint("userID", userID),
-			zap.Int("currentInstances", currentInstances),
-			zap.Int("maxInstances", levelLimits.MaxInstances))
+		zap.Uint("userID", userID),
+		zap.Uint("orderID", req.OrderID))
 
 		// 1. 只预留资源，不立即消费（等待实例创建成功后再消费）
 		reservationService := resources.GetResourceReservationService()

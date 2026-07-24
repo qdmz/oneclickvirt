@@ -5,6 +5,8 @@ export default {
   groupImages: '镜像',
   groupTasks: '任务',
   groupSystem: '系统',
+  groupStore: '商城管理',
+  groupTickets: '工单管理',
   dashboard: '仪表盘',
   myInstances: '我的实例',
   apply: '申请领取',
@@ -33,5 +35,14 @@ export default {
   kycManagement: 'KYC管理',
   oauth2Management: 'OAuth2',
   apiTokenManagement: 'API Token管理',
-  adminApiTokenManagement: 'API Token管理'
+  adminApiTokenManagement: 'API Token管理',
+  store: '产品商城',
+  storeDetail: '产品详情',
+  orders: '我的订单',
+  tickets: '我的工单',
+  wallet: '我的钱包',
+  productManagement: '产品管理',
+  orderManagement: '订单管理',
+  ticketManagement: '工单管理',
+  siteConfig: '站点配置'
 }

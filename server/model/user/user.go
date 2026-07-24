@@ -50,6 +50,9 @@ type User struct {
 	MaxDisk      int `json:"maxDisk" gorm:"default:10240"`    // 最大磁盘空间（MB）
 	MaxBandwidth int `json:"maxBandwidth" gorm:"default:100"` // 最大带宽（Mbps）
 
+	// 账户余额
+	Balance float64 `json:"balance" gorm:"default:0"` // 账户余额(元)
+
 	// 其他信息
 	InviteCode  string     `json:"inviteCode" gorm:"size:32"` // 注册时使用的邀请码
 	LastLoginAt *time.Time `json:"lastLoginAt"`               // 最后登录时间

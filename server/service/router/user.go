@@ -2,6 +2,7 @@ package router
 
 import (
 	"oneclickvirt/api/v1/auth"
+	productAPI "oneclickvirt/api/v1/product"
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/traffic"
 	"oneclickvirt/api/v1/user"
@@ -115,5 +116,35 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.POST("/user/api-tokens", auth.CreateApiToken)
 		UserGroup.GET("/user/api-tokens", auth.GetApiTokenList)
 		UserGroup.DELETE("/user/api-tokens/:id", auth.DeleteApiToken)
+
+		// 用户工单管理
+		UserGroup.POST("/user/tickets", productAPI.CreateTicket)
+		UserGroup.GET("/user/tickets", productAPI.GetTicketList)
+		UserGroup.GET("/user/tickets/:id", productAPI.GetTicketDetail)
+		UserGroup.POST("/user/tickets/:id/reply", productAPI.ReplyTicket)
+		UserGroup.POST("/user/tickets/:id/close", productAPI.CloseTicket)
+
+		// 用户余额管理
+		UserGroup.GET("/user/balance", user.GetUserBalance)
+		UserGroup.GET("/user/balance/logs", user.GetBalanceLogs)
+
+		// 产品商城
+		UserGroup.GET("/products", productAPI.GetProductList)
+		UserGroup.GET("/products/:id", productAPI.GetProductDetail)
+		UserGroup.GET("/products/:id/images", productAPI.GetProductImages)
+
+		// 订单管理
+		UserGroup.POST("/orders", productAPI.CreateOrder)
+		UserGroup.GET("/orders", productAPI.GetOrderList)
+		UserGroup.GET("/orders/:id", productAPI.GetOrderDetail)
+		UserGroup.POST("/orders/pay", productAPI.PayOrderWithBalance)
+		UserGroup.GET("/orders/:id/pay-status", productAPI.GetOrderPayStatus)
+		UserGroup.POST("/orders/renew", productAPI.RenewOrder)
+		UserGroup.POST("/orders/cancel", productAPI.CancelOrder)
+		UserGroup.POST("/orders/:id/complete-renew", productAPI.CompleteRenewOrder)
+
+		// 支付充值
+		UserGroup.POST("/payments/yipay", productAPI.CreateYiPayOrder)
+		UserGroup.GET("/payments/recharge-list", productAPI.GetRechargeList)
 	}
 }

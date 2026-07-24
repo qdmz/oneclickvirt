@@ -12,6 +12,7 @@ import (
 	monitoringModel "oneclickvirt/model/monitoring"
 	oauth2Model "oneclickvirt/model/oauth2"
 	permissionModel "oneclickvirt/model/permission"
+	productModel "oneclickvirt/model/product"
 	providerModel "oneclickvirt/model/provider"
 	resourceModel "oneclickvirt/model/resource"
 	systemModel "oneclickvirt/model/system"
@@ -192,6 +193,15 @@ func RegisterTables(db *gorm.DB) {
 
 		// API Token表
 		&authModel.ApiToken{}, // API访问令牌表
+
+		// 产品商城表
+		&productModel.Product{},         // 产品定义表
+		&productModel.ProductOrder{},    // 产品订单表
+		&productModel.Ticket{},          // 用户工单表
+		&productModel.TicketReply{},     // 工单回复表
+		&productModel.SiteConfig{},      // 站点前端配置表
+		&productModel.UserBalanceLog{},  // 用户余额变动记录表
+		&productModel.YiPayConfig{},     // 易支付配置表
 	)
 	if err != nil {
 		global.APP_LOG.Error("register table failed", zap.Error(err))

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"oneclickvirt/api/v1/product"
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/system"
 
@@ -34,5 +35,17 @@ func InitPublicRouter(Router *gin.RouterGroup) {
 		PublicRouter.POST("instance-shares/:token/sftp/upload", public.SharedSFTPUpload)
 		PublicRouter.GET("instance-shares/:token/sftp/upload/status", public.SharedSFTPUploadStatus)
 		PublicRouter.POST("instance-shares/:token/sftp/upload/abort", public.SharedSFTPUploadAbort)
+
+		// 站点公开配置
+		PublicRouter.GET("site-config", product.GetSiteConfig)
+		PublicRouter.GET("site-info", product.GetPublicSiteInfo)
+
+		// 公开产品列表
+		PublicRouter.GET("products", product.GetPublicProductList)
+		PublicRouter.GET("products/:id", product.GetPublicProductDetail)
+
+		// 易支付异步通知(无需登录)
+		PublicRouter.POST("payments/yipay/notify", product.YiPayNotify)
+		PublicRouter.GET("payments/yipay/return", product.YiPayReturn)
 	}
 }

@@ -194,6 +194,56 @@ const routes = [
           requiresAuth: true,
           roles: ['user', 'admin']
         }
+      },
+      {
+        path: 'store',
+        name: 'UserStore',
+        component: () => import('@/view/user/store/index.vue'),
+        meta: {
+          title: 'sidebar.store',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'store/:id',
+        name: 'UserStoreDetail',
+        component: () => import('@/view/user/store/detail.vue'),
+        meta: {
+          title: 'sidebar.storeDetail',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'orders',
+        name: 'UserOrders',
+        component: () => import('@/view/user/orders/index.vue'),
+        meta: {
+          title: 'sidebar.orders',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'tickets',
+        name: 'UserTickets',
+        component: () => import('@/view/user/tickets/index.vue'),
+        meta: {
+          title: 'sidebar.tickets',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'wallet',
+        name: 'UserWallet',
+        component: () => import('@/view/user/wallet/index.vue'),
+        meta: {
+          title: 'sidebar.wallet',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
       }
     ]
   },
@@ -413,6 +463,46 @@ const routes = [
         component: () => import('@/view/admin/api-tokens/index.vue'),
         meta: {
           title: 'sidebar.adminApiTokenManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'products',
+        name: 'AdminProducts',
+        component: () => import('@/view/admin/products/index.vue'),
+        meta: {
+          title: 'sidebar.productManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'orders',
+        name: 'AdminOrders',
+        component: () => import('@/view/admin/orders/index.vue'),
+        meta: {
+          title: 'sidebar.orderManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'tickets',
+        name: 'AdminTickets',
+        component: () => import('@/view/admin/tickets/index.vue'),
+        meta: {
+          title: 'sidebar.ticketManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'site-config',
+        name: 'AdminSiteConfig',
+        component: () => import('@/view/admin/site-config/index.vue'),
+        meta: {
+          title: 'sidebar.siteConfig',
           requiresAuth: true,
           roles: ['admin']
         }

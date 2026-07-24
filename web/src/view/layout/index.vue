@@ -1,11 +1,18 @@
 <template>
   <div
     class="app-wrapper"
-    :class="{ 'mobile': isMobile, 'has-topbar-announcement': hasTopbarAnnouncement }"
+    :class="{ 'mobile': isMobile, 'has-topbar-announcement': hasTopbarAnnouncement, 'has-custom-header': siteStore.hasCustomHeader }"
   >
+    <!-- 自定义页眉 HTML -->
+    <div
+      v-if="siteStore.hasCustomHeader"
+      class="custom-header"
+      v-html="siteStore.customHeader"
+    />
+
     <!-- 顶部栏公告 -->
     <TopbarAnnouncement @visible-change="hasTopbarAnnouncement = $event" />
-    
+
     <!-- 移动端遮罩层 -->
     <div
       v-if="isMobile && sidebar.opened"
@@ -43,6 +50,12 @@
         <navbar @toggle-sidebar="toggleSidebar" />
       </div>
       <app-main />
+      <!-- 自定义页脚 HTML -->
+      <div
+        v-if="siteStore.hasCustomFooter"
+        class="custom-footer"
+        v-html="siteStore.customFooter"
+      />
       <app-footer />
     </div>
   </div>
@@ -52,10 +65,13 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, provide } from 'vue'
 import { Navbar, Sidebar, AppMain, AppFooter } from './components'
 import { useUserStore } from '@/pinia/modules/user'
+import { useSiteStore } from '@/pinia/modules/site'
 import TopbarAnnouncement from '@/components/TopbarAnnouncement.vue'
 import { shouldUseSidebarDrawer } from '@/utils/layout'
 
 const userStore = useUserStore()
+const siteStore = useSiteStore()
+
 const SIDEBAR_COLLAPSE_STORAGE_KEY = 'sidebarCollapsed'
 const isMobile = ref(false)
 const sidebar = ref({
@@ -129,7 +145,10 @@ provide('closeSidebar', closeSidebar)
 onMounted(() => {
   checkDevice()
   window.addEventListener('resize', checkDevice)
-  
+
+  // 加载完整站点配置（主题色、自定义CSS、页眉页脚等）
+  siteStore.fetchFullSiteConfig()
+
   nextTick(() => {
     const sidebarEl = document.querySelector('.sidebar-container')
     if (!sidebarEl || sidebarEl.children.length === 0) {
@@ -247,6 +266,50 @@ onBeforeUnmount(() => {
   }
 }
 
+.custom-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-navbar) + 1);
+  background-color: var(--bg-color-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.custom-footer {
+  width: 100%;
+  background-color: var(--bg-color-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 16px 24px;
+}
+
+/* 有自定义页眉时的布局调整 */
+.app-wrapper.has-custom-header {
+  .custom-header + .topbar-announcement {
+    top: var(--custom-header-height, 40px);
+  }
+
+  .fixed-header {
+    top: var(--custom-header-height, 40px);
+  }
+
+  .sidebar-container {
+    top: var(--custom-header-height, 40px);
+    height: calc(100% - var(--custom-header-height, 40px));
+  }
+
+  &.has-topbar-announcement {
+    .fixed-header {
+      top: calc(var(--custom-header-height, 40px) + var(--topbar-announcement-height));
+    }
+
+    .sidebar-container {
+      top: calc(var(--custom-header-height, 40px) + var(--topbar-announcement-height));
+      height: calc(100% - var(--custom-header-height, 40px) - var(--topbar-announcement-height));
+    }
+  }
+}
+
 /* 移动端适配 */
 @media (max-width: 768px) {
   .app-wrapper {
@@ -256,13 +319,18 @@ onBeforeUnmount(() => {
   .sidebar-container {
     width: var(--sidebar-width);
   }
-  
+
   .main-container {
     margin-left: 0;
   }
-  
+
   .fixed-header {
     width: 100%;
+  }
+
+  .custom-header,
+  .custom-footer {
+    padding: 12px 16px;
   }
 }
 </style>

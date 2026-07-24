@@ -91,6 +91,7 @@ type CreateInstanceRequest struct {
 	// GPU直通配置（LXD/Incus 原生支持，Docker/Podman/Containerd/Orbstack 尽力通过运行参数附加）
 	GpuEnabled   bool   `json:"gpuEnabled"`   // 是否启用GPU直通
 	GpuDeviceIds string `json:"gpuDeviceIds"` // GPU设备ID列表（逗号分隔），为空则附加所有GPU
+	OrderID      uint   `json:"orderId"`      // 关联产品订单ID（大于0时跳过等级配额限制）
 }
 
 // QuotaCheckRequest 配额检查请求

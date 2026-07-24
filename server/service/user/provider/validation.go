@@ -9,6 +9,7 @@ import (
 	"oneclickvirt/constant"
 	"oneclickvirt/global"
 	adminModel "oneclickvirt/model/admin"
+	productModel "oneclickvirt/model/product"
 	providerModel "oneclickvirt/model/provider"
 	resourceModel "oneclickvirt/model/resource"
 	systemModel "oneclickvirt/model/system"
@@ -65,7 +66,7 @@ func (s *Service) validateProviderImageCompatibility(provider *providerModel.Pro
 // - 此函数在事务外执行，可以快速失败
 // - 不验证实例数量限制（在事务内验证以防并发问题）
 // - 管理员不受限制
-func (s *Service) validateUserSpecPermissions(userID uint, providerID uint, cpuSpec *constant.CPUSpec, memorySpec *constant.MemorySpec, diskSpec *constant.DiskSpec, bandwidthSpec *constant.BandwidthSpec) error {
+func (s *Service) validateUserSpecPermissions(userID uint, providerID uint, cpuSpec *constant.CPUSpec, memorySpec *constant.MemorySpec, diskSpec *constant.DiskSpec, bandwidthSpec *constant.BandwidthSpec, orderID uint) error {
 	// 获取用户权限信息
 	permissionService := auth.PermissionService{}
 	effective, err := permissionService.GetUserEffectivePermission(userID)
@@ -75,6 +76,24 @@ func (s *Service) validateUserSpecPermissions(userID uint, providerID uint, cpuS
 
 	// 管理员可以使用所有规格
 	if effective.EffectiveType == "admin" {
+		return nil
+	}
+
+	// 如果关联了产品订单，验证订单后跳过等级限制
+	if orderID > 0 {
+		var order productModel.ProductOrder
+		if err := global.APP_DB.First(&order, orderID).Error; err != nil {
+			return fmt.Errorf("订单不存在: %v", err)
+		}
+		if order.UserID != userID {
+			return fmt.Errorf("订单不属于当前用户")
+		}
+		if order.PaymentStatus != 1 {
+			return fmt.Errorf("订单未支付")
+		}
+		global.APP_LOG.Info("产品订单实例创建，跳过等级配额限制",
+			zap.Uint("userID", userID),
+			zap.Uint("orderID", orderID))
 		return nil
 	}
 
