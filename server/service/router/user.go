@@ -115,5 +115,23 @@ func InitUserRouter(Router *gin.RouterGroup) {
 		UserGroup.POST("/user/api-tokens", auth.CreateApiToken)
 		UserGroup.GET("/user/api-tokens", auth.GetApiTokenList)
 		UserGroup.DELETE("/user/api-tokens/:id", auth.DeleteApiToken)
+
+		// 工单系统
+		UserGroup.GET("/user/tickets", user.ListMyTickets)
+		UserGroup.POST("/user/tickets", user.CreateTicket)
+		UserGroup.GET("/user/tickets/:id", user.GetMyTicket)
+		UserGroup.POST("/user/tickets/:id/replies", user.ReplyMyTicket)
+		UserGroup.POST("/user/tickets/:id/close", user.CloseMyTicket)
+
+		// 钱包与充值（易支付）
+		UserGroup.GET("/user/wallet", user.GetWallet)
+		UserGroup.POST("/user/recharge", user.CreateRecharge)
+		UserGroup.GET("/user/recharge/orders", user.ListRechargeOrders)
+
+		// 商品与订单
+		UserGroup.GET("/user/products", user.ListProducts)
+		UserGroup.GET("/user/products/:id", user.GetProduct)
+		UserGroup.POST("/user/products/:id/buy", user.BuyProduct)
+		UserGroup.GET("/user/orders", user.ListMyOrders)
 	}
 }

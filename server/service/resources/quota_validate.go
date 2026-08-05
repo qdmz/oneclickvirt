@@ -45,6 +45,16 @@ func (s *QuotaService) validateInTransaction(tx *gorm.DB, req ResourceRequest) (
 		}, nil
 	}
 
+	// 全局开关：取消等级配额限制（购买即得资源模式）
+	// 开启后不再按用户等级校验实例数/CPU/内存/硬盘/带宽上限，
+	// 资源额度完全由「购买的商品」决定。
+	if global.GetAppConfig().Quota.DisableLevelQuota {
+		return &QuotaCheckResult{
+			Allowed: true,
+			Reason:  "已关闭等级配额限制",
+		}, nil
+	}
+
 	// 获取用户等级限制
 	levelLimits, err := userquota.ResolveLevelLimit(user.Level)
 	if err != nil {
@@ -356,6 +366,10 @@ func (s *QuotaService) getLevelBandwidthLimit(level int) int {
 
 // checkInstanceTypePermission 检查实例类型权限
 func (s *QuotaService) checkInstanceTypePermission(level int, instanceType string) bool {
+	// 关闭等级配额限制时，不再按等级限制可创建的实例类型
+	if global.GetAppConfig().Quota.DisableLevelQuota {
+		return true
+	}
 	// 从配置中获取实例类型权限设置
 	permissions := global.GetAppConfig().Quota.InstanceTypePermissions
 

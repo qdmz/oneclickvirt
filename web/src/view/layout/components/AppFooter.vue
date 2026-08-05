@@ -53,6 +53,35 @@
       >
         {{ t('home.footer.versionFetchFailed') }}
       </span>
+      <span
+        v-if="siteStore.footerText"
+        class="footer-divider"
+      />
+      <span
+        v-if="siteStore.footerText"
+        class="footer-custom-text"
+      >
+        {{ siteStore.footerText }}
+      </span>
+      <span
+        v-if="siteStore.icpText"
+        class="footer-divider"
+      />
+      <a
+        v-if="siteStore.icpText && siteStore.icpLink"
+        :href="siteStore.icpLink"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="footer-icp-link"
+      >
+        {{ siteStore.icpText }}
+      </a>
+      <span
+        v-else-if="siteStore.icpText"
+        class="footer-icp-text"
+      >
+        {{ siteStore.icpText }}
+      </span>
     </div>
   </footer>
 </template>
@@ -201,5 +230,26 @@ onMounted(async () => {
 .footer-version-error {
   font-size: 12px;
   color: var(--el-color-warning);
+}
+
+.footer-custom-text {
+  font-size: 13px;
+  color: var(--text-color-secondary);
+}
+
+.footer-icp-text {
+  font-size: 12px;
+  color: var(--text-color-tertiary);
+}
+
+.footer-icp-link {
+  font-size: 12px;
+  color: var(--text-color-tertiary);
+  text-decoration: none;
+  transition: var(--transition-all);
+
+  &:hover {
+    color: var(--footer-link-color, var(--primary-color));
+  }
 }
 </style>

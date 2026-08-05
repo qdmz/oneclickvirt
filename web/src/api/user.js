@@ -467,3 +467,113 @@ export function redeemCode(code) {
     data: { code }
   })
 }
+
+// ==================== 工单系统 ====================
+
+// 获取我的工单列表
+export function getMyTickets(params) {
+  return request({
+    url: '/v1/user/tickets',
+    method: 'get',
+    params
+  })
+}
+
+// 创建工单
+export function createMyTicket(data) {
+  return request({
+    url: '/v1/user/tickets',
+    method: 'post',
+    data
+  })
+}
+
+// 获取工单详情
+export function getMyTicketDetail(id) {
+  return request({
+    url: `/v1/user/tickets/${id}`,
+    method: 'get'
+  })
+}
+
+// 回复工单
+export function replyMyTicket(id, content) {
+  return request({
+    url: `/v1/user/tickets/${id}/replies`,
+    method: 'post',
+    data: { content }
+  })
+}
+
+// 关闭工单
+export function closeMyTicket(id) {
+  return request({
+    url: `/v1/user/tickets/${id}/close`,
+    method: 'post'
+  })
+}
+
+// ==================== 钱包与充值 ====================
+
+// 获取钱包余额（单位：分）
+export function getWallet() {
+  return request({
+    url: '/v1/user/wallet',
+    method: 'get'
+  })
+}
+
+// 发起充值（金额单位：元）
+export function createRecharge(data) {
+  return request({
+    url: '/v1/user/recharge',
+    method: 'post',
+    data
+  })
+}
+
+// 我的充值/余额流水
+export function listRechargeOrders(params) {
+  return request({
+    url: '/v1/user/recharge/orders',
+    method: 'get',
+    params
+  })
+}
+
+// ==================== 商品与订单 ====================
+
+// 商品列表（已上架）
+export function listProducts(params) {
+  return request({
+    url: '/v1/user/products',
+    method: 'get',
+    params
+  })
+}
+
+// 商品详情
+export function getProductDetail(id) {
+  return request({
+    url: `/v1/user/products/${id}`,
+    method: 'get'
+  })
+}
+
+// 购买商品（method: balance | epay）
+export function buyProduct(id, data) {
+  return request({
+    url: `/v1/user/products/${id}/buy`,
+    method: 'post',
+    data
+  })
+}
+
+// 我的订单
+export function listMyOrders(params) {
+  return request({
+    url: '/v1/user/orders',
+    method: 'get',
+    params
+  })
+}

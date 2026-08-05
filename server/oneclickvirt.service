@@ -1,0 +1,24 @@
+[Unit]
+Description=OneClickVirt Backend Service
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+# 运行用户（生产建议用专用低权用户；此处用 root 以兼容既有部署）
+User=root
+# 请按实际部署目录修改下面两行
+WorkingDirectory=/opt/oneclickvirt/server
+ExecStart=/opt/oneclickvirt/server/oneclickvirt-server
+# 崩溃/退出后总是拉起，5 秒后重试；避免再出现后端挂掉导致 nginx 502
+Restart=always
+RestartSec=5
+# 日志（请先 mkdir -p /var/log/oneclickvirt）
+StandardOutput=append:/var/log/oneclickvirt/backend.log
+StandardError=append:/var/log/oneclickvirt/backend.log
+Environment=GIN_MODE=release
+# 若后端依赖特定时区/配置，可在此附加：
+# Environment=TZ=Asia/Shanghai
+
+[Install]
+WantedBy=multi-user.target

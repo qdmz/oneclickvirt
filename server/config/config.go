@@ -17,6 +17,7 @@ type Server struct {
 	Other       Other       `mapstructure:"other" json:"other" yaml:"other"`
 	KYC         KYC         `mapstructure:"kyc" json:"kyc" yaml:"kyc"`
 	Maintenance Maintenance `mapstructure:"maintenance" json:"maintenance" yaml:"maintenance"`
+	Payment     Payment     `mapstructure:"payment" json:"payment" yaml:"payment"` // 支付（易支付）配置
 }
 
 type Maintenance struct {
@@ -32,6 +33,10 @@ type Other struct {
 	DefaultLanguage string `mapstructure:"default-language" json:"default-language" yaml:"default-language"` // 默认语言
 	LogoURL         string `mapstructure:"logo-url" json:"logo-url" yaml:"logo-url"`                         // 自定义 Logo 图片 URL
 	SiteName        string `mapstructure:"site-name" json:"site-name" yaml:"site-name"`                      // 自定义网站名称
+	Slogan          string `mapstructure:"slogan" json:"slogan" yaml:"slogan"`                               // 站点标语（首页副标题）
+	FooterText      string `mapstructure:"footer-text" json:"footer-text" yaml:"footer-text"`                // 自定义页脚文字
+	ICPText         string `mapstructure:"icp-text" json:"icp-text" yaml:"icp-text"`                         // 备案号文字
+	ICPLink         string `mapstructure:"icp-link" json:"icp-link" yaml:"icp-link"`                         // 备案号跳转链接
 }
 
 type CORS struct {
@@ -61,6 +66,9 @@ type Quota struct {
 	DefaultLevel            int                     `mapstructure:"default-level" json:"default-level" yaml:"default-level"`
 	LevelLimits             map[int]LevelLimitInfo  `mapstructure:"level-limits" json:"level-limits" yaml:"level-limits"`
 	InstanceTypePermissions InstanceTypePermissions `mapstructure:"instance-type-permissions" json:"instance-type-permissions" yaml:"instance-type-permissions"`
+	// DisableLevelQuota 取消用户等级配额限制：开启后用户不再受等级配额约束，
+	// 资源完全由购买的产品决定（购买成功即获得对应资源配置）。
+	DisableLevelQuota bool `mapstructure:"disable-level-quota" json:"disable-level-quota" yaml:"disable-level-quota"`
 }
 
 type InstanceTypePermissions struct {
@@ -174,5 +182,22 @@ type KYC struct {
 	// 细粒度限制: 未实名用户禁止的操作
 	RestrictCreateInstance bool `mapstructure:"restrict-create-instance" json:"restrict-create-instance" yaml:"restrict-create-instance"` // 禁止创建实例
 	RestrictRedeemCode     bool `mapstructure:"restrict-redeem-code" json:"restrict-redeem-code" yaml:"restrict-redeem-code"`             // 禁止兑换码
-	RestrictDomainBind     bool `mapstructure:"restrict-domain-bind" json:"restrict-domain-bind" yaml:"restrict-domain-bind"`             // 禁止域名绑定
+	RestrictDomainBind     bool `mapstructure:"restrict-domain-bind" json:"restrict-domain-bind" yaml:"restrict-domain-bind"`             	// 禁止域名绑定
+}
+
+// Payment 支付（易支付）配置
+// 易支付：商户 PID/KEY/网关在后台配置，文档 https://www.yunfx.cc/
+type Payment struct {
+	// EpayEnabled 是否启用易支付充值
+	EpayEnabled bool `mapstructure:"epay-enabled" json:"epay-enabled" yaml:"epay-enabled"`
+	// EpayPID 易支付商户PID
+	EpayPID string `mapstructure:"epay-pid" json:"epay-pid" yaml:"epay-pid"`
+	// EpayKey 易支付商户密钥（通信密钥，切勿外泄）
+	EpayKey string `mapstructure:"epay-key" json:"epay-key" yaml:"epay-key"`
+	// EpayApiURL 易支付下单网关地址，例如 https://pay.example.com/submit.php
+	EpayApiURL string `mapstructure:"epay-api-url" json:"epay-api-url" yaml:"epay-api-url"`
+	// EpayNotifyURL 异步回调地址（由系统自动拼接，通常无需修改）
+	EpayNotifyURL string `mapstructure:"epay-notify-url" json:"epay-notify-url" yaml:"epay-notify-url"`
+	// EpayReturnURL 同步跳转地址（由系统自动拼接，通常无需修改）
+	EpayReturnURL string `mapstructure:"epay-return-url" json:"epay-return-url" yaml:"epay-return-url"`
 }

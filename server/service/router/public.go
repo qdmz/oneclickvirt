@@ -1,6 +1,7 @@
 package router
 
 import (
+	"oneclickvirt/api/v1/payment"
 	"oneclickvirt/api/v1/public"
 	"oneclickvirt/api/v1/system"
 
@@ -34,5 +35,13 @@ func InitPublicRouter(Router *gin.RouterGroup) {
 		PublicRouter.POST("instance-shares/:token/sftp/upload", public.SharedSFTPUpload)
 		PublicRouter.GET("instance-shares/:token/sftp/upload/status", public.SharedSFTPUploadStatus)
 		PublicRouter.POST("instance-shares/:token/sftp/upload/abort", public.SharedSFTPUploadAbort)
+	}
+
+	// 支付回调（易支付）—— 必须无鉴权，供支付平台服务器直接访问
+	PaymentRouter := Router.Group("v1/payment")
+	{
+		PaymentRouter.POST("epay/notify", payment.EpayNotify)
+		PaymentRouter.GET("epay/notify", payment.EpayNotify)
+		PaymentRouter.GET("epay/return", payment.EpayReturn)
 	}
 }

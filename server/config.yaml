@@ -3,14 +3,23 @@ auth:
     enable-public-registration: false
     enable-qq: false
     enable-telegram: false
-
+    enable-kyc: false
+    telegram-bot-token: ""
+    email-smtp-port: 587
+    enable-checkin: false
+    email-username: ""
+    qq-app-id: ""
+    email-password: ""
+    enable-oauth2: false
+    enable-domain: false
+    qq-app-key: ""
+    email-smtp-host: ""
 captcha:
     enabled: false
     expire-time: 300
     height: 40
     length: 4
     width: 120
-
 cdn:
     base-endpoint: https://cdn.spiritlhl.net/
     endpoints:
@@ -18,21 +27,17 @@ cdn:
         - http://cdn3.spiritlhl.net/
         - http://cdn1.spiritlhl.net/
         - http://cdn2.spiritlhl.net/
-
 cors:
     mode: ""
     whitelist: []
-
 invite-code:
     enabled: false
     required: false
-
 jwt:
     buffer-time: 1d
     expires-time: 7d
     issuer: oneclickvirt
     signing-key: ""
-
 mysql:
     auto-create: "true"
     config: charset=utf8mb4&parseTime=True&loc=Local&time_zone=%27%2B08%3A00%27
@@ -44,12 +49,11 @@ mysql:
     max-lifetime: "900"
     max-open-conns: "500"
     password: ""
-    path:
-    port:
+    path: 127.0.0.1
+    port: 3306
     prefix: ""
     singular: "false"
     username: root
-
 quota:
     default-level: 1
     level-limits:
@@ -103,11 +107,17 @@ quota:
             max-traffic: 512000
             expiry-days: 0
             max-snapshots: 20
+    instance-type-permissions:
+        min-level-for-delete-container: 2
+        min-level-for-container: 1
+        min-level-for-vm: 2
+        min-level-for-delete-vm: 2
+        min-level-for-reset-container: 2
+        min-level-for-reset-vm: 2
 redis:
     addr: ""
     db: 0
     password: ""
-
 system:
     addr: 8888
     db-type: mysql
@@ -120,18 +130,20 @@ system:
     provider-inactive-hours: 24
     use-multipoint: false
     use-redis: false
-
 task:
     delete-retry-count: 3
     delete-retry-delay: 2
-
 upload:
     max-avatar-size: 2
-
 other:
     default-language: zh-CN
     max-avatar-size: 2
-
+    site-name: 云虚拟化平台
+    logo-url: ""
+    icp-link: https://beian.miit.gov.cn/
+    footer-text: © 2026 云虚拟化平台 保留所有权利
+    icp-text: 粤ICP备2026000001号
+    slogan: 极速开通 · 弹性计费 · 稳定可靠
 zap:
     director: storage/logs
     encode-level: LowercaseLevelEncoder
@@ -147,13 +159,28 @@ zap:
     retention-day: 3
     show-line: false
     stacktrace-key: stacktrace
-
 max_avatar_size: 2
 default_language:
 signing_key_v1:
     created_at: ""
     expires_at: ""
     is_active: false
-    key:
+    key: ""
     version: 1
 active_version: 1
+kyc:
+    alipay-public-key: ""
+    alipay-app-id: ""
+    alipay-private-key: ""
+    restrict-create-instance: false
+    restrict-redeem-code: false
+    method: manual
+    restrict-domain-bind: false
+    require-real-name: false
+maintenance:
+    optimize-after-cleanup: false
+    data-cleanup-interval-hours: 24
+    traffic-history-retention-days: 180
+    audit-log-retention-days: 30
+    cleanup-batch-size: 5000
+    enable-data-cleanup: true

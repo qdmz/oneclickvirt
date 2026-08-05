@@ -194,6 +194,46 @@ const routes = [
           requiresAuth: true,
           roles: ['user', 'admin']
         }
+      },
+      {
+        path: 'tickets',
+        name: 'UserTickets',
+        component: () => import('@/view/user/tickets/index.vue'),
+        meta: {
+          title: 'sidebar.ticketList',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'wallet',
+        name: 'UserWallet',
+        component: () => import('@/view/user/wallet/index.vue'),
+        meta: {
+          title: 'sidebar.wallet',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'products',
+        name: 'UserProducts',
+        component: () => import('@/view/user/products/index.vue'),
+        meta: {
+          title: 'sidebar.store',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'orders',
+        name: 'UserOrders',
+        component: () => import('@/view/user/orders/index.vue'),
+        meta: {
+          title: 'sidebar.myOrders',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
       }
     ]
   },
@@ -413,6 +453,36 @@ const routes = [
         component: () => import('@/view/admin/api-tokens/index.vue'),
         meta: {
           title: 'sidebar.adminApiTokenManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'tickets',
+        name: 'AdminTickets',
+        component: () => import('@/view/admin/tickets/index.vue'),
+        meta: {
+          title: 'sidebar.ticketManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'products',
+        name: 'AdminProducts',
+        component: () => import('@/view/admin/products/index.vue'),
+        meta: {
+          title: 'sidebar.productManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'wallet',
+        name: 'AdminWallet',
+        component: () => import('@/view/admin/wallet/index.vue'),
+        meta: {
+          title: 'sidebar.walletManagement',
           requiresAuth: true,
           roles: ['admin']
         }

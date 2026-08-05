@@ -278,6 +278,26 @@ func InitAdminRouter(Router *gin.RouterGroup) {
 		SuperAdminGroup.PUT("/announcements/batch-status", admin.BatchUpdateAnnouncementStatus)
 		SuperAdminGroup.POST("/announcements/batch-delete", admin.BatchDeleteAnnouncements)
 
+		// 工单管理（管理员）
+		SuperAdminGroup.GET("/tickets", admin.GetTickets)
+		SuperAdminGroup.GET("/tickets/stats", admin.GetTicketStats)
+		SuperAdminGroup.GET("/tickets/:id", admin.GetTicketDetail)
+		SuperAdminGroup.POST("/tickets/:id/replies", admin.ReplyTicket)
+		SuperAdminGroup.PUT("/tickets/:id/status", admin.UpdateTicketStatus)
+		SuperAdminGroup.POST("/tickets/:id/close", admin.CloseTicket)
+		SuperAdminGroup.DELETE("/tickets/:id", admin.DeleteTicket)
+
+		// 商品管理（超管）
+		SuperAdminGroup.GET("/products", admin.ListProductsAdmin)
+		SuperAdminGroup.POST("/products", admin.CreateProductAdmin)
+		SuperAdminGroup.PUT("/products/:id", admin.UpdateProductAdmin)
+		SuperAdminGroup.DELETE("/products/:id", admin.DeleteProductAdmin)
+
+		// 余额与订单（超管）
+		SuperAdminGroup.POST("/users/:id/balance", admin.AdjustUserBalance)
+		SuperAdminGroup.GET("/recharge-orders", admin.ListRechargeOrdersAdmin)
+		SuperAdminGroup.GET("/orders", admin.ListOrdersAdmin)
+
 		// 系统监控
 		monitoringApi := &system.MonitoringApi{}
 		SuperAdminGroup.GET("/monitoring/system", admin.GetAdminDashboard)

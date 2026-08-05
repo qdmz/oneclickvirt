@@ -389,6 +389,19 @@ func (s *InitService) UpdateDatabaseConfig(dbConfig config.DatabaseConfig) error
 
 	// 写入新配置
 	if err := os.WriteFile(configPath, newConfigData, 0644); err != nil {
+		// 某些平台（如 Windows）下运行中的进程通过 viper WatchConfig 持有 config.yaml
+		// 的文件句柄，可能导致写入被拒绝（Access is denied）。若当前已加载的启动配置
+		// 已经与目标数据库参数一致，则文件内容本就正确，重写属于冗余操作，可安全跳过，
+		// 避免因文件锁导致初始化整体失败。
+		if databaseConfigAlreadyApplied(dbConfig) {
+			global.APP_LOG.Warn("写入配置文件失败，但当前配置已与目标数据库一致，跳过重写",
+				zap.String("error", utils.FormatError(err)),
+				zap.String("host", dbConfig.Host),
+				zap.Int("port", dbConfig.Port),
+				zap.String("database", dbConfig.Database))
+			applyDatabaseConfigToGlobal(dbConfig)
+			return nil
+		}
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 
@@ -402,6 +415,17 @@ func (s *InitService) UpdateDatabaseConfig(dbConfig config.DatabaseConfig) error
 	applyDatabaseConfigToGlobal(dbConfig)
 
 	return nil
+}
+
+// databaseConfigAlreadyApplied 判断当前已加载的启动级配置是否已经与目标数据库参数一致。
+// 用于在 config.yaml 因文件锁无法写入时，判断重写是否为冗余操作。
+func databaseConfigAlreadyApplied(dbConfig config.DatabaseConfig) bool {
+	cur := global.GetAppConfig().Mysql
+	return cur.Path == dbConfig.Host &&
+		cur.Port == strconv.Itoa(dbConfig.Port) &&
+		cur.Dbname == dbConfig.Database &&
+		cur.Username == dbConfig.Username &&
+		cur.Password == dbConfig.Password
 }
 
 // detectMysqlKey 检测配置文件中 MySQL/MariaDB 配置使用的键名

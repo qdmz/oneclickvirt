@@ -338,6 +338,7 @@ func getAdminConfig(cm *config.ConfigManager) map[string]interface{} {
 	result["quota"] = map[string]interface{}{
 		"defaultLevel": global.GetAppConfig().Quota.DefaultLevel,
 		"levelLimits":  levelLimits,
+		"disableLevelQuota": global.GetAppConfig().Quota.DisableLevelQuota,
 		"instanceTypePermissions": map[string]interface{}{
 			"minLevelForContainer":       global.GetAppConfig().Quota.InstanceTypePermissions.MinLevelForContainer,
 			"minLevelForVM":              global.GetAppConfig().Quota.InstanceTypePermissions.MinLevelForVM,
@@ -353,6 +354,20 @@ func getAdminConfig(cm *config.ConfigManager) map[string]interface{} {
 		"defaultLanguage": global.GetAppConfig().Other.DefaultLanguage,
 		"logoURL":         global.GetAppConfig().Other.LogoURL,
 		"siteName":        global.GetAppConfig().Other.SiteName,
+		"slogan":          global.GetAppConfig().Other.Slogan,
+		"footerText":      global.GetAppConfig().Other.FooterText,
+		"icpText":         global.GetAppConfig().Other.ICPText,
+		"icpLink":         global.GetAppConfig().Other.ICPLink,
+	}
+
+	// 支付（易支付）配置
+	result["payment"] = map[string]interface{}{
+		"epayEnabled":   global.GetAppConfig().Payment.EpayEnabled,
+		"epayPid":       global.GetAppConfig().Payment.EpayPID,
+		"epayKey":       global.GetAppConfig().Payment.EpayKey,
+		"epayApiUrl":    global.GetAppConfig().Payment.EpayApiURL,
+		"epayNotifyUrl": global.GetAppConfig().Payment.EpayNotifyURL,
+		"epayReturnUrl": global.GetAppConfig().Payment.EpayReturnURL,
 	}
 
 	// 验证码配置

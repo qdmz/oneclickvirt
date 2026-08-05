@@ -571,6 +571,13 @@ func (s *Service) GetInstanceTypePermissions(userID uint) (map[string]interface{
 	canResetContainer := user.Level >= permissions.MinLevelForResetContainer
 	canResetVM := user.Level >= permissions.MinLevelForResetVM
 
+	// 关闭等级配额限制后，全部放开
+	if global.GetAppConfig().Quota.DisableLevelQuota {
+		canCreateContainer, canCreateVM = true, true
+		canDeleteContainer, canDeleteVM = true, true
+		canResetContainer, canResetVM = true, true
+	}
+
 	result := map[string]interface{}{
 		"userLevel":                  user.Level,
 		"canCreateContainer":         canCreateContainer,

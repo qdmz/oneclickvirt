@@ -79,6 +79,17 @@
           />
         </el-tab-pane>
 
+        <!-- 支付配置 -->
+        <el-tab-pane
+          :label="$t('admin.config.paymentConfig')"
+          name="payment"
+        >
+          <PaymentTab
+            :config="config"
+            :loading="loading"
+          />
+        </el-tab-pane>
+
         <!-- 其他配置 -->
         <el-tab-pane
           :label="$t('admin.config.otherConfig')"
@@ -120,6 +131,7 @@ import OAuthTab from './components/OAuthTab.vue'
 import QuotaTab from './components/QuotaTab.vue'
 import InstancePermissionsTab from './components/InstancePermissionsTab.vue'
 import KycTab from './components/KycTab.vue'
+import PaymentTab from './components/PaymentTab.vue'
 import OtherTab from './components/OtherTab.vue'
 
 const {

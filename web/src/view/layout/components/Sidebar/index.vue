@@ -188,6 +188,38 @@ const userRoutes = computed(() => {
           title: 'sidebar.apiTokenManagement',
           icon: 'Key'
         }
+      },
+      {
+        path: '/user/tickets',
+        name: 'UserTickets',
+        meta: {
+          title: 'sidebar.ticketList',
+          icon: 'ChatDotRound'
+        }
+      },
+      {
+        path: '/user/products',
+        name: 'UserProducts',
+        meta: {
+          title: 'sidebar.store',
+          icon: 'Goods'
+        }
+      },
+      {
+        path: '/user/wallet',
+        name: 'UserWallet',
+        meta: {
+          title: 'sidebar.wallet',
+          icon: 'Wallet'
+        }
+      },
+      {
+        path: '/user/orders',
+        name: 'UserOrders',
+        meta: {
+          title: 'sidebar.myOrders',
+          icon: 'Tickets'
+        }
       }
     ],
     // 管理员路由
@@ -407,6 +439,30 @@ const userRoutes = computed(() => {
               title: 'sidebar.announcementManagement',
               icon: 'Bell'
             }
+          },
+          {
+            path: '/admin/tickets',
+            name: 'AdminTickets',
+            meta: {
+              title: 'sidebar.ticketManagement',
+              icon: 'ChatDotRound'
+            }
+          },
+          {
+            path: '/admin/products',
+            name: 'AdminProducts',
+            meta: {
+              title: 'sidebar.productManagement',
+              icon: 'Goods'
+            }
+          },
+          {
+            path: '/admin/wallet',
+            name: 'AdminWallet',
+            meta: {
+              title: 'sidebar.walletManagement',
+              icon: 'Wallet'
+            }
           }
         ]
       }
@@ -419,7 +475,7 @@ const userRoutes = computed(() => {
   // 超级管理员专属路由名称集（normal_admin 不可见）
   const superAdminOnlyRoutes = new Set([
     'AdminUsers', 'AdminConfig', 'AdminPerformance', 'AdminLogs', 'AdminOAuth2Providers',
-    'AdminInviteCodes', 'AdminAnnouncements', 'AdminSystemImages', 'AdminApiTokens', 'AdminKYC'
+    'AdminInviteCodes', 'AdminAnnouncements', 'AdminSystemImages', 'AdminApiTokens', 'AdminKYC', 'AdminTickets'
   ])
   
   // 判断是否为普通管理员

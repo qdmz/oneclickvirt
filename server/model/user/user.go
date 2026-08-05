@@ -38,6 +38,9 @@ type User struct {
 	PendingQuota int `json:"pendingQuota" gorm:"default:0"` // 待确认的配额（创建中/重置中实例）
 	TotalQuota   int `json:"totalQuota" gorm:"default:0"`   // 总配额限制
 
+	// 钱包余额（单位：分，int64 避免浮点误差）
+	Balance int64 `json:"balance" gorm:"default:0"` // 钱包余额（分）
+
 	// 流量管理（MB为单位）
 	TotalTraffic   int64      `json:"totalTraffic" gorm:"default:0"`       // 当月流量配额（MB），根据用户等级自动设置
 	TrafficResetAt *time.Time `json:"trafficResetAt"`                      // 流量重置时间

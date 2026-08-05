@@ -15,6 +15,10 @@ import (
 	providerModel "oneclickvirt/model/provider"
 	resourceModel "oneclickvirt/model/resource"
 	systemModel "oneclickvirt/model/system"
+	ticketModel "oneclickvirt/model/ticket"
+	walletModel "oneclickvirt/model/wallet"
+	productModel "oneclickvirt/model/product"
+	orderModel "oneclickvirt/model/order"
 	userModel "oneclickvirt/model/user"
 	"oneclickvirt/service/database"
 	firewallService "oneclickvirt/service/firewall"
@@ -149,6 +153,15 @@ func RegisterTables(db *gorm.DB) {
 		&systemModel.InviteCode{},      // 邀请码表
 		&systemModel.InviteCodeUsage{}, // 邀请码使用记录表
 		&systemModel.RedemptionCode{},  // 兑换码表
+
+		// 工单系统表
+		&ticketModel.Ticket{},      // 工单表
+		&ticketModel.TicketReply{}, // 工单回复表
+
+		// 钱包 / 支付 / 产品 / 订单 表
+		&walletModel.RechargeOrder{}, // 余额充值订单表
+		&productModel.Product{},      // VM/容器 产品表
+		&orderModel.Order{},          // 产品购买订单表
 
 		// 权限管理表
 		&permissionModel.UserPermission{}, // 用户权限组合表

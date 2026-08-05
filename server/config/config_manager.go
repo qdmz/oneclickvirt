@@ -86,6 +86,10 @@ var publicConfigKeys = map[string]bool{
 	"other.default-language":          true,
 	"other.logo-url":                  true,
 	"other.site-name":                 true,
+	"other.slogan":                    true,
+	"other.footer-text":               true,
+	"other.icp-text":                  true,
+	"other.icp-link":                  true,
 }
 
 // SystemConfig 系统配置模型（避免循环导入）
@@ -429,15 +433,11 @@ func (cm *ConfigManager) UpdateConfig(config map[string]interface{}) error {
 		return fmt.Errorf("批量保存配置失败: %v", transactionErr)
 	}
 
-	// 创建配置修改标志文件
+	// 创建配置修改标志文件（非致命：配置已成功写入数据库；
+	// 标志文件仅用于标记"配置曾通过API修改"，在部分Windows环境下该文件可能被杀毒/索引进程短暂占用导致写入失败，
+	// 此时不应回滚已成功的数据库保存，仅记录告警并继续）
 	if err := cm.markConfigAsModified(); err != nil {
-		// 恢复配置
-		for k, v := range oldValues {
-			cm.configCache[k] = v
-		}
-		cm.logger.Error("创建配置修改标志文件失败", zap.Error(err))
-		cm.mu.Unlock()
-		return fmt.Errorf("创建配置修改标志文件失败: %v", err)
+		cm.logger.Warn("创建配置修改标志文件失败，但配置已写入数据库，忽略该错误并继续", zap.Error(err))
 	}
 
 	cm.lastUpdate = time.Now()

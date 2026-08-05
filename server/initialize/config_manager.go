@@ -99,6 +99,10 @@ func syncConfigToGlobal(key string, oldValue, newValue interface{}) error {
 		if kycConfig, ok := newValue.(map[string]interface{}); ok {
 			syncKYCConfig(&cfg, kycConfig)
 		}
+	case "payment":
+		if paymentConfig, ok := newValue.(map[string]interface{}); ok {
+			syncPaymentConfig(&cfg, paymentConfig)
+		}
 	}
 
 	global.SetAppConfig(cfg) // 原子写入，读侧立即可见
@@ -252,12 +256,16 @@ func syncQuotaConfig(cfg *config.Server, quotaConfig map[string]interface{}) {
 		} else if v, ok := permissions["min-level-for-reset-container"].(int); ok {
 			cfg.Quota.InstanceTypePermissions.MinLevelForResetContainer = v
 		}
-		if v, ok := permissions["min-level-for-reset-vm"].(float64); ok {
-			cfg.Quota.InstanceTypePermissions.MinLevelForResetVM = int(v)
-		} else if v, ok := permissions["min-level-for-reset-vm"].(int); ok {
-			cfg.Quota.InstanceTypePermissions.MinLevelForResetVM = v
-		}
+	if v, ok := permissions["min-level-for-reset-vm"].(float64); ok {
+		cfg.Quota.InstanceTypePermissions.MinLevelForResetVM = int(v)
+	} else if v, ok := permissions["min-level-for-reset-vm"].(int); ok {
+		cfg.Quota.InstanceTypePermissions.MinLevelForResetVM = v
 	}
+
+	if v, ok := quotaConfig["disable-level-quota"].(bool); ok {
+		cfg.Quota.DisableLevelQuota = v
+	}
+}
 }
 
 // syncSystemConfig 同步系统配置到配置副本
@@ -364,6 +372,18 @@ func syncOtherConfig(cfg *config.Server, otherConfig map[string]interface{}) {
 	if v, ok := otherConfig["site-name"].(string); ok {
 		cfg.Other.SiteName = v
 	}
+	if v, ok := otherConfig["slogan"].(string); ok {
+		cfg.Other.Slogan = v
+	}
+	if v, ok := otherConfig["footer-text"].(string); ok {
+		cfg.Other.FooterText = v
+	}
+	if v, ok := otherConfig["icp-text"].(string); ok {
+		cfg.Other.ICPText = v
+	}
+	if v, ok := otherConfig["icp-link"].(string); ok {
+		cfg.Other.ICPLink = v
+	}
 }
 
 // syncKYCConfig 同步KYC实名认证配置到配置副本
@@ -397,5 +417,27 @@ func syncKYCConfig(cfg *config.Server, kycConfig map[string]interface{}) {
 		if err := kyc.InitAlipayClient(); err != nil {
 			global.APP_LOG.Error("重新初始化支付宝客户端失败", zap.Error(err))
 		}
+	}
+}
+
+// syncPaymentConfig 同步支付（易支付）配置到配置副本
+func syncPaymentConfig(cfg *config.Server, paymentConfig map[string]interface{}) {
+	if v, ok := paymentConfig["epay-enabled"].(bool); ok {
+		cfg.Payment.EpayEnabled = v
+	}
+	if v, ok := paymentConfig["epay-pid"].(string); ok {
+		cfg.Payment.EpayPID = v
+	}
+	if v, ok := paymentConfig["epay-key"].(string); ok {
+		cfg.Payment.EpayKey = v
+	}
+	if v, ok := paymentConfig["epay-api-url"].(string); ok {
+		cfg.Payment.EpayApiURL = v
+	}
+	if v, ok := paymentConfig["epay-notify-url"].(string); ok {
+		cfg.Payment.EpayNotifyURL = v
+	}
+	if v, ok := paymentConfig["epay-return-url"].(string); ok {
+		cfg.Payment.EpayReturnURL = v
 	}
 }

@@ -36,7 +36,16 @@ export function useConfigManagement() {
     },
     quota: {
       defaultLevel: 1,
+      disableLevelQuota: false,
       levelLimits: normalizeLevelLimits(DEFAULT_QUOTA_LEVEL_LIMITS, DEFAULT_QUOTA_LEVEL_LIMITS)
+    },
+    payment: {
+      epayEnabled: false,
+      epayPid: '',
+      epayKey: '',
+      epayApiUrl: '',
+      epayNotifyUrl: '',
+      epayReturnUrl: ''
     },
     inviteCode: {
       enabled: false
@@ -45,7 +54,11 @@ export function useConfigManagement() {
       maxAvatarSize: 2,
       defaultLanguage: '',
       logoURL: '',
-      siteName: ''
+      siteName: '',
+      slogan: '',
+      footerText: '',
+      icpText: '',
+      icpLink: ''
     },
     captcha: {
       enabled: false
@@ -99,9 +112,15 @@ export function useConfigManagement() {
           if (response.data.quota.defaultLevel != null) {
             config.value.quota.defaultLevel = response.data.quota.defaultLevel
           }
+          if (response.data.quota.disableLevelQuota != null) {
+            config.value.quota.disableLevelQuota = !!response.data.quota.disableLevelQuota
+          }
           if (response.data.quota.levelLimits) {
             config.value.quota.levelLimits = normalizeLevelLimits(response.data.quota.levelLimits, DEFAULT_QUOTA_LEVEL_LIMITS)
           }
+        }
+        if (response.data.payment) {
+          config.value.payment = { ...config.value.payment, ...response.data.payment }
         }
       }
     } catch (error) {

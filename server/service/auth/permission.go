@@ -176,6 +176,11 @@ func (s *PermissionService) CheckInstancePermission(userID uint, instanceType st
 		return true
 	}
 
+	// 关闭等级配额限制后，任何用户都可创建任意类型实例（由商品决定）
+	if global.GetAppConfig().Quota.DisableLevelQuota {
+		return true
+	}
+
 	// 根据配置检查用户等级是否满足实例类型要求
 	permissions := global.GetAppConfig().Quota.InstanceTypePermissions
 	switch instanceType {

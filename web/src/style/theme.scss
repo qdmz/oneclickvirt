@@ -4,17 +4,17 @@
  */
 
 :root {
-  /* 主题颜色 - 绿色调色板 */
+  /* 主题颜色 - 绿色作为克制点缀色（现代极简 SaaS） */
   --primary-color: #16a34a;
   --primary-color-dark: #15803d;
   --primary-color-darker: #166534;
   --primary-color-light: #22c55e;
   --primary-color-lighter: #4ade80;
-  --primary-color-bg: rgba(22, 163, 74, 0.05);
+  --primary-color-bg: rgba(22, 163, 74, 0.06);
   --primary-color-bg-hover: rgba(22, 163, 74, 0.1);
-  --primary-color-shadow: rgba(22, 163, 74, 0.25);
-  --primary-color-shadow-hover: rgba(22, 163, 74, 0.35);
-  --primary-color-focus: rgba(34, 197, 94, 0.25);
+  --primary-color-shadow: rgba(22, 163, 74, 0.18);
+  --primary-color-shadow-hover: rgba(22, 163, 74, 0.24);
+  --primary-color-focus: rgba(34, 197, 94, 0.18);
   --accent-text-color: #15803d;
   --accent-text-color-hover: #166534;
   --accent-soft-bg: rgba(22, 163, 74, 0.08);
@@ -36,25 +36,25 @@
   --text-color-sidebar-primary: #374151;
   --text-color-white: #ffffff;
   
-  /* 背景颜色 */
-  --bg-color-primary: #ffffff;
+  /* 背景颜色 - 中性灰白底 */
+  --bg-color-primary: #f7f8fa;
   --bg-color-secondary: #ffffff;
-  --bg-color-tertiary: #f9fafb;
+  --bg-color-tertiary: #f3f4f6;
   --bg-color-sidebar: #ffffff;
   --bg-color-sidebar-logo: #1f2937;
   --bg-color-sidebar-light: #f8fafc;
-  --bg-color-hover: rgba(22, 163, 74, 0.05);
-  --bg-color-active: rgba(22, 163, 74, 0.1);
-  --bg-color-overlay: rgba(0, 0, 0, 0.5);
-  --surface-header: rgba(255, 255, 255, 0.92);
+  --bg-color-hover: #f3f4f6;
+  --bg-color-active: rgba(22, 163, 74, 0.08);
+  --bg-color-overlay: rgba(15, 23, 42, 0.45);
+  --surface-header: rgba(255, 255, 255, 0.85);
   --surface-elevated: #ffffff;
   --surface-input: #ffffff;
   
-  /* 边框颜色 */
-  --border-color: rgba(22, 163, 74, 0.1);
-  --border-color-light: rgba(22, 163, 74, 0.05);
-  --border-color-hover: rgba(22, 163, 74, 0.2);
-  --border-color-focus: rgba(22, 163, 74, 0.3);
+  /* 边框颜色 - 中性细边框 */
+  --border-color: #e5e7eb;
+  --border-color-light: #f0f1f3;
+  --border-color-hover: #d1d5db;
+  --border-color-focus: rgba(22, 163, 74, 0.4);
   --border-color-disabled: #e5e7eb;
   
   /* 状态颜色 */
@@ -63,21 +63,21 @@
   --error-color: #ef4444;
   --info-color: #3b82f6;
   
-  /* 阴影 */
-  --box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --box-shadow-light: 0 4px 15px rgba(22, 163, 74, 0.08);
-  --box-shadow-medium: 0 8px 25px rgba(22, 163, 74, 0.1);
-  --box-shadow-heavy: 0 15px 35px rgba(22, 163, 74, 0.15);
-  --box-shadow-hover: 0 20px 40px rgba(22, 163, 74, 0.2);
+  /* 阴影 - 中性克制 */
+  --box-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --box-shadow-light: 0 1px 3px rgba(16, 24, 40, 0.06);
+  --box-shadow-medium: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --box-shadow-heavy: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --box-shadow-hover: 0 6px 18px rgba(16, 24, 40, 0.1);
   
-  /* 圆角 */
+  /* 圆角 - 收敛（现代 SaaS 直角化） */
   --border-radius-xs: 4px;
-  --border-radius-sm: 8px;
-  --border-radius-medium: 12px;
-  --border-radius-large: 16px;
-  --border-radius-xl: 20px;
-  --border-radius-2xl: 24px;
-  --border-radius-3xl: 30px;
+  --border-radius-sm: 6px;
+  --border-radius-medium: 8px;
+  --border-radius-large: 10px;
+  --border-radius-xl: 12px;
+  --border-radius-2xl: 14px;
+  --border-radius-3xl: 16px;
   --border-radius-full: 50%;
   
   /* 间距 */
@@ -135,15 +135,18 @@
   --z-drawer-bg: 999;
 
   /* 语义化背景色（用于状态/信息块和卡片，暗模式下切换） */
-  --neutral-bg: #f5f7fa;
-  --subtle-bg: #f8fafc;
+  --neutral-bg: #f3f4f6;
+  --subtle-bg: #f7f8fa;
   --card-bg-solid: #ffffff;
-  --card-bg: rgba(255, 255, 255, 0.96);
+  --card-bg: #ffffff;
   --terminal-bg: #f3f6fb;
   --terminal-foreground: #1f2937;
   --terminal-cursor: #16a34a;
-  --auth-page-bg: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-  --auth-header-bg: rgba(255, 255, 255, 0.95);
+  --auth-page-bg:
+    radial-gradient(circle at 15% 15%, rgba(22, 163, 74, 0.05), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.04), transparent 42%),
+    #f7f8fa;
+  --auth-header-bg: rgba(255, 255, 255, 0.85);
   --footer-bg: #ffffff;
   --footer-link-color: #15803d;
   --footer-link-hover-color: #166534;
@@ -230,29 +233,27 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light));
+  background: var(--primary-color);
   color: var(--text-color-white);
-  box-shadow: 0 4px 15px var(--primary-color-shadow);
+  box-shadow: none;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-color-dark), var(--primary-color));
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--primary-color-shadow-hover);
+  background: var(--primary-color-dark);
+  box-shadow: 0 1px 3px var(--primary-color-shadow-hover);
 }
 
 .btn-secondary {
   background: transparent;
   color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.1);
+  border: 1px solid var(--primary-color);
+  box-shadow: none;
 }
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--primary-color);
   color: var(--text-color-white);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--primary-color-shadow);
+  box-shadow: none;
 }
 
 .btn-outline {
@@ -287,9 +288,9 @@ body {
 }
 
 .btn-lg {
-  padding: 16px 32px;
+  padding: 14px 28px;
   font-size: var(--font-size-lg);
-  border-radius: var(--border-radius-3xl);
+  border-radius: var(--border-radius-large);
 }
 
 /* 导航链接样式 */
@@ -305,30 +306,28 @@ body {
 }
 
 .nav-link:hover {
-  background: var(--primary-color-bg-hover);
+  background: var(--bg-color-hover);
   color: var(--primary-color);
-  transform: translateY(-1px);
 }
 
 .nav-link.active {
   background: var(--primary-color);
   color: var(--text-color-white);
-  box-shadow: 0 2px 8px var(--primary-color-shadow);
+  box-shadow: none;
 }
 
-/* 卡片样式 */
+/* 卡片样式 - 扁平细边框 */
 .card {
   background: var(--bg-color-secondary);
   padding: var(--spacing-2xl);
-  border-radius: var(--border-radius-2xl);
-  box-shadow: var(--box-shadow-medium);
-  transition: var(--transition-normal);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--box-shadow-sm);
+  transition: var(--transition-fast);
   border: 1px solid var(--border-color);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--box-shadow-hover);
+  box-shadow: var(--box-shadow-medium);
   border-color: var(--border-color-hover);
 }
 
@@ -346,19 +345,19 @@ body {
 /* 表单元素样式 */
 .form-input {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid var(--border-color);
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius-medium);
   font-size: var(--font-size-base);
-  transition: var(--transition-normal);
-  background: var(--bg-color-primary);
+  transition: var(--transition-fast);
+  background: var(--surface-input);
   color: var(--text-color-primary);
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px var(--primary-color-bg-hover);
+  box-shadow: 0 0 0 3px var(--primary-color-focus);
 }
 
 .form-input:disabled {
@@ -379,10 +378,7 @@ body {
   color: var(--text-color-primary);
   margin: 0 0 var(--spacing-md) 0;
   font-weight: var(--font-weight-bold);
-  background: linear-gradient(135deg, var(--text-color-primary), var(--text-color-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .section-header h3 {
@@ -831,7 +827,7 @@ html.dark {
   --bg-color-sidebar: #101827;
   --bg-color-sidebar-logo: #0b1220;
   --bg-color-sidebar-light: #162033;
-  --bg-color-hover: rgba(74, 222, 128, 0.08);
+  --bg-color-hover: rgba(148, 163, 184, 0.1);
   --bg-color-active: rgba(74, 222, 128, 0.14);
   --bg-color-overlay: rgba(0, 0, 0, 0.7);
   --surface-header: rgba(11, 18, 32, 0.9);

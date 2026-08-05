@@ -54,6 +54,68 @@
       </el-col>
     </el-row>
 
+    <!-- 站点内容设置：标语 / 页脚 / 备案 -->
+    <el-divider content-position="left">
+      站点内容设置
+    </el-divider>
+
+    <el-row :gutter="20">
+      <el-col :span="16">
+        <el-form-item label="站点标语">
+          <el-input
+            v-model="config.other.slogan"
+            placeholder="首页副标题，如：一站式虚拟化资源管理与销售平台"
+            clearable
+          />
+          <div class="form-item-hint">
+            显示在首页主标题下方，留空使用默认标语
+          </div>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20">
+      <el-col :span="16">
+        <el-form-item label="页脚文字">
+          <el-input
+            v-model="config.other.footerText"
+            placeholder="自定义页脚文字，如公司名称或版权信息"
+            clearable
+          />
+          <div class="form-item-hint">
+            显示在页脚区域，留空则不显示
+          </div>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20">
+      <el-col :span="10">
+        <el-form-item label="备案号">
+          <el-input
+            v-model="config.other.icpText"
+            placeholder="如：京ICP备xxxxxxxx号"
+            clearable
+          />
+          <div class="form-item-hint">
+            显示在页脚，留空则不显示
+          </div>
+        </el-form-item>
+      </el-col>
+      <el-col :span="10">
+        <el-form-item label="备案链接">
+          <el-input
+            v-model="config.other.icpLink"
+            placeholder="如：https://beian.miit.gov.cn/"
+            clearable
+          />
+          <div class="form-item-hint">
+            备案号点击跳转地址，留空则不可点击
+          </div>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
     <el-divider content-position="left">
       {{ $t('admin.config.languageSettings') }}
     </el-divider>

@@ -34,6 +34,10 @@ import userDomain from './en-US/user/domain.js'
 import userKyc from './en-US/user/kyc.js'
 import userCheckin from './en-US/user/checkin.js'
 import userApiTokens from './en-US/user/apiTokens.js'
+import userTickets from './en-US/user/tickets.js'
+import userWallet from './en-US/user/wallet.js'
+import userProducts from './en-US/user/products.js'
+import userOrders from './en-US/user/orders.js'
 
 // 管理员模块
 import adminDashboard from './en-US/admin/dashboard.js'
@@ -57,6 +61,9 @@ import adminKyc from './en-US/admin/kyc.js'
 import adminGroup from './en-US/admin/group.js'
 import adminApiTokens from './en-US/admin/apiTokens.js'
 import adminSnapshots from './en-US/admin/snapshots.js'
+import adminTickets from './en-US/admin/tickets.js'
+import adminProducts from './en-US/admin/products.js'
+import adminWallet from './en-US/admin/wallet.js'
 
 export default {
   common,
@@ -83,7 +90,11 @@ export default {
     domain: userDomain,
     kyc: userKyc,
     checkin: userCheckin,
-    apiTokens: userApiTokens
+    apiTokens: userApiTokens,
+    tickets: userTickets,
+    wallet: userWallet,
+    products: userProducts,
+    orders: userOrders
   },
   admin: {
     dashboard: adminDashboard,
@@ -106,7 +117,10 @@ export default {
     kyc: adminKyc,
     group: adminGroup,
     apiTokens: adminApiTokens,
-    snapshots: adminSnapshots
+    snapshots: adminSnapshots,
+    tickets: adminTickets,
+    products: adminProducts,
+    wallet: adminWallet
   },
   validation,
   message,

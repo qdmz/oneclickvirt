@@ -34,4 +34,11 @@ export default {
   oauth2Management: 'OAuth2',
   apiTokenManagement: 'API Token',
   adminApiTokenManagement: 'API Tokens Management',
+  ticketManagement: 'Ticket Management',
+  ticketList: 'My Tickets',
+  store: 'Store',
+  wallet: 'My Wallet',
+  myOrders: 'My Orders',
+  productManagement: 'Product Management',
+  walletManagement: 'Balance & Orders',
 }

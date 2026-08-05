@@ -34,6 +34,10 @@ type OtherConfig struct {
 	DefaultLanguage string  `json:"defaultLanguage"` // 系统默认语言，空字符串表示使用浏览器语言
 	LogoURL         string  `json:"logoURL"`         // 自定义 Logo 图片第三方 URL，空表示使用默认logo
 	SiteName        string  `json:"siteName"`        // 自定义网站名称，空表示使用默认名称 OneClickVirt
+	Slogan          string  `json:"slogan"`          // 站点标语（首页副标题），空表示使用默认
+	FooterText      string  `json:"footerText"`      // 自定义页脚文字，空表示使用默认
+	ICPText         string  `json:"icpText"`         // 备案号文字，空表示不显示
+	ICPLink         string  `json:"icpLink"`         // 备案号跳转链接，空表示不跳转
 }
 
 type QuotaConfig struct {

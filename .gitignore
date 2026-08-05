@@ -14,6 +14,11 @@ server/certs
 server/configs
 server/oneclickvirt.db
 server/oneclickvirt
+# Cross-compiled / local build artifacts (NEVER commit — rebuilt by deploy/sync.py)
+/oneclickvirt-linux-amd64
+server/oneclickvirt-server*.exe
+server/oneclickvirt-server.exe
+*.exe
 web/node_modules
 web/dist
 web/dist.zip
@@ -34,3 +39,5 @@ test/.DS_Store*
 .back/DS_Store*
 data
 .idea
+# Stale build backup (renamed from web/dist during deploy)
+web/dist.old/

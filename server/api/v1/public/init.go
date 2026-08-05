@@ -480,6 +480,14 @@ func GetPublicSystemConfig(c *gin.Context) {
 					result["logo_url"] = config.Value
 				case "other.site-name":
 					result["site_name"] = config.Value
+				case "other.slogan":
+					result["slogan"] = config.Value
+				case "other.footer-text":
+					result["footer_text"] = config.Value
+				case "other.icp-text":
+					result["icp_text"] = config.Value
+				case "other.icp-link":
+					result["icp_link"] = config.Value
 				default:
 					result[config.Key] = config.Value
 				}
@@ -506,6 +514,22 @@ func GetPublicSystemConfig(c *gin.Context) {
 
 		if global.GetAppConfig().Other.SiteName != "" {
 			result["site_name"] = global.GetAppConfig().Other.SiteName
+		}
+
+		if global.GetAppConfig().Other.Slogan != "" {
+			result["slogan"] = global.GetAppConfig().Other.Slogan
+		}
+
+		if global.GetAppConfig().Other.FooterText != "" {
+			result["footer_text"] = global.GetAppConfig().Other.FooterText
+		}
+
+		if global.GetAppConfig().Other.ICPText != "" {
+			result["icp_text"] = global.GetAppConfig().Other.ICPText
+		}
+
+		if global.GetAppConfig().Other.ICPLink != "" {
+			result["icp_link"] = global.GetAppConfig().Other.ICPLink
 		}
 
 		global.APP_LOG.Debug("使用默认配置",

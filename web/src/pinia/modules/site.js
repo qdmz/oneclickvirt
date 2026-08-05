@@ -7,6 +7,14 @@ export const useSiteStore = defineStore('site', () => {
   const logoURL = ref('')
   // 自定义网站名称（空表示使用默认 OneClickVirt）
   const siteName = ref('')
+  // 自定义站点标语（首页副标题）
+  const slogan = ref('')
+  // 自定义页脚文字
+  const footerText = ref('')
+  // 备案号文字
+  const icpText = ref('')
+  // 备案号跳转链接
+  const icpLink = ref('')
   // 是否已经初始化
   const initialized = ref(false)
 
@@ -23,6 +31,13 @@ export const useSiteStore = defineStore('site', () => {
     return siteName.value && siteName.value.trim() !== '' ? siteName.value.trim() : 'OneClickVirt'
   })
 
+  // 计算最终显示的标语（空时使用默认）
+  const displaySlogan = computed(() => {
+    return slogan.value && slogan.value.trim() !== ''
+      ? slogan.value.trim()
+      : '一站式虚拟化资源管理与销售平台'
+  })
+
   // 从后端获取站点配置
   async function fetchSiteConfig() {
     if (initialized.value) return
@@ -34,6 +49,18 @@ export const useSiteStore = defineStore('site', () => {
         }
         if (res.data.site_name) {
           siteName.value = res.data.site_name
+        }
+        if (res.data.slogan !== undefined && res.data.slogan !== null) {
+          slogan.value = res.data.slogan
+        }
+        if (res.data.footer_text !== undefined && res.data.footer_text !== null) {
+          footerText.value = res.data.footer_text
+        }
+        if (res.data.icp_text !== undefined && res.data.icp_text !== null) {
+          icpText.value = res.data.icp_text
+        }
+        if (res.data.icp_link !== undefined && res.data.icp_link !== null) {
+          icpLink.value = res.data.icp_link
         }
       }
     } catch (e) {
@@ -49,5 +76,9 @@ export const useSiteStore = defineStore('site', () => {
     return fetchSiteConfig()
   }
 
-  return { logoURL, logoSrc, siteName, displaySiteName, fetchSiteConfig, refresh }
+  return {
+    logoURL, logoSrc, siteName, displaySiteName,
+    slogan, displaySlogan, footerText, icpText, icpLink,
+    fetchSiteConfig, refresh
+  }
 })

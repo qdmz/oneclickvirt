@@ -23,6 +23,22 @@
       </div>
     </el-alert>
 
+    <el-form-item :label="$t('admin.config.disableLevelQuota')">
+      <el-switch v-model="config.quota.disableLevelQuota" />
+      <div class="quota-switch-tip">
+        {{ $t('admin.config.disableLevelQuotaTip') }}
+      </div>
+    </el-form-item>
+
+    <el-alert
+      v-if="config.quota.disableLevelQuota"
+      :title="$t('admin.config.disableLevelQuotaActive')"
+      type="warning"
+      :closable="false"
+      show-icon
+      style="margin-bottom: 20px;"
+    />
+
     <el-form-item :label="$t('admin.config.newUserDefaultLevel')">
       <el-select
         v-model="config.quota.defaultLevel"
@@ -232,6 +248,12 @@ const removeLevel = (level) => {
 .config-form {
   max-height: 600px;
   overflow-y: auto;
+}
+.quota-switch-tip {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
+  margin-top: 4px;
 }
 .level-card {
   border: 1px solid var(--border-color);

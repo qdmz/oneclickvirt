@@ -51,10 +51,10 @@
       <section class="hero-section">
         <div class="hero-content">
           <h1 class="hero-title">
-            {{ t('home.hero.title') }}
+            {{ siteStore.displaySiteName || t('home.hero.title') }}
           </h1>
           <p class="hero-description">
-            {{ t('home.hero.description') }}
+            {{ siteStore.displaySlogan || t('home.hero.description') }}
           </p>
           <div class="hero-actions">
             <router-link

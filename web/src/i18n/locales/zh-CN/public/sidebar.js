@@ -33,5 +33,12 @@ export default {
   kycManagement: 'KYC管理',
   oauth2Management: 'OAuth2',
   apiTokenManagement: 'API Token管理',
-  adminApiTokenManagement: 'API Token管理'
+  adminApiTokenManagement: 'API Token管理',
+  ticketManagement: '工单管理',
+  ticketList: '我的工单',
+  store: '产品商店',
+  wallet: '我的钱包',
+  myOrders: '我的订单',
+  productManagement: '产品管理',
+  walletManagement: '余额与订单'
 }
