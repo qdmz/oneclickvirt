@@ -1,10 +1,9 @@
-import { ref, nextTick } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
-import { getAllInstances, adminInstanceAction, adminBatchInstanceAction, resetInstancePassword, getAdminInstanceNewPassword, setInstanceExpiry, freezeInstance, unfreezeInstance, getUserList, createAdminInstanceShare } from '@/api/admin'
+import { getAllInstances, getAdminInstance, adminInstanceAction, adminBatchInstanceAction, resetInstancePassword, getAdminInstanceNewPassword, setInstanceExpiry, freezeInstance, unfreezeInstance, getUserList, createAdminInstanceShare } from '@/api/admin'
 import { adminTransferInstance } from '@/api/features'
 import { useSSHStore } from '@/pinia/modules/ssh'
-import { copyToClipboard } from '@/utils/clipboard'
 import { normalizeShareURL, showShareLinkDialog } from '@/utils/share-link'
 import { canOpenInstanceDetail, getInstanceBusyMessage, isInstanceBusy } from '@/utils/instance-status'
 
@@ -16,8 +15,15 @@ export function useInstanceManagement() {
   const loading = ref(false)
   const detailDialogVisible = ref(false)
   const actionDialogVisible = ref(false)
+  const egressDialogVisible = ref(false)
+  const accessDialogVisible = ref(false)
+  const consoleDialogVisible = ref(false)
+  const accessLoading = ref(false)
   const selectedInstance = ref(null)
   const actionInstance = ref(null)
+  const egressInstance = ref(null)
+  const accessInstance = ref(null)
+  const consoleInstance = ref(null)
   const actionLoading = ref(false)
   const showPassword = ref(false)
   const selectedInstances = ref([])
@@ -27,6 +33,17 @@ export function useInstanceManagement() {
   const searchingUsers = ref(false)
   const userOptions = ref([])
   const tableRef = ref(null)
+
+  // 重装系统镜像选择相关
+  const resetImageDialogVisible = ref(false)
+  const resetImageList = ref([])
+  const selectedResetImage = ref('')
+  const loadingResetImages = ref(false)
+
+  // VNC 控制台相关
+  const vncDialogVisible = ref(false)
+  const vncInstanceId = ref(null)
+  const vncInstanceName = ref('')
 
   const filters = ref({
     instanceName: '',
@@ -107,6 +124,40 @@ export function useInstanceManagement() {
     actionDialogVisible.value = true
   }
 
+  const showEgressDialog = (instance) => {
+    if (!warnInstanceBlocked(instance)) return
+    egressInstance.value = instance
+    actionDialogVisible.value = false
+    egressDialogVisible.value = true
+  }
+
+  const showInstanceAccessDialog = async (instance) => {
+    if (!warnInstanceBlocked(instance, true)) return
+    accessLoading.value = true
+    try {
+      const response = await getAdminInstance(instance.id)
+      accessInstance.value = {
+        ...(response.data || {}),
+        hasSshKey: Boolean(instance.hasSshKey)
+      }
+      accessDialogVisible.value = true
+    } catch (error) {
+      ElMessage.error(error?.fullMessage || error?.userMessage || error?.message || t('admin.instances.editAccessLoadFailed'))
+    } finally {
+      accessLoading.value = false
+    }
+  }
+
+  const refreshInstanceAccess = async () => {
+    const instanceID = accessInstance.value?.id
+    await loadInstances()
+    if (!instanceID) return
+    const refreshed = instances.value.find(item => item.id === instanceID)
+    if (refreshed && selectedInstance.value?.id === instanceID) {
+      selectedInstance.value = refreshed
+    }
+  }
+
   const pollForAdminNewPassword = (instanceId, taskId) => {
     let attempts = 0
     const maxAttempts = 20
@@ -140,13 +191,22 @@ export function useInstanceManagement() {
 
   const performAction = async (action) => {
     if (!warnInstanceBlocked(actionInstance.value)) return
-    if (action === 'setExpiry') { actionDialogVisible.value = false; await handleSetInstanceExpiry(actionInstance.value); actionInstance.value = null; return }
+    if (action === 'setExpiry') { actionDialogVisible.value = false; openSetInstanceExpiry(actionInstance.value); actionInstance.value = null; return }
+    if (action === 'renew') { actionDialogVisible.value = false; actionInstance.value = null; return }
     if (action === 'freeze') { actionDialogVisible.value = false; await handleFreezeInstance(actionInstance.value); actionInstance.value = null; return }
     if (action === 'unfreeze') { actionDialogVisible.value = false; await handleUnfreezeInstance(actionInstance.value); actionInstance.value = null; return }
+    if (action === 'vnc') {
+      vncInstanceId.value = actionInstance.value.id
+      vncInstanceName.value = actionInstance.value.name || actionInstance.value.uuid || ''
+      vncDialogVisible.value = true
+      actionDialogVisible.value = false
+      return
+    }
 
     const actionText = {
       'start': t('common.start'), 'stop': t('common.stop'), 'restart': t('common.restart'),
-      'reset': t('admin.instances.resetSystem'), 'resetPassword': t('admin.instances.resetPassword'), 'delete': t('common.delete')
+      'reset': t('admin.instances.resetSystem'), 'resetPassword': t('admin.instances.resetPassword'), 'delete': t('common.delete'),
+      'renew': t('admin.instances.renew')
     }[action]
 
     try {
@@ -155,6 +215,14 @@ export function useInstanceManagement() {
         t('admin.instances.manageTitle', { action: actionText }),
         { confirmButtonText: t('common.confirm'), cancelButtonText: t('common.cancel'), type: 'warning' }
       )
+
+      // 重装系统：先弹出镜像选择对话框，不直接调用 API
+      if (action === 'reset') {
+        await loadResetImages(actionInstance.value)
+        resetImageDialogVisible.value = true
+        return
+      }
+
       actionLoading.value = true
       const instanceId = actionInstance.value.id
       const instanceIndex = instances.value.findIndex(i => i.id === instanceId)
@@ -180,6 +248,54 @@ export function useInstanceManagement() {
       }
     } catch (error) {
       if (error !== 'cancel') { ElMessage.error(t('admin.instances.actionFailed', { action: actionText })); await loadInstances() }
+    } finally {
+      actionLoading.value = false
+    }
+  }
+
+  // 加载重装系统可用的镜像列表
+  const loadResetImages = async (instance) => {
+    const providerId = instance?.provider_id || instance?.providerId
+    if (!providerId) {
+      ElMessage.warning(t('admin.instances.instanceNotFound'))
+      return
+    }
+    loadingResetImages.value = true
+    try {
+      const res = await getFilteredImages({
+        provider_id: providerId,
+        instance_type: instance.instance_type || instance.instanceType
+      })
+      resetImageList.value = res.data?.data || res.data || []
+      selectedResetImage.value = instance.image || ''
+    } catch (err) {
+      console.error('Failed to load images for reset:', err)
+      resetImageList.value = []
+    } finally {
+      loadingResetImages.value = false
+    }
+  }
+
+  // 确认使用所选镜像重装系统
+  const confirmResetWithImage = async () => {
+    resetImageDialogVisible.value = false
+    const instance = actionInstance.value
+    if (!instance) return
+    actionLoading.value = true
+    const instanceId = instance.id
+    const instanceIndex = instances.value.findIndex(i => i.id === instanceId)
+    if (instanceIndex !== -1) {
+      instances.value[instanceIndex].status = 'resetting'
+    }
+    try {
+      await adminInstanceAction(instanceId, 'reset', { image: selectedResetImage.value || undefined })
+      ElMessage.success(t('admin.instances.taskCreated', { action: t('admin.instances.resetSystem') }))
+      actionDialogVisible.value = false
+      actionInstance.value = null
+      setTimeout(() => loadInstances(), 500)
+    } catch (error) {
+      ElMessage.error(t('admin.instances.actionFailed', { action: t('admin.instances.resetSystem') }))
+      await loadInstances()
     } finally {
       actionLoading.value = false
     }
@@ -234,6 +350,16 @@ export function useInstanceManagement() {
     if (instance.status !== 'running') { ElMessage.warning(t('admin.instances.instanceNotRunning')); return }
     if (!instance.hasSshMapping && instance.networkType === 'no_port_mapping') { ElMessage.warning(t('admin.instances.sshNoPortMapping')); return }
     if (!sshStore.hasConnection(instance.id)) { sshStore.createConnection(instance.id, instance.name, true) } else { sshStore.showConnection(instance.id) }
+  }
+
+  const openConsole = (instance) => {
+    if (!warnInstanceBlocked(instance, true)) return
+    if (instance.status !== 'running') {
+      ElMessage.warning(t('admin.instances.instanceNotRunning'))
+      return
+    }
+    consoleInstance.value = instance
+    consoleDialogVisible.value = true
   }
 
   const handleSelectionChange = (selection) => { selectedInstances.value = selection }
@@ -324,19 +450,30 @@ export function useInstanceManagement() {
     failedMessage: 'admin.instances.batchStopFailed'
   })
 
-  const handleSetInstanceExpiry = async (instance) => {
+  // 设置过期时间：使用日期选择器对话框（避免手动录入格式错误）
+  const showSetExpiryDialog = ref(false)
+  const expiryInstance = ref(null)
+  const expiryForm = reactive({ name: '', expiresAt: '' })
+  const expiryLoading = ref(false)
+  const openSetInstanceExpiry = (instance) => {
+    expiryInstance.value = instance
+    expiryForm.name = instance?.name || ''
+    expiryForm.expiresAt = instance?.expiresAt || ''
+    showSetExpiryDialog.value = true
+  }
+  const confirmSetInstanceExpiry = async () => {
+    if (!expiryInstance.value) return
+    expiryLoading.value = true
     try {
-      const { value: expiresAt } = await ElMessageBox.prompt(t('admin.instances.setExpiryPrompt'), t('admin.instances.setExpiry'), {
-        confirmButtonText: t('common.confirm'), cancelButtonText: t('common.cancel'),
-        inputPattern: /^(\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?)?$/,
-        inputErrorMessage: t('admin.instances.dateFormatError'),
-        inputPlaceholder: instance.expiresAt ? formatDate(instance.expiresAt) : '2024-12-31 23:59:59',
-        inputValue: instance.expiresAt ? formatDate(instance.expiresAt) : ''
-      })
-      await setInstanceExpiry({ instanceId: instance.id, expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null })
+      await setInstanceExpiry({ instanceId: expiryInstance.value.id, expiresAt: expiryForm.expiresAt || null })
+      showSetExpiryDialog.value = false
       ElMessage.success(t('admin.instances.setExpirySuccess'))
       await loadInstances()
-    } catch (error) { if (error !== 'cancel') ElMessage.error(t('admin.instances.setExpiryFailed')) }
+    } catch (error) {
+      ElMessage.error(t('admin.instances.setExpiryFailed'))
+    } finally {
+      expiryLoading.value = false
+    }
   }
 
   const handleFreezeInstance = async (instance) => {
@@ -434,19 +571,23 @@ export function useInstanceManagement() {
   }
 
   return {
-    instances, loading, detailDialogVisible, actionDialogVisible,
-    selectedInstance, actionInstance, actionLoading, showPassword,
+    instances, loading, detailDialogVisible, actionDialogVisible, egressDialogVisible, accessDialogVisible, consoleDialogVisible, accessLoading,
+    selectedInstance, actionInstance, egressInstance, accessInstance, consoleInstance, actionLoading, showPassword,
     selectedInstances, transferDialogVisible, transferLoading, transferForm, tableRef,
     filters, pagination,
     loadInstances, handleSearch, handleReset, handleSizeChange, handleCurrentChange,
-    viewInstanceDetail, showActionDialog, performAction,
+    viewInstanceDetail, showActionDialog, showEgressDialog, showInstanceAccessDialog, refreshInstanceAccess, performAction,
     getStatusType, getStatusText, formatDate, formatMemory, formatDisk, formatTraffic,
-    isExpired, isExpiringSoon, openSSHTerminal,
+    isExpired, isExpiringSoon, openSSHTerminal, openConsole,
     handleSelectionChange, batchDeleteInstances, batchStartInstances, batchStopInstances,
     showTransferDialog, confirmTransfer, handleWindowResize,
     searchUsers, searchingUsers, userOptions,
     canOpenInstanceDetail, isInstanceBusy,
     createShareLink,
+    resetImageDialogVisible, resetImageList, selectedResetImage, loadingResetImages,
+    confirmResetWithImage,
+    vncDialogVisible, vncInstanceId, vncInstanceName,
+    showSetExpiryDialog, expiryForm, expiryLoading, confirmSetInstanceExpiry,
     t
   }
 }

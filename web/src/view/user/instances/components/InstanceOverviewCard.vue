@@ -170,7 +170,7 @@
             {{ $t('user.instanceDetail.webSSH') }}
           </el-button>
           <el-button
-            v-if="instance.status === 'running' && instance.instanceType === 'vm' && !shareMode"
+            v-if="instance.status === 'running' && (instance.instance_type || instance.type) === 'vm' && !shareMode"
             type="primary"
             size="small"
             :disabled="operationLocked"
@@ -178,7 +178,18 @@
             @click="$emit('open-vnc')"
           >
             <el-icon><Monitor /></el-icon>
-            {{ $t('user.instanceDetail.webVNC') }}
+            {{ $t('user.instanceDetail.webConsole') }}
+          </el-button>
+          <el-button
+            v-if="!shareMode && instance.orderId"
+            type="warning"
+            size="small"
+            :disabled="operationLocked"
+            :title="operationLockMessage"
+            @click="openRenew"
+          >
+            <el-icon><Refresh /></el-icon>
+            {{ $t('user.instanceDetail.renew') }}
           </el-button>
           <el-button
             v-if="!shareMode"
@@ -232,14 +243,33 @@
       </div>
     </div>
   </el-card>
+  <el-dialog
+    v-model="renewDialogVisible"
+    :title="$t('user.instanceDetail.renew')"
+    width="420px"
+    append-to-body
+    destroy-on-close
+  >
+    <el-form label-width="90px">
+      <el-form-item :label="$t('user.instanceDetail.renewMonths')">
+        <el-input-number v-model="renewQuantity" :min="1" :max="36" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="renewDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+      <el-button type="primary" :loading="renewLoading" @click="confirmRenew">{{ $t('common.confirm') }}</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Link } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Link, Refresh } from '@element-plus/icons-vue'
 import { formatDiskSize, formatMemorySize } from '@/utils/unit-formatter'
 import { useInstanceFormatters } from '../composables/useInstanceFormatters'
+import { renewOrder } from '@/api/product'
 
 const { t, te } = useI18n()
 
@@ -252,6 +282,28 @@ const props = defineProps({
 })
 
 defineEmits(['perform-action', 'reset-password', 'open-ssh', 'open-vnc', 'view-task', 'create-share'])
+
+// 续费
+const renewDialogVisible = ref(false)
+const renewQuantity = ref(1)
+const renewLoading = ref(false)
+const openRenew = () => {
+  if (!props.instance.orderId) return
+  renewQuantity.value = 1
+  renewDialogVisible.value = true
+}
+const confirmRenew = async () => {
+  renewLoading.value = true
+  try {
+    const res = await renewOrder(props.instance.orderId, { quantity: renewQuantity.value })
+    renewDialogVisible.value = false
+    ElMessage.success(t('user.instanceDetail.renewOrderCreated', { id: res.data?.id || res.data?.orderNo || '' }))
+  } catch (error) {
+    ElMessage.error(error?.details || error?.message || t('user.instanceDetail.renewFailed'))
+  } finally {
+    renewLoading.value = false
+  }
+}
 
 const {
   getTaskTitle,

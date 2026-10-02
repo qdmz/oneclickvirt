@@ -15,16 +15,25 @@
         @click.stop
         @contextmenu.prevent
       >
-        <div class="menu-item" @click="handleCopy">
+        <div
+          class="menu-item"
+          @click="handleCopy"
+        >
           <span class="menu-label">{{ t('common.copy') }}</span>
           <span class="menu-shortcut">{{ copyShortcut }}</span>
         </div>
-        <div class="menu-item" @click="handlePaste">
+        <div
+          class="menu-item"
+          @click="handlePaste"
+        >
           <span class="menu-label">{{ t('common.paste') }}</span>
           <span class="menu-shortcut">{{ pasteShortcut }}</span>
         </div>
         <div class="menu-divider" />
-        <div class="menu-item" @click="handleSelectAll">
+        <div
+          class="menu-item"
+          @click="handleSelectAll"
+        >
           <span class="menu-label">{{ t('common.selectAll') }}</span>
         </div>
       </div>
@@ -42,6 +51,7 @@ import '@xterm/xterm/css/xterm.css'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { applyTerminalTheme } from '@/utils/terminalTheme'
+import { copyToClipboard, readFromClipboard } from '@/utils/clipboard'
 
 const { t } = useI18n()
 
@@ -157,47 +167,30 @@ onBeforeUnmount(() => {
 })
 
 // 复制选中文本到系统剪贴板
-const copySelectionToClipboard = () => {
-  if (!terminal) return
+const copySelectionToClipboard = async () => {
+  if (!terminal) return false
   const selection = terminal.getSelection()
-  if (selection) {
-    try {
-      navigator.clipboard.writeText(selection).catch((err) => {
-        console.error('复制到剪贴板失败:', err)
-      })
-    } catch (error) {
-      // 降级方案：使用 textarea
-      const textarea = document.createElement('textarea')
-      textarea.value = selection
-      textarea.style.position = 'fixed'
-      textarea.style.opacity = '0'
-      document.body.appendChild(textarea)
-      textarea.select()
-      try {
-        document.execCommand('copy')
-      } catch (e) {
-        // ignore
-      }
-      document.body.removeChild(textarea)
-    }
-  }
+  return copyToClipboard(
+    selection,
+    t('common.copySuccess'),
+    t('common.copyFailed')
+  )
 }
 
 // 从系统剪贴板粘贴到终端
-const pasteFromClipboard = () => {
-  if (!terminal || !websocket || websocket.readyState !== WebSocket.OPEN) return
-  try {
-    navigator.clipboard.readText().then((text) => {
-      if (websocket && websocket.readyState === WebSocket.OPEN) {
-        websocket.send(text)
-      }
-    }).catch((err) => {
-      console.error('从剪贴板读取失败:', err)
-    })
-  } catch (error) {
-    // 降级方案不可用于粘贴
-    console.error('粘贴失败:', error)
+const pasteFromClipboard = async () => {
+  if (!terminal || !websocket || websocket.readyState !== WebSocket.OPEN) {
+    ElMessage.warning(t('user.instanceDetail.sshConnectionClosed'))
+    return false
   }
+  const text = await readFromClipboard(t('common.pasteFailed'))
+  if (text === null) return false
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    websocket.send(text)
+    return true
+  }
+  ElMessage.warning(t('user.instanceDetail.sshConnectionClosed'))
+  return false
 }
 
 const initTerminal = () => {
@@ -357,11 +350,13 @@ const connect = () => {
     : `${protocol}//${host}${apiPath}?token=${encodeURIComponent(token)}`
 
   try {
-    websocket = new WebSocket(wsUrl)
+    const socket = new WebSocket(wsUrl)
+    websocket = socket
     // 设置为接收二进制数据作为 ArrayBuffer
     websocket.binaryType = 'arraybuffer'
 
     websocket.onopen = () => {
+      if (websocket !== socket || !terminal || isIntentionallyClosed) return
       isConnecting = false
       terminal.writeln(`\x1b[32m${t('user.instanceDetail.sshConnected')}\x1b[0m`)
       terminal.focus()
@@ -379,6 +374,7 @@ const connect = () => {
     }
 
     websocket.onmessage = (event) => {
+      if (websocket !== socket || !terminal || isIntentionallyClosed) return
       // 处理二进制数据
       if (event.data instanceof ArrayBuffer) {
         const uint8Array = new Uint8Array(event.data)
@@ -390,6 +386,7 @@ const connect = () => {
     }
 
     websocket.onerror = (error) => {
+      if (websocket !== socket || !terminal || isIntentionallyClosed) return
       console.error('WebSocket错误:', error)
       terminal.writeln(`\x1b[31m${t('user.instanceDetail.sshWebSocketError')}\x1b[0m`)
       ElMessage.error(t('user.instanceDetail.sshConnectionError'))
@@ -398,6 +395,7 @@ const connect = () => {
     }
 
     websocket.onclose = (event) => {
+      if (websocket !== socket || !terminal || isIntentionallyClosed) return
       isConnecting = false
       stopHeartbeat()
       
@@ -418,7 +416,7 @@ const connect = () => {
       if (!isIntentionallyClosed && terminal) {
         terminal.writeln(`\x1b[33m${t('user.instanceDetail.sshReconnecting')}\x1b[0m`)
         reconnectTimeout = setTimeout(() => {
-          reconnect()
+          if (websocket === socket && !isIntentionallyClosed) reconnect()
         }, 3000)
       }
     }

@@ -14,6 +14,7 @@ import {
   resetUserPassword,
   setUserExpiry
 } from '@/api/admin'
+import { adjustUserBalance } from '@/api/voucher'
 import { adminLoginAsUser } from '@/api/features'
 import { containsUnsafeUsernameContent } from '@/utils/validate'
 import { getAdminConfig } from '@/api/config'
@@ -61,6 +62,18 @@ export function useUserManagement() {
     userId: null,
     username: '',
     expiresAt: null
+  })
+
+  // 余额调整相关
+  const showAdjustBalanceDialog = ref(false)
+  const balanceLoading = ref(false)
+  const balanceForm = reactive({
+    userId: null,
+    username: '',
+    currentBalance: 0,
+    mode: 'add',
+    amount: 0,
+    remark: ''
   })
 
   // 搜索相关
@@ -508,6 +521,47 @@ export function useUserManagement() {
     }
   }
 
+  // 调整用户余额
+  const handleAdjustBalance = (user) => {
+    balanceForm.userId = user.id
+    balanceForm.username = user.username
+    balanceForm.currentBalance = Number(user.balance || 0)
+    balanceForm.mode = 'add'
+    balanceForm.amount = 0
+    balanceForm.remark = ''
+    showAdjustBalanceDialog.value = true
+  }
+
+  const confirmAdjustBalance = async () => {
+    const amount = Number(balanceForm.amount)
+    if (!amount && balanceForm.mode === 'add') {
+      ElMessage.warning(t('admin.users.adjustAmountRequired'))
+      return
+    }
+    if (balanceForm.mode === 'set' && amount < 0) {
+      ElMessage.warning(t('admin.users.adjustAmountInvalid'))
+      return
+    }
+    try {
+      balanceLoading.value = true
+      const res = await adjustUserBalance(balanceForm.userId, {
+        mode: balanceForm.mode,
+        amount,
+        remark: balanceForm.remark || ''
+      })
+      const after = res?.data?.balanceAfter
+      ElMessage.success(t('admin.users.adjustBalanceSuccess', {
+        balance: Number(after ?? 0).toFixed(2)
+      }))
+      showAdjustBalanceDialog.value = false
+      await loadUsers()
+    } catch (error) {
+      ElMessage.error(error?.message || t('admin.users.adjustBalanceFailed'))
+    } finally {
+      balanceLoading.value = false
+    }
+  }
+
   const formatDateTime = (dateTimeStr) => {
     if (!dateTimeStr) return '-'
     const date = new Date(dateTimeStr)
@@ -538,6 +592,7 @@ export function useUserManagement() {
     addUserLoading, addUserFormRef, isEditing,
     showResetPasswordDialog, resetPasswordForm, resetPasswordLoading, generatedPassword,
     showSetExpiryDialog, freezeLoading, freezeForm,
+    showAdjustBalanceDialog, balanceLoading, balanceForm,
     searchUsername, searchStatus, searchUserType,
     multipleSelection, currentPage, pageSize, total, availableLevels,
     addUserForm, addUserRules,
@@ -551,6 +606,7 @@ export function useUserManagement() {
     handleResetPassword, confirmResetPassword, cancelResetPassword,
     handleLoginAsUser, copyPassword,
     handleSetExpiry, confirmSetExpiry,
+    handleAdjustBalance, confirmAdjustBalance,
     formatDateTime, isExpired,
     handleSizeChange, handleCurrentChange,
     t

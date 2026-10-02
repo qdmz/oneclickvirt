@@ -377,26 +377,40 @@ const {
 
 .page-header {
   margin-bottom: 24px;
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .page-header h1 {
   margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   color: var(--text-color-primary);
+  letter-spacing: -0.5px;
 }
 
 .page-header p {
   margin: 0;
   color: var(--text-color-secondary);
+  font-size: 14px;
 }
 
 .filter-section {
   background: var(--card-bg-solid);
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 18px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   margin-bottom: 24px;
+  border: 1px solid var(--border-color);
+  animation: fadeInUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.05s both;
+}
+
+.filter-section :deep(.el-input__wrapper) {
+  border-radius: 12px !important;
 }
 
 .instances-grid {
@@ -409,20 +423,40 @@ const {
 .instance-card {
   background: var(--card-bg-solid);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 22px;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.instance-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #06b6d4, #6366f1);
+  border-radius: 18px 18px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .instance-card:hover {
   border-color: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.12), 0 0 0 1px rgba(16, 185, 129, 0.06);
+  transform: translateY(-4px);
+}
+
+.instance-card:hover::before {
+  opacity: 1;
 }
 
 .instance-card-disabled {
@@ -432,8 +466,12 @@ const {
 
 .instance-card-disabled:hover {
   border-color: var(--border-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transform: none;
+}
+
+.instance-card-disabled:hover::before {
+  opacity: 0;
 }
 
 .instance-header {
@@ -450,7 +488,7 @@ const {
 .instance-info h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color-primary);
   overflow-wrap: anywhere;
 }
@@ -463,10 +501,27 @@ const {
 
 .instance-type .el-tag {
   margin-left: 0 !important;
+  border-radius: 999px !important;
 }
 
 .instance-status {
   flex-shrink: 0;
+}
+
+.instance-status :deep(.el-tag) {
+  border-radius: 999px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.instance-status :deep(.el-tag)::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
 }
 
 .instance-details {
@@ -488,8 +543,9 @@ const {
 
 .detail-item .label {
   color: var(--text-color-secondary);
-  font-weight: 500;
+  font-weight: 600;
   min-width: 80px;
+  font-size: 13px;
 }
 
 .detail-item .value {
@@ -498,6 +554,7 @@ const {
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
 }
 
 .port-mappings {
@@ -519,48 +576,8 @@ const {
 .port-tag {
   margin: 2px;
   font-size: 12px;
+  border-radius: 8px !important;
 }
-
-.instance-details {
-  margin-bottom: 16px;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.detail-item.port-info {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.detail-item .label {
-  color: var(--text-color-secondary);
-  font-weight: 500;
-  min-width: 80px;
-}
-
-.detail-item .value {
-  color: var(--text-color-primary);
-  text-align: right;
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.port-mappings {
-  margin-top: 8px;
-  width: 100%;
-}
-
-.public-ip, .port-range, .ipv6-info {
-  margin-bottom: 8px;
-}
-
 
 .pagination {
   display: flex;
@@ -574,7 +591,7 @@ const {
 
 .instance-actions {
   border-top: 1px solid var(--el-border-color-lighter);
-  padding-top: 12px;
+  padding-top: 14px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -584,11 +601,47 @@ const {
 .instance-actions .el-button {
   font-size: 12px;
   margin-left: 0;
+  border-radius: 10px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.instance-actions .el-button:hover {
+  transform: translateY(-1px);
+}
+
+.instance-card {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.instance-card:nth-child(1) { animation-delay: 0.06s; }
+.instance-card:nth-child(2) { animation-delay: 0.12s; }
+.instance-card:nth-child(3) { animation-delay: 0.18s; }
+.instance-card:nth-child(4) { animation-delay: 0.24s; }
+.instance-card:nth-child(5) { animation-delay: 0.30s; }
+.instance-card:nth-child(6) { animation-delay: 0.36s; }
+.instance-card:nth-child(7) { animation-delay: 0.42s; }
+.instance-card:nth-child(8) { animation-delay: 0.48s; }
+
+@media (max-width: 1024px) {
+  .instances-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+  }
 }
 
 @media (max-width: 768px) {
   .user-instances {
     padding: 0;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .filter-section {
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 16px;
   }
 
   .filter-section :deep(.el-form--inline) {
@@ -614,22 +667,66 @@ const {
 
   .instance-card {
     padding: 16px;
+    border-radius: 14px;
   }
 
   .instance-header {
     gap: 12px;
   }
 
+  .instance-info h3 {
+    font-size: 16px;
+  }
+
   .detail-item {
     gap: 12px;
+    font-size: 13px;
   }
 
   .detail-item .label {
     min-width: 72px;
+    font-size: 12px;
   }
 
   .instance-actions {
     justify-content: flex-start;
+  }
+
+  .instance-actions .el-button {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .instance-card {
+    padding: 14px;
+  }
+
+  .instance-info h3 {
+    font-size: 15px;
+  }
+
+  .detail-item {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .detail-item .label {
+    min-width: 64px;
+  }
+
+  .port-tag {
+    font-size: 10px;
+  }
+
+  .instance-actions .el-button {
+    font-size: 10px;
+    padding: 5px 8px;
   }
 }
 </style>

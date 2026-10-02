@@ -94,9 +94,15 @@ export default {
   noPermission: '您没有权限执行此操作',
   accountDisabled: '您的账户已被禁用，请联系管理员',
   requestTooLarge: '上传的文件或数据过大，请减少文件大小或数据量',
+  apiVersionMismatchTitle: '主控版本不一致',
+  apiVersionMismatchMessage: '当前前端与主控的 API 契约不一致，或请求接口未在主控中注册。请完整更新主控二进制和 Web 文件到同一版本后刷新页面，避免仅替换其中一部分。',
+  backendVersion: '主控版本',
   nothingToCopy: '没有可复制的内容',
   copySuccess: '复制成功',
   copyFailed: '复制失败，请手动复制',
+  pasteFailed: '粘贴失败，请检查浏览器剪贴板权限',
+  clipboardUnavailable: '浏览器剪贴板读取不可用，请使用 HTTPS 并允许剪贴板权限',
+  connectionClosed: '连接已断开',
   cannotSerialize: '无法序列化对象',
   unknownError: '未知错误',
   popupBlocked: '无法打开新窗口，请检查浏览器弹窗设置',
@@ -158,5 +164,8 @@ export default {
   agentFMDeleteFailed: '删除失败',
   agentFMDeleteConfirm: '确定要删除 {name} 吗？此操作不可撤销。',
   agentFMMkdirFailed: '创建目录失败',
-  agentFMFileSizeLimit: '文件过大（最大 50 MB），请通过其他方式传输'
+  agentFMFileSizeLimit: '文件过大（最大 50 MB），请通过其他方式传输',
+  detail: '详情',
+  reply: '回复',
+  tip: '提示'
 }

@@ -7,10 +7,10 @@
         <div class="logo">
           <img
             :src="siteStore.logoSrc"
-            alt="OneClickVirt Logo"
+            :alt="siteStore.displaySiteName"
             class="logo-image"
           >
-          <h1>{{ t('home.title') }}</h1>
+          <h1>{{ siteStore.displaySiteName }}</h1>
         </div>
         <nav class="nav-menu">
           <!-- 主题切换按钮 -->
@@ -48,13 +48,16 @@
     <!-- 主要内容 -->
     <main class="home-main">
       <!-- 英雄区域 -->
-      <section class="hero-section">
+      <section
+        class="hero-section"
+        :style="heroStyle"
+      >
         <div class="hero-content">
           <h1 class="hero-title">
-            {{ siteStore.displaySiteName || t('home.hero.title') }}
+            {{ siteStore.homeTitle || t('home.hero.title') }}
           </h1>
           <p class="hero-description">
-            {{ siteStore.displaySlogan || t('home.hero.description') }}
+            {{ siteStore.homeSubtitle || t('home.hero.description') }}
           </p>
           <div class="hero-actions">
             <router-link
@@ -163,13 +166,16 @@
       </section>
 
       <!-- 支持的虚拟化平台 -->
-      <section class="platforms-section">
+      <section
+        v-if="siteStore.showPlatforms"
+        class="platforms-section"
+      >
         <div class="section-header">
           <h2>{{ t('home.platforms.title') }}</h2>
           <p>{{ t('home.platforms.description') }}</p>
         </div>
         <LogoCarousel
-          :items="platforms"
+          :items="platformList"
           :speed="35"
           direction="left"
           :gap="24"
@@ -207,14 +213,17 @@
       </section>
 
       <!-- 赞助方 -->
-      <section class="supporters-section">
+      <section
+        v-if="siteStore.showSponsors"
+        class="supporters-section"
+      >
         <div class="section-header">
           <h2>{{ t('home.supporters.title') }}</h2>
           <p>{{ t('home.supporters.description') }}</p>
         </div>
         <div class="supporters-grid">
           <a
-            v-for="item in footerSponsors"
+            v-for="item in sponsorList"
             :key="item.name"
             :href="item.href"
             target="_blank"
@@ -267,6 +276,92 @@
           </div>
         </div>
       </section>
+
+      <!-- 推荐产品 -->
+      <section
+        v-if="siteStore.showRecommended && recommendedProducts.length > 0"
+        class="recommended-section"
+      >
+        <div class="section-header">
+          <h2>{{ siteStore.recommendedTitle || t('home.recommendedProducts.title') }}</h2>
+          <p>{{ siteStore.recommendedSubtitle || t('home.recommendedProducts.subtitle') }}</p>
+        </div>
+        <div
+          class="recommended-grid"
+          :style="{ gridTemplateColumns: 'repeat(' + effectiveCols + ', minmax(0, 1fr))' }"
+        >
+          <el-card
+            v-for="p in recommendedProducts"
+            :key="p.id"
+            shadow="hover"
+            class="recommended-card"
+            @click="goToProduct(p.id)"
+          >
+            <div class="rec-card-head">
+              <div class="rec-card-icon">
+                <img
+                  v-if="p.icon"
+                  :src="p.icon"
+                  :alt="p.name"
+                  class="rec-icon-img"
+                >
+                <el-icon v-else :size="30" color="#16a34a"><Box /></el-icon>
+              </div>
+              <div class="rec-card-title">
+                <h3 class="rec-name">{{ p.name }}</h3>
+                <span class="rec-type-tag">{{ categoryLabel(p) }}</span>
+              </div>
+            </div>
+            <p class="rec-desc">{{ p.description }}</p>
+
+            <div
+              v-if="siteStore.recommendedShowSpecs"
+              class="rec-specs"
+            >
+              <div class="rec-spec">
+                <span class="rec-spec-label">{{ t('user.store.cpu') }}</span>
+                <span class="rec-spec-val">{{ p.cpu }} {{ t('user.store.cores') }}</span>
+              </div>
+              <div class="rec-spec">
+                <span class="rec-spec-label">{{ t('user.store.memory') }}</span>
+                <span class="rec-spec-val">{{ formatMB(p.memory) }}</span>
+              </div>
+              <div class="rec-spec">
+                <span class="rec-spec-label">{{ t('user.store.disk') }}</span>
+                <span class="rec-spec-val">{{ formatMB(p.disk) }}</span>
+              </div>
+              <div class="rec-spec">
+                <span class="rec-spec-label">{{ t('user.store.bandwidth') }}</span>
+                <span class="rec-spec-val">{{ p.bandwidth }} Mbps</span>
+              </div>
+              <div class="rec-spec">
+                <span class="rec-spec-label">{{ t('user.store.traffic') }}</span>
+                <span class="rec-spec-val">{{ formatMB(p.traffic) }}</span>
+              </div>
+            </div>
+
+            <div class="rec-footer">
+              <div
+                v-if="siteStore.recommendedShowPrice"
+                class="rec-price"
+              >
+                <span class="rec-price-symbol">¥</span>
+                <span class="rec-price-num">{{ p.price }}</span>
+                <span class="rec-price-unit">/{{ periodLabel(p) }}</span>
+              </div>
+              <div class="rec-stock">
+                {{ p.stock < 0 ? t('user.store.stockUnlimited') : (p.stock + ' ' + t('user.store.stock')) }}
+              </div>
+            </div>
+          </el-card>
+        </div>
+        <div class="rec-viewall">
+          <router-link
+            to="/user/store"
+            class="btn btn-secondary"
+          >{{ t('home.recommendedProducts.viewAll') }}</router-link>
+        </div>
+      </section>
     </main>
 
     <!-- 页脚 -->
@@ -303,120 +398,26 @@
           </a>
         </div>
 
-        <div class="footer-links-grid">
+        <div
+          v-if="footerLinkList.length > 0"
+          class="footer-links-grid"
+        >
           <div class="footer-col">
             <h4 class="footer-col-title">
               <span class="footer-col-dot" />
-              {{ t('home.footer.coreProjects') }}
+              {{ t('home.footer.friendLinks') }}
             </h4>
             <ul class="footer-link-list">
-              <li>
+              <li
+                v-for="l in footerLinkList"
+                :key="l.id"
+              >
                 <a
-                  href="https://github.com/oneclickvirt/oneclickvirt"
+                  :href="l.href"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span class="link-arrow">›</span>OneClickVirt
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt/ecs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>ECS
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="footer-col-title">
-              <span class="footer-col-dot" />
-              {{ t('home.footer.relatedProjects') }}
-            </h4>
-            <ul class="footer-link-list">
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt/pve"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>Proxmox VE
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt/incus"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>Incus
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt/docker"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>Docker
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt/lxd"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>LXD
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="more-link"
-                >
-                  <span class="link-arrow">›</span>{{ t('home.footer.moreProjects') }}
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="footer-col-title">
-              <span class="footer-col-dot" />
-              {{ t('home.footer.supportAndDocs') }}
-            </h4>
-            <ul class="footer-link-list">
-              <li>
-                <a
-                  href="https://www.spiritlhl.net/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>{{ t('home.footer.documentation') }}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/oneclickvirt/oneclickvirt/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>{{ t('home.footer.feedback') }}
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://t.me/oneclickvirt"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>{{ t('home.footer.communityGroup') }}
+                  <span class="link-arrow">›</span>{{ l.name }}
                 </a>
               </li>
             </ul>
@@ -426,7 +427,7 @@
 
       <div class="footer-bottom">
         <div class="footer-bottom-inner">
-          <span class="footer-copyright">&copy; 2026 {{ siteStore.displaySiteName }}. {{ t('home.footer.allRightsReserved') }}</span>
+          <span class="footer-copyright">&copy; 2026 {{ siteStore.copyrightText || (siteStore.displaySiteName + '. ' + t('home.footer.allRightsReserved')) }}</span>
           <span class="footer-divider" />
           <a
             href="https://github.com/oneclickvirt"
@@ -476,10 +477,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { getPublicAnnouncements, getPublicStats, getServerVersion } from '@/api/public'
+import { getPublicAnnouncements, getPublicStats, getServerVersion, getRecommendedProducts, getSiteLinks } from '@/api/public'
 import { checkSystemInit } from '@/api/init'
 import { ElTag, ElMessage } from 'element-plus'
-import { Operation, Sunny, Moon } from '@element-plus/icons-vue'
+import { Operation, Sunny, Moon, Box } from '@element-plus/icons-vue'
 import { useLanguageStore } from '@/pinia/modules/language'
 import LogoCarousel from '@/components/LogoCarousel.vue'
 import proxmoxPng from '@/assets/images/proxmox.png'
@@ -501,6 +502,8 @@ const languageStore = useLanguageStore()
 const themeStore = useThemeStore()
 const siteStore = useSiteStore()
 const announcements = ref([])
+// 首页推荐产品
+const recommendedProducts = ref([])
 // 统计数据
 const usersCount = ref(null)
 const nodesCount = ref(null)
@@ -552,11 +555,6 @@ const footerSponsors = [
     logo: 'https://cdn3.ldstatic.com/original/4X/d/1/4/d146c68151340881c884d95e0da4acdf369258c6.png',
     cardClass: 'supporter-card-linuxdo',
     logoClass: 'supporter-logo-linuxdo'
-  },
-  {
-    name: 'JTTI',
-    href: 'https://www.jtti.cc/zh/activity/special-offer.html?z=oneclickvirt',
-    logo: 'https://www.jtti.cc/static/images/common/article_logo.png'
   }
 ]
 
@@ -564,6 +562,52 @@ const usersCountDisplay = computed(() => (usersCount.value === null ? '-' : user
 const nodesCountDisplay = computed(() => (nodesCount.value === null ? '-' : nodesCount.value))
 const containersCountDisplay = computed(() => (containersCount.value === null ? '-' : containersCount.value))
 const vmsCountDisplay = computed(() => (vmsCount.value === null ? '-' : vmsCount.value))
+
+// 站点链接（来自 site_links 表，后台「站点链接」可配置）——首页平台/赞助方/页脚均从此读取
+const siteLinksPlatform = ref([])
+const siteLinksSponsor = ref([])
+const footerLinks = ref([])
+
+const fetchSiteLinks = async () => {
+  try {
+    const [p, s, f] = await Promise.all([
+      getSiteLinks('platform'),
+      getSiteLinks('sponsor'),
+      getSiteLinks('footer')
+    ])
+    if (p && p.code === 200 && Array.isArray(p.data)) siteLinksPlatform.value = p.data
+    if (s && s.code === 200 && Array.isArray(s.data)) siteLinksSponsor.value = s.data
+    if (f && f.code === 200 && Array.isArray(f.data)) footerLinks.value = f.data
+  } catch (error) {
+    console.error('获取站点链接失败', error)
+  }
+}
+
+// 平台轮播：优先使用后台配置的 site_links，无数据时回退到内置默认值
+const platformList = computed(() => {
+  if (siteLinksPlatform.value.length > 0) {
+    return siteLinksPlatform.value.map(l => ({ name: l.name, href: l.url, icon: l.iconUrl, repo: l.description || '' }))
+  }
+  return platforms
+})
+
+// 赞助方：优先后台配置，无数据回退内置默认值
+const sponsorList = computed(() => {
+  if (siteLinksSponsor.value.length > 0) {
+    return siteLinksSponsor.value.map(l => ({ name: l.name, href: l.url, logo: l.iconUrl }))
+  }
+  return footerSponsors
+})
+
+// 页脚友链
+const footerLinkList = computed(() => footerLinks.value.map(l => ({ id: l.id, name: l.name, href: l.url })))
+
+// 英雄区背景（站点配置可设置首页背景图）
+const heroStyle = computed(() => {
+  return siteStore.homeBackground
+    ? { backgroundImage: `url(${siteStore.homeBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : {}
+})
 
 const switchLanguage = () => {
   const newLang = languageStore.toggleLanguage()
@@ -616,6 +660,60 @@ const fetchPublicStats = async () => {
   }
 }
 
+const fetchRecommendedProducts = async () => {
+  try {
+    const limit = siteStore.recommendedLimit > 0 ? siteStore.recommendedLimit : 8
+    const res = await getRecommendedProducts({ limit })
+    if (res && res.code === 200 && Array.isArray(res.data)) {
+      recommendedProducts.value = res.data.slice(0, limit)
+    }
+  } catch (error) {
+    console.error('获取推荐产品失败', error)
+  }
+}
+
+const goToProduct = (id) => {
+  router.push(`/user/store/${id}`)
+}
+
+const goToStore = () => {
+  router.push('/user/store')
+}
+
+// 推荐产品每行列数（来自站点配置，限制在 2~6 之间）
+const effectiveCols = computed(() => {
+  const c = Number(siteStore.recommendedCols)
+  if (!c || c < 2) return 2
+  if (c > 6) return 6
+  return c
+})
+
+// 产品类型/类别标签
+const categoryLabel = (p) => {
+  if (!p) return ''
+  if (p.category === 'container') return t('user.store.categoryContainer')
+  if (p.category === 'vm') return t('user.store.categoryVM')
+  return p.type || ''
+}
+
+// 将 MB 格式化为 GB / MB
+const formatMB = (mb) => {
+  const n = Number(mb) || 0
+  if (n >= 1024) return (n / 1024) + ' GB'
+  return n + ' MB'
+}
+
+// 计费周期后缀
+const periodLabel = (p) => {
+  const map = {
+    month: t('user.store.perMonth'),
+    day: t('user.store.perDay'),
+    year: t('user.store.perYear'),
+    hour: t('user.store.perHour')
+  }
+  return map[p && p.periodType] || t('user.store.perMonth')
+}
+
 const checkInitStatus = async () => {
   try {
     const response = await checkSystemInit()
@@ -635,12 +733,18 @@ const checkInitStatus = async () => {
 }
 
 onMounted(() => {
+  // 首先加载完整站点配置（首页各栏目/英雄区文本/显示开关均由站点配置驱动）
+  siteStore.fetchFullSiteConfig()
+  // 获取后台可配置的站点链接（平台/赞助方/页脚）
+  fetchSiteLinks()
   // 首先检查初始化状态
   checkInitStatus()
   // 然后获取公告
   fetchAnnouncements()
   // 获取公开统计数据（用于未登录首页展示）
   fetchPublicStats()
+  // 获取首页推荐产品
+  fetchRecommendedProducts()
   // 获取服务器版本信息
   getServerVersion().then(res => {
     if (res && (res.code === 200) && res.data?.server_version) {
@@ -653,4 +757,315 @@ onMounted(() => {
 })
 </script>
 
-<style src="./home.css" scoped></style>
+<style src="./home.css" scoped>
+
+/* ── 现代 UI 增强 ── */
+
+/* 卡片 */
+:deep(.el-card),
+:deep(.el-card.is-always-shadow),
+:deep(.el-card.is-hover-shadow) {
+  border-radius: 16px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.el-card:hover) {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.09) !important;
+}
+
+/* 统计卡片 */
+.stat-card :deep(.el-card__body) {
+  padding: 20px !important;
+}
+
+.stat-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+.stat-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 22px !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+}
+
+.stat-icon.user-icon { background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; }
+.stat-icon.server-icon { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; }
+.stat-icon.vm-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; }
+.stat-icon.container-icon { background: linear-gradient(135deg, #ec4899, #f472b6); color: #fff; }
+.stat-icon.cpu-icon { background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; }
+.stat-icon.memory-icon { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; }
+.stat-icon.disk-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; }
+
+.stat-number {
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  color: var(--text-color-primary) !important;
+  line-height: 1.1 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.stat-label {
+  font-size: 13px !important;
+  color: var(--text-color-secondary) !important;
+  font-weight: 600 !important;
+  margin-top: 2px !important;
+}
+
+/* 资源卡片 */
+.resource-card :deep(.el-card__body) {
+  padding: 16px 20px !important;
+}
+
+.resource-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.resource-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+}
+
+.resource-title {
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  color: var(--text-color-primary) !important;
+}
+
+.resource-number-value {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: var(--primary-color) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.resource-number-label {
+  font-size: 11px !important;
+  color: var(--text-color-secondary) !important;
+  font-weight: 600 !important;
+}
+
+.resource-number-separator {
+  color: var(--text-color-tertiary) !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  margin: 0 8px !important;
+}
+
+/* 按钮 */
+:deep(.el-button--primary) {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light)) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2) !important;
+}
+
+:deep(.el-button--primary:hover) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
+}
+
+:deep(.el-button--success) {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+:deep(.el-button--warning) {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+:deep(.el-button--danger) {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+:deep(.el-button--default) {
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.el-button--default:hover) {
+  transform: translateY(-1px) !important;
+}
+
+/* 表格 */
+:deep(.el-table) {
+  --el-table-border-color: var(--border-color) !important;
+}
+
+:deep(.el-table th) {
+  background: rgba(99, 102, 241, 0.04) !important;
+  color: var(--text-color-primary) !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.3px !important;
+}
+
+:deep(.el-table td) {
+  font-size: 13px !important;
+  color: var(--text-color-primary) !important;
+}
+
+:deep(.el-table__row) {
+  transition: all 0.2s ease !important;
+}
+
+:deep(.el-table__row:hover) {
+  background: rgba(99, 102, 241, 0.04) !important;
+  transform: scale(1.005) !important;
+}
+
+/* 徽章 */
+:deep(.el-tag) {
+  border-radius: 999px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  padding: 2px 12px !important;
+  border: none !important;
+}
+
+:deep(.el-tag--success) {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #10b981 !important;
+}
+
+:deep(.el-tag--warning) {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #f59e0b !important;
+}
+
+:deep(.el-tag--danger) {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+}
+
+:deep(.el-tag--info) {
+  background: rgba(107, 114, 128, 0.1) !important;
+  color: #6b7280 !important;
+}
+
+/* 输入框 */
+:deep(.el-input__wrapper) {
+  border-radius: 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+:deep(.el-select .el-input__wrapper),
+:deep(.el-cascader .el-input__wrapper) {
+  border-radius: 12px !important;
+}
+
+/* 分页 */
+:deep(.el-pagination) {
+  margin-top: 24px !important;
+}
+
+:deep(.el-pager li),
+:deep(.el-pager li.btn-quicknext),
+:deep(.el-pager li.btn-quickprev),
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next) {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+:deep(.el-pager li.is-active) {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light)) !important;
+  border-color: transparent !important;
+}
+
+/* 加载态 */
+.el-loading-mask {
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.el-dark .el-loading-mask {
+  background: rgba(15, 23, 42, 0.7) !important;
+}
+
+/* 标题 */
+h1, h2, h3, h4 {
+  color: var(--text-color-primary) !important;
+}
+
+/* 进场动画 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 响应式断点 */
+@media (max-width: 768px) {
+  .stat-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .stat-number {
+    font-size: 22px !important;
+  }
+
+  .stat-icon {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+  }
+
+  .resource-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .resource-numbers {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-number {
+    font-size: 20px !important;
+  }
+
+  .stat-label {
+    font-size: 12px !important;
+  }
+
+  .resource-number-value {
+    font-size: 18px !important;
+  }
+}
+</style>

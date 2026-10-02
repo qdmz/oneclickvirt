@@ -540,3 +540,566 @@ body {
     margin-bottom: 14px;
   }
 }
+
+/* ============================================================
+ * OneHost 现代 UI 增强层 - 玻璃拟态/霓虹/动画/响应式
+ * ============================================================ */
+
+/* ── 玻璃拟态卡片 ── */
+.modern-card {
+  background: var(--dark-card, rgba(30, 41, 59, 0.75));
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12));
+  border-radius: var(--radius-modern-lg, 20px);
+  box-shadow: var(--glow-md, 0 8px 24px rgba(0, 0, 0, 0.35));
+  transition: transform 0.35s var(--modern-transition, cubic-bezier(0.4,0,0.2,1)),
+              box-shadow 0.35s var(--modern-transition, cubic-bezier(0.4,0,0.2,1)),
+              border-color 0.35s var(--modern-transition, cubic-bezier(0.4,0,0.2,1));
+}
+
+.modern-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow-lg, 0 12px 40px rgba(99, 102, 241, 0.15));
+  border-color: var(--dark-border, rgba(99, 102, 241, 0.25));
+}
+
+/* ── 渐变文字 ── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--neon-primary, #6366f1), var(--neon-accent, #06b6d4));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-purple {
+  background: linear-gradient(135deg, var(--neon-purple, #a855f7), var(--neon-pink, #ec4899));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── 霓虹按钮 ── */
+.neon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-modern, 14px);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.25s var(--modern-transition, cubic-bezier(0.4,0,0.2,1)),
+              box-shadow 0.25s var(--modern-transition, cubic-bezier(0.4,0,0.2,1));
+  background: linear-gradient(135deg, var(--neon-primary, #6366f1), var(--neon-purple, #a855f7));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+}
+
+.neon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45), 0 0 20px rgba(99, 102, 241, 0.25);
+}
+
+.neon-btn:active {
+  transform: translateY(0);
+}
+
+.neon-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+  pointer-events: none;
+}
+
+.neon-btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* ── 玻璃按钮 ── */
+.glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-modern, 14px);
+  border: 1px solid var(--dark-border, rgba(99, 102, 241, 0.25));
+  background: var(--dark-input, rgba(255, 255, 255, 0.06));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--dark-text-primary, #f8fafc);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s var(--modern-transition, cubic-bezier(0.4,0,0.2,1));
+}
+
+.glass-btn:hover {
+  background: var(--dark-hover, rgba(99, 102, 241, 0.12));
+  border-color: var(--neon-primary, #6366f1);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ── 状态徽章 ── */
+.status-badge-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.status-badge-modern::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.status-badge-modern.running,
+.status-badge-modern.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--neon-green, #10b981);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.status-badge-modern.stopped,
+.status-badge-modern.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--neon-red, #ef4444);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.status-badge-modern.pending,
+.status-badge-modern.warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--neon-amber, #f59e0b);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.status-badge-modern.info {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+/* ── 统计卡片 ── */
+.stat-card-modern {
+  position: relative;
+  padding: 24px;
+  border-radius: var(--radius-modern-lg, 20px);
+  background: var(--dark-card, rgba(30, 41, 59, 0.75));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12));
+  box-shadow: var(--glow-sm, 0 2px 6px rgba(0, 0, 0, 0.3));
+  transition: transform 0.35s var(--modern-transition, cubic-bezier(0.4,0,0.2,1)),
+              box-shadow 0.35s var(--modern-transition, cubic-bezier(0.4,0,0.2,1));
+  overflow: hidden;
+}
+
+.stat-card-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-primary, #6366f1), var(--neon-accent, #06b6d4), var(--neon-purple, #a855f7));
+  opacity: 0.8;
+}
+
+.stat-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow-lg, 0 12px 40px rgba(99, 102, 241, 0.15));
+}
+
+.stat-value-modern {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--dark-text-primary, #f8fafc), var(--dark-text-secondary, #94a3b8));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label-modern {
+  font-size: 13px;
+  color: var(--dark-text-secondary, #94a3b8);
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* ── 现代输入框 ── */
+.modern-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-modern, 14px);
+  border: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12));
+  background: var(--dark-input, rgba(255, 255, 255, 0.06));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--dark-text-primary, #f8fafc);
+  font-size: 14px;
+  transition: all 0.25s var(--modern-transition, cubic-bezier(0.4,0,0.2,1));
+}
+
+.modern-input:focus {
+  outline: none;
+  border-color: var(--neon-primary, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-input::placeholder {
+  color: var(--dark-text-muted, #64748b);
+}
+
+/* ── 现代表格 ── */
+.modern-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius-modern-lg, 20px);
+  overflow: hidden;
+  background: var(--dark-card, rgba(30, 41, 59, 0.75));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12));
+}
+
+.modern-table thead tr {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.modern-table th {
+  padding: 14px 18px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--dark-text-secondary, #94a3b8);
+  border-bottom: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12));
+}
+
+.modern-table td {
+  padding: 14px 18px;
+  font-size: 14px;
+  color: var(--dark-text-primary, #f8fafc);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+}
+
+.modern-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.modern-table tbody tr:hover {
+  background: var(--dark-hover, rgba(99, 102, 241, 0.12));
+}
+
+.modern-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── 动画 ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.15);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s var(--modern-transition, cubic-bezier(0.4,0,0.2,1)) both;
+}
+
+.animate-slide-in {
+  animation: slideInLeft 0.5s var(--modern-transition, cubic-bezier(0.4,0,0.2,1)) both;
+}
+
+.neon-pulse {
+  animation: neonPulse 2.5s ease-in-out infinite;
+}
+
+/* ── 骨架屏 ── */
+.skeleton-modern {
+  border-radius: var(--radius-modern, 14px);
+  background: linear-gradient(90deg,
+    rgba(148, 163, 184, 0.08) 25%,
+    rgba(148, 163, 184, 0.16) 50%,
+    rgba(148, 163, 184, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── 现代滚动条 ── */
+.modern-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modern-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modern-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-primary, #6366f1), var(--neon-purple, #a855f7));
+  border-radius: 999px;
+}
+
+/* ── 增强响应式 ── */
+
+/* 平板 (768px - 1023px) */
+@media (max-width: 1023px) {
+  .stat-card-modern {
+    padding: 18px;
+  }
+
+  .stat-value-modern {
+    font-size: 26px;
+  }
+
+  .modern-table th,
+  .modern-table td {
+    padding: 10px 12px;
+  }
+}
+
+/* 移动端 (480px - 767px) */
+@media (max-width: 767px) {
+  .stat-card-modern {
+    padding: 14px;
+    border-radius: var(--radius-modern, 14px);
+  }
+
+  .stat-value-modern {
+    font-size: 22px;
+  }
+
+  .stat-label-modern {
+    font-size: 11px;
+  }
+
+  .neon-btn,
+  .glass-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .modern-table {
+    border-radius: var(--radius-modern, 14px);
+  }
+
+  .modern-table th,
+  .modern-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .modern-input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .gradient-text {
+    font-size: inherit;
+  }
+}
+
+/* 小屏手机 (<480px) */
+@media (max-width: 479px) {
+  .stat-card-modern {
+    padding: 12px;
+  }
+
+  .stat-value-modern {
+    font-size: 20px;
+  }
+
+  .neon-btn,
+  .glass-btn {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .modern-table th {
+    font-size: 10px;
+    letter-spacing: 0.4px;
+  }
+
+  .modern-table td {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .status-badge-modern {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+}
+
+/* ── 深色模式下的 Element Plus 增强 ── */
+html.dark {
+  .el-card {
+    background: var(--dark-card, rgba(30, 41, 59, 0.75)) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: var(--dark-border-subtle, rgba(148, 163, 184, 0.12)) !important;
+    border-radius: var(--radius-modern-lg, 20px) !important;
+  }
+
+  .el-button--primary {
+    background: linear-gradient(135deg, var(--neon-primary, #6366f1), var(--neon-purple, #a855f7)) !important;
+    border: none !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3) !important;
+  }
+
+  .el-button--primary:hover {
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45), 0 0 20px rgba(99, 102, 241, 0.25) !important;
+    transform: translateY(-1px);
+  }
+
+  .el-input__wrapper {
+    background: var(--dark-input, rgba(255, 255, 255, 0.06)) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-modern, 14px) !important;
+    box-shadow: 0 0 0 1px var(--dark-border-subtle, rgba(148, 163, 184, 0.12)) inset !important;
+  }
+
+  .el-input__wrapper.is-focus {
+    box-shadow: 0 0 0 1px var(--neon-primary, #6366f1) inset, 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+  }
+
+  .el-dialog {
+    background: var(--dark-card, rgba(30, 41, 59, 0.9)) !important;
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12));
+    border-radius: var(--radius-modern-xl, 28px) !important;
+    box-shadow: var(--glow-lg, 0 12px 40px rgba(99, 102, 241, 0.15));
+  }
+
+  .el-table {
+    background: transparent !important;
+    border-radius: var(--radius-modern-lg, 20px);
+    overflow: hidden;
+  }
+
+  .el-table tr {
+    background: transparent !important;
+  }
+
+  .el-table th.el-table__cell {
+    background: rgba(99, 102, 241, 0.08) !important;
+    border-bottom: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12)) !important;
+  }
+
+  .el-table--border .el-table__cell {
+    border-right: 1px solid rgba(148, 163, 184, 0.06) !important;
+  }
+
+  .el-pagination .el-pager li {
+    background: var(--dark-input, rgba(255, 255, 255, 0.06)) !important;
+    border-radius: 8px !important;
+  }
+
+  .el-pagination .el-pager li.is-active {
+    background: linear-gradient(135deg, var(--neon-primary, #6366f1), var(--neon-purple, #a855f7)) !important;
+    color: #fff !important;
+  }
+
+  .el-tabs__item.is-active {
+    color: var(--neon-primary, #6366f1) !important;
+  }
+
+  .el-tabs__active-bar {
+    background: linear-gradient(90deg, var(--neon-primary, #6366f1), var(--neon-accent, #06b6d4)) !important;
+    height: 3px !important;
+    border-radius: 2px;
+  }
+
+  .el-switch.is-checked .el-switch__core {
+    background: linear-gradient(135deg, var(--neon-primary, #6366f1), var(--neon-purple, #a855f7)) !important;
+    border-color: transparent !important;
+  }
+
+  .el-slider__bar {
+    background: linear-gradient(90deg, var(--neon-primary, #6366f1), var(--neon-accent, #06b6d4)) !important;
+  }
+
+  .el-progress-bar__inner {
+    background: linear-gradient(90deg, var(--neon-primary, #6366f1), var(--neon-accent, #06b6d4)) !important;
+    border-radius: 999px;
+  }
+
+  .el-tag {
+    border-radius: 999px !important;
+  }
+
+  .el-drawer {
+    background: var(--dark-card, rgba(30, 41, 59, 0.9)) !important;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .el-message {
+    background: var(--dark-card, rgba(30, 41, 59, 0.9)) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--dark-border-subtle, rgba(148, 163, 184, 0.12)) !important;
+    border-radius: var(--radius-modern, 14px) !important;
+  }
+}

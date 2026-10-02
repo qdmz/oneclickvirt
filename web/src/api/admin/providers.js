@@ -141,6 +141,14 @@ export const syncProviderInstances = (id) => {
   })
 }
 
+// 节点重启后的受保护恢复同步：一次有界发现并复用后端恢复租约。
+export const forceProviderRecoverySync = (id) => {
+  return request({
+    url: `/v1/admin/providers/${id}/force-recovery-sync`,
+    method: 'post'
+  })
+}
+
 export const getProviderStatus = (id) => {
   return request({
     url: `/v1/admin/providers/${id}/status`,
@@ -282,6 +290,123 @@ export const deleteProviderIPv4PoolEntry = (providerId, entryId) => {
   return request({
     url: `/v1/admin/providers/${providerId}/ipv4-pool/${entryId}`,
     method: 'delete'
+  })
+}
+
+// IPv6 address pool management. Inputs may contain individual IPv6 addresses
+// or CIDR ranges; range expansion and allocation are handled by the server.
+export const getProviderIPv6Pool = (providerId, params) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-pool`,
+    method: 'get',
+    params
+  })
+}
+
+export const setProviderIPv6Pool = (providerId, data) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-pool`,
+    method: 'post',
+    data
+  })
+}
+
+export const syncProviderIPv6Pool = (providerId, data = {}) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-pool/sync`,
+    method: 'post',
+    data,
+    timeout: 120000
+  })
+}
+
+export const clearProviderIPv6Pool = (providerId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-pool`,
+    method: 'delete'
+  })
+}
+
+export const deleteProviderIPv6PoolEntry = (providerId, entryId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-pool/${entryId}`,
+    method: 'delete'
+  })
+}
+
+// Host-side IPv6-over-IPv4 tunnel management. Lifecycle calls use a longer
+// timeout because Agent and SSH execution share the same remote path.
+export const getProviderIPv6Tunnels = (providerId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels`,
+    method: 'get',
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const createProviderIPv6Tunnel = (providerId, data) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels`,
+    method: 'post',
+    data,
+    timeout: 120000,
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const updateProviderIPv6Tunnel = (providerId, tunnelId, data) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels/${tunnelId}`,
+    method: 'put',
+    data,
+    timeout: 120000,
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const enableProviderIPv6Tunnel = (providerId, tunnelId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels/${tunnelId}/enable`,
+    method: 'post',
+    timeout: 120000,
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const disableProviderIPv6Tunnel = (providerId, tunnelId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels/${tunnelId}/disable`,
+    method: 'post',
+    timeout: 120000,
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const checkProviderIPv6Tunnels = (providerId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels/check`,
+    method: 'post',
+    timeout: 120000,
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const deleteProviderIPv6Tunnel = (providerId, tunnelId) => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels/${tunnelId}`,
+    method: 'delete',
+    timeout: 120000,
+    suppressApiVersionMismatch: true
+  })
+}
+
+export const detectProviderIPv6TunnelLocalIPv4 = (providerId, remoteIpv4 = '') => {
+  return request({
+    url: `/v1/admin/providers/${providerId}/ipv6-tunnels/detect-local-ipv4`,
+    method: 'post',
+    data: { remoteIpv4 },
+    timeout: 30000,
+    suppressApiVersionMismatch: true
   })
 }
 

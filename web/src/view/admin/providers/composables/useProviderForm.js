@@ -7,6 +7,7 @@ import { extractEndpointHost } from '@/utils/endpoint'
 import { useI18n } from 'vue-i18n'
 import { DEFAULT_LEVEL_LIMITS, normalizeLevelLimits, formatLevelLimitsForBackend as formatLevels, getLevelTagType } from '@/utils/levels'
 import { isContainerOnlyProvider, isVMOnlyProvider } from '@/utils/providerTypes'
+import { hasAgentMappedNetworking } from '@/utils/networkType'
 
 // 解析等级限制配置（后端 kebab-case → 前端 camelCase）
 export const parseLevelLimits = (levelLimitsStr) => {
@@ -78,6 +79,9 @@ const buildDefaultForm = () => ({
   portRangeEnd: 65535,
   fixedPorts: [REQUIRED_FIXED_PORT],
   networkType: 'nat_ipv4',
+  ipv6AddressFilePath: '',
+  ipv6AddressFileSyncedAt: null,
+  ipv6AddressFileSyncError: '',
   defaultInboundBandwidth: 300,
   defaultOutboundBandwidth: 300,
   maxInboundBandwidth: 1000,
@@ -151,8 +155,6 @@ const buildDefaultForm = () => ({
   agentExecLastSeen: null,
   levelLimits: normalizeLevelLimits(DEFAULT_LEVEL_LIMITS)
 })
-
-const hasAgentMappedNetworking = (formData) => Boolean(formData.portIP)
 
 export function useProviderForm(loadProviders) {
   const { t, locale } = useI18n()
@@ -253,6 +255,9 @@ export function useProviderForm(loadProviders) {
     addProviderForm.portRangeStart = provider.portRangeStart || 10000
     addProviderForm.portRangeEnd = provider.portRangeEnd || 65535
     addProviderForm.networkType = provider.networkType || 'nat_ipv4'
+    addProviderForm.ipv6AddressFilePath = provider.ipv6AddressFilePath || ''
+    addProviderForm.ipv6AddressFileSyncedAt = provider.ipv6AddressFileSyncedAt || null
+    addProviderForm.ipv6AddressFileSyncError = provider.ipv6AddressFileSyncError || ''
     addProviderForm.defaultInboundBandwidth = provider.defaultInboundBandwidth || 300
     addProviderForm.defaultOutboundBandwidth = provider.defaultOutboundBandwidth || 300
     addProviderForm.maxInboundBandwidth = provider.maxInboundBandwidth || 1000
@@ -436,6 +441,7 @@ export function useProviderForm(loadProviders) {
         networkType: isAgentMode
           ? (agentCanUseMappedNetworking ? (formData.networkType || 'nat_ipv4') : 'no_port_mapping')
           : (formData.networkType || 'nat_ipv4'),
+        ipv6AddressFilePath: String(formData.ipv6AddressFilePath || '').trim(),
         defaultInboundBandwidth: formData.defaultInboundBandwidth || 300,
         defaultOutboundBandwidth: formData.defaultOutboundBandwidth || 300,
         maxInboundBandwidth: formData.maxInboundBandwidth || 1000,

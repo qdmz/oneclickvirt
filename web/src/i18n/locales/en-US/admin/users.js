@@ -76,5 +76,21 @@ export default {
   loginAs: "Login As",
   loginAsConfirm: "Are you sure you want to login as user {username}? A new tab will be opened.",
   loginAsSuccess: "Login as user successful, please operate in the new tab",
-  manualExpiry: "Manual Expiry"
+  manualExpiry: "Manual Expiry",
+  balance: "Balance",
+  adjustBalance: "Adjust Balance",
+  currentBalance: "Current Balance",
+  adjustMode: "Adjust Mode",
+  modeAdd: "Add / Deduct",
+  modeSet: "Set To Value",
+  modeAddTip: "Add (positive) or deduct (negative) on top of the current balance",
+  modeSetTip: "Set the balance directly to the value entered below",
+  adjustAmount: "Amount",
+  afterBalance: "Balance After",
+  yuan: "CNY",
+  adjustRemarkPlaceholder: "Optional, recorded in the user's balance history",
+  adjustAmountRequired: "Please enter an amount",
+  adjustAmountInvalid: "Balance cannot be negative",
+  adjustBalanceSuccess: "Balance updated, current balance ¥{balance}",
+  adjustBalanceFailed: "Failed to adjust balance"
 }

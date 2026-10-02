@@ -43,6 +43,11 @@ export default {
     typeHomepage: '首页公告',
     typeTopbar: '顶部栏公告'
   },
+  recommendedProducts: {
+    title: '推荐产品',
+    subtitle: '精选优质云服务器方案，限时抢购',
+    viewAll: '查看全部产品'
+  },
   supporters: {
     title: '赞助方',
     description: '感谢以下团体或个人赞助 OneClickVirt 项目'
@@ -56,11 +61,40 @@ export default {
     documentation: '使用文档',
     feedback: '问题反馈',
     communityGroup: '交流群组',
+    friendLinks: '友情链接',
     allRightsReserved: 'All rights reserved.',
     openSourceProject: '一键虚拟化旗下开源项目',
     serverVersion: '主控版本',
     latestVersion: '最新版本',
-    versionFetchFailed: '版本获取失败，后端可能已断连'
+    versionFetchFailed: '版本获取失败，后端可能已断连',
+    manageUpdates: '升级管理',
+    updateDialogTitle: '主控版本管理',
+    currentVersion: '当前版本',
+    deploymentMode: '部署模式',
+    deploymentFlavor: '发布类型',
+    updateTab: '升级',
+    rollbackTab: '回退',
+    commandsTab: '命令',
+    selectVersion: '选择目标版本',
+    selectRollbackVersion: '选择回退版本或本地备份',
+    assetUnavailable: '资产不可用',
+    localBackup: '本地备份',
+    updateNow: '立即升级',
+    rollbackNow: '立即回退',
+    restartNow: '重启主控',
+    noCommands: '当前部署没有可展示的命令',
+    destructiveCommand: '会修改运行环境',
+    copyCommand: '复制命令',
+    updateLoadFailed: '获取升级信息失败',
+    operationRunning: '操作进行中',
+    reconnecting: '主控正在重启，等待连接恢复',
+    operationSubmitted: '操作已提交',
+    operationFailed: '操作失败',
+    updateConfirm: '确定升级到 {version} 吗？升级会备份当前主控和 Web 文件，并重启服务。',
+    rollbackConfirm: '确定回退到 {version} 吗？数据库迁移不会自动逆向回退。',
+    restartConfirm: '确定重启主控服务吗？当前页面会短暂断开。',
+    rollbackWarning: '回退只替换主控和 Web 资产；数据库迁移通常保持向前兼容，请先确认版本兼容性。',
+    rollbackDatabaseNote: '数据库迁移通常不会自动逆向回退，请在生产操作前保留数据库备份。'
   },
   errors: {
     fetchAnnouncementsFailed: '获取公告失败:',

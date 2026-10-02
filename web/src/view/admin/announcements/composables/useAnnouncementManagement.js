@@ -187,10 +187,17 @@ export function useAnnouncementManagement() {
 
     submitting.value = true
     try {
+      const stripHtml = (html) => {
+        if (!html) return ''
+        const tmp = document.createElement('div')
+        tmp.innerHTML = html
+        return (tmp.textContent || tmp.innerText || '').trim()
+      }
+      const html = form.value.content || ''
       const data = {
         title: form.value.title,
-        content: form.value.content, // 这里既存储富文本也存储HTML
-        contentHtml: form.value.content, // 富文本编辑器返回的就是HTML
+        content: stripHtml(html),      // 纯文本（列表/概览直接展示，避免 <p> 包裹）
+        contentHtml: html,             // 富文本 HTML（首页 v-html 渲染）
         type: form.value.type,
         priority: form.value.priority,
         isSticky: form.value.isSticky

@@ -1,4 +1,5 @@
 import { useUserStore } from '@/pinia/modules/user'
+import { useSiteStore } from '@/pinia/modules/site'
 import { checkSystemInit } from '@/api/init'
 import { ElMessage } from 'element-plus'
 import i18n from '@/i18n'
@@ -12,6 +13,26 @@ let initStatusChecked = false
 let needsInit = false
 const INIT_CHECK_INTERVAL = 5 * 60 * 1000 // Re-check every 5 minutes
 let lastInitCheck = 0
+const DYNAMIC_IMPORT_RELOAD_KEY = 'ocv:dynamic-import-reload'
+
+function isDynamicImportFailure(error) {
+  const message = String(error?.message || error || '')
+  return /failed to fetch dynamically imported module|importing a module script failed|error loading dynamically imported module/i.test(message)
+}
+
+function reloadAfterDynamicImportFailure() {
+  try {
+    if (sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY)) {
+      sessionStorage.removeItem(DYNAMIC_IMPORT_RELOAD_KEY)
+      return false
+    }
+    sessionStorage.setItem(DYNAMIC_IMPORT_RELOAD_KEY, '1')
+    window.location.reload()
+    return true
+  } catch {
+    return false
+  }
+}
 
 // resetInitCache 供初始化成功后的页面调用，强制下次路由守卫重新查询初始化状态
 export function resetInitCache() {
@@ -40,10 +61,33 @@ async function checkInitStatus() {
 }
 
 export function setupRouterGuards(router) {
+  // chunk 加载失败自动重载（一次）：部署后浏览器残留旧 index.html 指向已删除的 JS chunk 时，
+  // 会触发「Failed to fetch dynamically imported module」，导致「加载失败」。自动刷新一次即可恢复，
+  // 避免用户手动硬刷新。
+  let chunkReloaded = false
   router.onError((error) => {
     NProgress.done()
+    const msg = (error && error.message) ? error.message : ''
+    if (/Failed to fetch dynamically imported module/i.test(msg) && !chunkReloaded) {
+      chunkReloaded = true
+      window.location.reload()
+      return
+    }
     console.error('路由加载失败:', error)
+    if (isDynamicImportFailure(error) && reloadAfterDynamicImportFailure()) {
+      return
+    }
     ElMessage.error(i18n.global.t('common.loadFailed'))
+  })
+
+  router.afterEach((_to, _from, failure) => {
+    if (!failure) {
+      try {
+        sessionStorage.removeItem(DYNAMIC_IMPORT_RELOAD_KEY)
+      } catch {
+        // Storage can be unavailable in restrictive browser contexts.
+      }
+    }
   })
 
   // 定义白名单（放在最前面，供所有逻辑使用）
@@ -75,7 +119,10 @@ export function setupRouterGuards(router) {
       
       // 获取用户信息
       try {
-        await userStore.fetchUserInfo()
+        const result = await userStore.fetchUserInfo()
+        if (!result || !result.success) {
+          throw new Error('fetchUserInfo returned failure')
+        }
         
         // 根据用户类型和视图模式跳转到相应页面
         const userType = userStore.userType
@@ -108,7 +155,10 @@ export function setupRouterGuards(router) {
       
       // 获取用户信息
       try {
-        await userStore.fetchUserInfo()
+        const result = await userStore.fetchUserInfo()
+        if (!result || !result.success) {
+          throw new Error('fetchUserInfo returned failure')
+        }
         
         // 清理OAuth2回调相关的localStorage
         localStorage.removeItem('username')
@@ -176,7 +226,10 @@ export function setupRouterGuards(router) {
       // 检查用户信息和状态
       if (!userStore.user) {
         try {
-          await userStore.fetchUserInfo()
+          const result = await userStore.fetchUserInfo()
+          if (!result || !result.success) {
+            throw new Error('fetchUserInfo returned failure')
+          }
         } catch (error) {
           console.error('获取用户信息失败:', error)
           userStore.logout()
@@ -212,7 +265,7 @@ export function setupRouterGuards(router) {
       }
       
       // 超级管理员专属页面：normal_admin 不能访问
-      const superAdminOnlyPaths = ['/admin/users', '/admin/config', '/admin/performance', '/admin/logs', '/admin/oauth2-providers', '/admin/invite-codes', '/admin/announcements', '/admin/kyc']
+      const superAdminOnlyPaths = ['/admin/users', '/admin/config', '/admin/performance', '/admin/logs', '/admin/oauth2-providers', '/admin/invite-codes', '/admin/announcements', '/admin/kyc', '/admin/vouchers']
       if (userStore.userType === 'normal_admin' && superAdminOnlyPaths.some(p => to.path.startsWith(p))) {
         ElMessage.warning(i18n.global.t('navbar.noPermission'))
         next('/admin/dashboard')
@@ -265,7 +318,14 @@ export function setupRouterGuards(router) {
     NProgress.done()
     const t = i18n.global.t
     const title = to.meta.title ? t(to.meta.title) : ''
-    document.title = title ? `${title} - OneClickVirt` : 'OneClickVirt'
+    // 站点名称跟随后台“站点配置”，未配置时回退到 OneClickVirt
+    let brand = 'OneClickVirt'
+    try {
+      brand = useSiteStore().displaySiteName || brand
+    } catch (e) {
+      // pinia 尚未就绪时使用默认值
+    }
+    document.title = title ? `${title} - ${brand}` : brand
     
     // 对于用户页面，确保每次导航都触发组件刷新
     if (to.path.startsWith('/user/') && from.path !== to.path) {

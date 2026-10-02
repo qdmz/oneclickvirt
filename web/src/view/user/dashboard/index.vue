@@ -413,41 +413,63 @@ onUnmounted(() => {
 
 .dashboard-header {
   margin-bottom: 24px;
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dashboard-header h1 {
   margin: 0 0 8px 0;
   color: var(--text-color-primary);
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  letter-spacing: -0.5px;
 }
 
 .dashboard-header p {
   margin: 0;
   color: var(--text-color-secondary);
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .level-tag {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  border-radius: 999px !important;
+  padding: 2px 14px !important;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color-primary);
+  font-size: 15px;
 }
 
 /* 资源限制信息 */
 .resource-limits-section {
   margin-bottom: 24px;
+  animation: fadeInUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) 0.05s both;
+}
+
+.resource-limits-section :deep(.el-card) {
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid var(--border-color) !important;
+  transition: box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resource-limits-section :deep(.el-card:hover) {
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.1) !important;
 }
 
 .limits-grid {
@@ -457,43 +479,96 @@ onUnmounted(() => {
 }
 
 .limit-item {
-  padding: 16px;
+  padding: 20px;
   background: var(--neutral-bg);
-  border-radius: 8px;
+  border-radius: 16px;
   border: 1px solid var(--border-color);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.limit-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-color-light));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.limit-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-color-hover);
+}
+
+.limit-item:hover::before {
+  opacity: 1;
 }
 
 .limit-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .limit-title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color-primary);
+  font-size: 14px;
 }
 
 .limit-usage {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color-secondary);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.limit-item :deep(.el-progress-bar__outer) {
+  border-radius: 999px !important;
+  background-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+.limit-item :deep(.el-progress-bar__inner) {
+  border-radius: 999px !important;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .limit-description {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 12px;
   color: #9ca3af;
+  line-height: 1.6;
 }
 
 /* 公告 */
 .announcements {
   margin-bottom: 24px;
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+.announcements :deep(.el-card) {
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* 流量历史图表 */
 .traffic-history-section {
   margin-bottom: 24px;
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.08s both;
+}
+
+.traffic-history-section :deep(.el-card) {
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
 }
 
 .announcements-list {
@@ -503,22 +578,31 @@ onUnmounted(() => {
 }
 
 .announcement-item {
-  padding: 16px;
+  padding: 18px 20px;
   background: var(--neutral-bg);
-  border-radius: 8px;
+  border-radius: 14px;
   border-left: 4px solid #10b981;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.announcement-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
 }
 
 .announcement-title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color-primary);
   margin-bottom: 8px;
+  font-size: 15px;
 }
 
 .announcement-content {
   color: #4b5563;
   margin-bottom: 8px;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 14px;
 }
 
 .announcement-date {
@@ -531,14 +615,104 @@ onUnmounted(() => {
   text-align: center;
 }
 
+.unlimited-badge :deep(.el-tag) {
+  border-radius: 999px !important;
+}
+
 /* 响应式设计 */
+@media (max-width: 1024px) {
+  .limits-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  
+  .limit-item {
+    padding: 16px;
+  }
+}
+
 @media (max-width: 768px) {
+  .user-dashboard {
+    padding: 16px;
+  }
+  
   .dashboard-header h1 {
-    font-size: 24px;
+    font-size: 22px;
+  }
+  
+  .dashboard-header p {
+    font-size: 13px;
   }
   
   .limits-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  
+  .limit-item {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  
+  .limit-header {
+    margin-bottom: 10px;
+  }
+  
+  .limit-title {
+    font-size: 13px;
+  }
+  
+  .limit-usage {
+    font-size: 13px;
+  }
+  
+  .announcement-item {
+    padding: 14px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-dashboard {
+    padding: 12px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 20px;
+    gap: 8px;
+  }
+  
+  .level-tag {
+    font-size: 12px;
+    padding: 2px 10px !important;
+  }
+  
+  .limit-item {
+    padding: 12px;
+  }
+  
+  .limit-title {
+    font-size: 12px;
+  }
+  
+  .limit-usage {
+    font-size: 12px;
+  }
+  
+  .limit-description {
+    font-size: 11px;
+  }
+  
+  .announcement-item {
+    padding: 12px;
+  }
+  
+  .announcement-title {
+    font-size: 14px;
+  }
+  
+  .announcement-content {
+    font-size: 13px;
   }
 }
 </style>

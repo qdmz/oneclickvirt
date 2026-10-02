@@ -104,30 +104,28 @@ export const useUserStore = defineStore('user', {
     },
 
     async fetchUserInfo() {
-      try {
-        const response = await getUserInfo()
-        if (response.code === 200) {
-          const currentUserType = this.userType
-          
-          // 从 response.data.user 中获取用户类型，如果不存在则使用当前类型
-          const userType = response.data.user?.userType || response.data.userType || currentUserType
-          
-          // 合并用户信息，确保包含 userType
-          const userData = {
-            ...response.data.user,
-            ...response.data,
-            userType: userType
-          }
-          
-          this.setUser(userData)
-          
-          return { success: true }
-        } else {
-          return { success: false, message: response.msg }
+      // 不再吞掉错误，让调用方的 try/catch 能正确捕获失败情况
+      // 这样路由守卫可以在获取用户信息失败时正确重定向到登录页
+      const response = await getUserInfo()
+      if (response.code === 200) {
+        const currentUserType = this.userType
+
+        // 从 response.data.user 中获取用户类型，如果不存在则使用当前类型
+        const userType = response.data.user?.userType || response.data.userType || currentUserType
+
+        // 合并用户信息，确保包含 userType
+        const userData = {
+          ...response.data.user,
+          ...response.data,
+          userType: userType
         }
-      } catch (error) {
-        console.error('获取用户信息失败:', error)
-        return { success: false, message: i18n.global.t('common.getUserInfoFailed') }
+
+        this.setUser(userData)
+
+        return { success: true }
+      } else {
+        // 获取用户信息失败（如 Token 失效），抛出错误让调用方处理
+        throw new Error(response.msg || i18n.global.t('common.getUserInfoFailed'))
       }
     },
 

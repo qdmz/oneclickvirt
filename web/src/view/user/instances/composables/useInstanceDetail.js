@@ -110,7 +110,7 @@ export function useInstanceDetail(shareToken = '') {
       return false
     } catch (error) {
       console.error('获取实例详情失败:', error)
-      ElMessage.error(error?.fullMessage || error?.userMessage || error?.details || error?.message || t('user.instanceDetail.getDetailFailed'))
+      ElMessage.error(error?.userMessage || error?.details || error?.message || t('user.instanceDetail.getDetailFailed'))
       if (token) {
         router.push('/home')
       } else {

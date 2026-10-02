@@ -93,9 +93,15 @@ export default {
   noPermission: 'You do not have permission to perform this action',
   accountDisabled: 'Your account has been disabled, please contact the administrator',
   requestTooLarge: 'The uploaded file or data is too large, please reduce the size',
+  apiVersionMismatchTitle: 'Controller Version Mismatch',
+  apiVersionMismatchMessage: 'The frontend and controller API contracts do not match, or the requested route is not registered. Update the controller binary and web assets to the same release, then refresh the page.',
+  backendVersion: 'Controller version',
   nothingToCopy: 'Nothing to copy',
   copySuccess: 'Copied',
   copyFailed: 'Copy failed, please copy manually',
+  pasteFailed: 'Paste failed, please check the browser clipboard permission',
+  clipboardUnavailable: 'Clipboard reading is unavailable. Use HTTPS and allow clipboard permission',
+  connectionClosed: 'Connection closed',
   cannotSerialize: 'Unable to serialize object',
   unknownError: 'Unknown error',
   popupBlocked: 'Unable to open new window, please check browser popup settings',
@@ -158,5 +164,8 @@ export default {
   agentFMDeleteFailed: 'Delete failed',
   agentFMDeleteConfirm: 'Are you sure you want to delete {name}? This action cannot be undone.',
   agentFMMkdirFailed: 'Failed to create directory',
-  agentFMFileSizeLimit: 'File too large (max 50 MB), please use another transfer method'
+  agentFMFileSizeLimit: 'File too large (max 50 MB), please use another transfer method',
+  detail: 'Details',
+  reply: 'Reply',
+  tip: 'Tip'
 }

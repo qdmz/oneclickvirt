@@ -43,6 +43,11 @@ export default {
     typeHomepage: 'Homepage Announcement',
     typeTopbar: 'Top Bar Announcement'
   },
+  recommendedProducts: {
+    title: 'Recommended Products',
+    subtitle: 'Hand-picked cloud server plans, limited-time offers',
+    viewAll: 'View All Products'
+  },
   supporters: {
     title: 'Sponsors',
     description: 'Thanks to these groups and individuals for sponsoring OneClickVirt'
@@ -56,11 +61,40 @@ export default {
     documentation: 'Documentation',
     feedback: 'Issue Feedback',
     communityGroup: 'Community Group',
+    friendLinks: 'Friend Links',
     allRightsReserved: 'All rights reserved.',
     openSourceProject: 'Open Source Projects by OneClickVirt',
     serverVersion: 'Server',
     latestVersion: 'Latest',
-    versionFetchFailed: 'Version unavailable, backend may be disconnected'
+    versionFetchFailed: 'Version unavailable, backend may be disconnected',
+    manageUpdates: 'Manage updates',
+    updateDialogTitle: 'Controller version management',
+    currentVersion: 'Current version',
+    deploymentMode: 'Deployment mode',
+    deploymentFlavor: 'Release flavor',
+    updateTab: 'Update',
+    rollbackTab: 'Rollback',
+    commandsTab: 'Commands',
+    selectVersion: 'Select target version',
+    selectRollbackVersion: 'Select a rollback release or local backup',
+    assetUnavailable: 'Assets unavailable',
+    localBackup: 'Local backup',
+    updateNow: 'Update now',
+    rollbackNow: 'Rollback now',
+    restartNow: 'Restart controller',
+    noCommands: 'No manual commands are available for this deployment',
+    destructiveCommand: 'Changes runtime files',
+    copyCommand: 'Copy command',
+    updateLoadFailed: 'Failed to load update information',
+    operationRunning: 'Operation in progress',
+    reconnecting: 'Controller is restarting; waiting for the connection',
+    operationSubmitted: 'Operation submitted',
+    operationFailed: 'Operation failed',
+    updateConfirm: 'Update to {version}? The current controller and Web files will be backed up and the service restarted.',
+    rollbackConfirm: 'Rollback to {version}? Database migrations are not automatically reversed.',
+    restartConfirm: 'Restart the controller service? This page will disconnect briefly.',
+    rollbackWarning: 'Rollback replaces controller and Web assets only. Database migrations are normally forward-compatible; verify compatibility first.',
+    rollbackDatabaseNote: 'Database migrations are not automatically reversed. Keep a database backup before production operations.'
   },
   errors: {
     fetchAnnouncementsFailed: 'Failed to fetch announcements:',

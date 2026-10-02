@@ -196,11 +196,41 @@ const routes = [
         }
       },
       {
+        path: 'store',
+        name: 'UserStore',
+        component: () => import('@/view/user/store/index.vue'),
+        meta: {
+          title: 'sidebar.store',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'store/:id',
+        name: 'UserStoreDetail',
+        component: () => import('@/view/user/store/detail.vue'),
+        meta: {
+          title: 'sidebar.storeDetail',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
+        path: 'orders',
+        name: 'UserOrders',
+        component: () => import('@/view/user/orders/index.vue'),
+        meta: {
+          title: 'sidebar.orders',
+          requiresAuth: true,
+          roles: ['user', 'admin']
+        }
+      },
+      {
         path: 'tickets',
         name: 'UserTickets',
         component: () => import('@/view/user/tickets/index.vue'),
         meta: {
-          title: 'sidebar.ticketList',
+          title: 'sidebar.tickets',
           requiresAuth: true,
           roles: ['user', 'admin']
         }
@@ -211,26 +241,6 @@ const routes = [
         component: () => import('@/view/user/wallet/index.vue'),
         meta: {
           title: 'sidebar.wallet',
-          requiresAuth: true,
-          roles: ['user', 'admin']
-        }
-      },
-      {
-        path: 'products',
-        name: 'UserProducts',
-        component: () => import('@/view/user/products/index.vue'),
-        meta: {
-          title: 'sidebar.store',
-          requiresAuth: true,
-          roles: ['user', 'admin']
-        }
-      },
-      {
-        path: 'orders',
-        name: 'UserOrders',
-        component: () => import('@/view/user/orders/index.vue'),
-        meta: {
-          title: 'sidebar.myOrders',
           requiresAuth: true,
           roles: ['user', 'admin']
         }
@@ -283,6 +293,16 @@ const routes = [
         component: () => import('@/view/admin/redemption-codes/index.vue'),
         meta: {
           title: 'sidebar.redemptionCodeManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'vouchers',
+        name: 'AdminVouchers',
+        component: () => import('@/view/admin/vouchers/index.vue'),
+        meta: {
+          title: 'sidebar.voucherManagement',
           requiresAuth: true,
           roles: ['admin']
         }
@@ -458,16 +478,6 @@ const routes = [
         }
       },
       {
-        path: 'tickets',
-        name: 'AdminTickets',
-        component: () => import('@/view/admin/tickets/index.vue'),
-        meta: {
-          title: 'sidebar.ticketManagement',
-          requiresAuth: true,
-          roles: ['admin']
-        }
-      },
-      {
         path: 'products',
         name: 'AdminProducts',
         component: () => import('@/view/admin/products/index.vue'),
@@ -478,13 +488,65 @@ const routes = [
         }
       },
       {
-        path: 'wallet',
-        name: 'AdminWallet',
-        component: () => import('@/view/admin/wallet/index.vue'),
+        path: 'orders',
+        name: 'AdminOrders',
+        component: () => import('@/view/admin/orders/index.vue'),
         meta: {
-          title: 'sidebar.walletManagement',
+          title: 'sidebar.orderManagement',
           requiresAuth: true,
           roles: ['admin']
+        }
+      },
+      {
+        path: 'tickets',
+        name: 'AdminTickets',
+        component: () => import('@/view/admin/tickets/index.vue'),
+        meta: {
+          title: 'sidebar.ticketManagement',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'site-config',
+        name: 'AdminSiteConfig',
+        component: () => import('@/view/admin/site-config/index.vue'),
+        meta: {
+          title: 'sidebar.siteConfig',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'site-link',
+        name: 'AdminSiteLink',
+        component: () => import('@/view/admin/site-link/index.vue'),
+        meta: {
+          title: 'sidebar.siteLink',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'yipay-config',
+        name: 'AdminYipayConfig',
+        component: () => import('@/view/admin/yipay-config/index.vue'),
+        meta: {
+          title: 'sidebar.yipayConfig',
+          requiresAuth: true,
+          roles: ['admin', 'normal_admin'],
+          icon: 'Wallet'
+        }
+      },
+      {
+        path: 'upstream',
+        name: 'AdminUpstream',
+        component: () => import('@/view/admin/upstream/index.vue'),
+        meta: {
+          title: 'sidebar.upstreamManagement',
+          requiresAuth: true,
+          roles: ['admin', 'normal_admin'],
+          icon: 'Connection'
         }
       }
     ]

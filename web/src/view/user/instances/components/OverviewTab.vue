@@ -45,7 +45,7 @@
           </div>
         </div>
         <div
-          v-if="instance.ipv6Address"
+          v-if="nodeIPv6Enabled && instance.ipv6Address"
           class="connection-item"
         >
           <span class="label">{{ $t('user.instanceDetail.ipv6') }}</span>
@@ -66,7 +66,7 @@
           </div>
         </div>
         <div
-          v-if="instance.publicIPv6"
+          v-if="nodeIPv6Enabled && instance.publicIPv6"
           class="connection-item"
         >
           <span class="label">{{ $t('user.instanceDetail.ipv6') }}</span>
@@ -192,6 +192,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
 import { useInstanceFormatters } from '../composables/useInstanceFormatters'
 import { useI18n } from 'vue-i18n'
@@ -215,4 +216,10 @@ const truncateIP = (ip, maxLength = 25) => {
   if (!ip) return ''
   return ip.length > maxLength ? ip.substring(0, maxLength) + '...' : ip
 }
+
+// 节点是否开通 IPv6：未开通则不展示任何 IPv6 相关项
+const nodeIPv6Enabled = computed(() => {
+  const nt = props.instance.networkType || ''
+  return ['nat_ipv4_ipv6', 'dedicated_ipv4_ipv6', 'ipv6_only'].includes(nt)
+})
 </script>

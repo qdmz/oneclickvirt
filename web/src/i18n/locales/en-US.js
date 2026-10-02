@@ -34,10 +34,10 @@ import userDomain from './en-US/user/domain.js'
 import userKyc from './en-US/user/kyc.js'
 import userCheckin from './en-US/user/checkin.js'
 import userApiTokens from './en-US/user/apiTokens.js'
+import userStore from './en-US/user/store.js'
+import userOrders from './en-US/user/orders.js'
 import userTickets from './en-US/user/tickets.js'
 import userWallet from './en-US/user/wallet.js'
-import userProducts from './en-US/user/products.js'
-import userOrders from './en-US/user/orders.js'
 
 // 管理员模块
 import adminDashboard from './en-US/admin/dashboard.js'
@@ -47,6 +47,7 @@ import adminConfig from './en-US/admin/config.js'
 import adminAnnouncements from './en-US/admin/announcements.js'
 import adminInviteCodes from './en-US/admin/inviteCodes.js'
 import adminRedemptionCodes from './en-US/admin/redemptionCodes.js'
+import adminVouchers from './en-US/admin/vouchers.js'
 import adminSystemImages from './en-US/admin/systemImages.js'
 import adminInstances from './en-US/admin/instances.js'
 import adminTasks from './en-US/admin/tasks.js'
@@ -61,9 +62,12 @@ import adminKyc from './en-US/admin/kyc.js'
 import adminGroup from './en-US/admin/group.js'
 import adminApiTokens from './en-US/admin/apiTokens.js'
 import adminSnapshots from './en-US/admin/snapshots.js'
-import adminTickets from './en-US/admin/tickets.js'
 import adminProducts from './en-US/admin/products.js'
-import adminWallet from './en-US/admin/wallet.js'
+import adminOrders from './en-US/admin/orders.js'
+import adminTickets from './en-US/admin/tickets.js'
+import adminSiteConfig from './en-US/admin/siteConfig.js'
+import adminYipayConfig from './en-US/admin/yipayConfig.js'
+import adminUpstream from './en-US/admin/upstream.js'
 
 export default {
   common,
@@ -91,10 +95,10 @@ export default {
     kyc: userKyc,
     checkin: userCheckin,
     apiTokens: userApiTokens,
+    store: userStore,
+    orders: userOrders,
     tickets: userTickets,
-    wallet: userWallet,
-    products: userProducts,
-    orders: userOrders
+    wallet: userWallet
   },
   admin: {
     dashboard: adminDashboard,
@@ -104,6 +108,7 @@ export default {
     announcements: adminAnnouncements,
     inviteCodes: adminInviteCodes,
     redemptionCodes: adminRedemptionCodes,
+    vouchers: adminVouchers,
     systemImages: adminSystemImages,
     instances: adminInstances,
     tasks: adminTasks,
@@ -118,9 +123,12 @@ export default {
     group: adminGroup,
     apiTokens: adminApiTokens,
     snapshots: adminSnapshots,
-    tickets: adminTickets,
     products: adminProducts,
-    wallet: adminWallet
+    orders: adminOrders,
+    tickets: adminTickets,
+    siteConfig: adminSiteConfig,
+    yipayConfig: adminYipayConfig,
+    upstream: adminUpstream
   },
   validation,
   message,

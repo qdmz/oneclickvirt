@@ -6,6 +6,7 @@ import { getCountriesByRegion, getCountryByName, getLocalizedRegion } from '@/ut
 import { testSSHConnection as testSSHConnectionAPI, generateAgentSecret as generateAgentSecretAPI, execOnProvider as execOnProviderAPI, getProviderDetail } from '@/api/admin'
 import { isContainerOnlyProvider, isVMOnlyProvider } from '@/utils/providerTypes'
 import { DEFAULT_LEVEL_LIMITS, normalizeLevelLimits } from '@/utils/levels'
+import { hasAgentMappedNetworking as agentHasMappedNetworking } from '@/utils/networkType'
 
 const REQUIRED_FIXED_PORT = 22
 
@@ -58,7 +59,7 @@ export function useProviderForm(props, emit) {
   const isAgentMode = computed(() => formData.value.connectionType === 'agent')
   const isLocalMode = computed(() => formData.value.connectionType === 'local')
 
-  const hasAgentMappedNetworking = computed(() => Boolean(formData.value.portIP))
+  const hasAgentMappedNetworking = computed(() => agentHasMappedNetworking(formData.value))
 
   // 国家列表数据 - 使用 computed 从 props 获取，如果没有则使用本地获取
   const groupedCountries = computed(() => {
@@ -108,6 +109,9 @@ export function useProviderForm(props, emit) {
     portRangeEnd: 65535,
     fixedPorts: [REQUIRED_FIXED_PORT],
     networkType: 'nat_ipv4',
+    ipv6AddressFilePath: '',
+    ipv6AddressFileSyncedAt: null,
+    ipv6AddressFileSyncError: '',
     defaultInboundBandwidth: 300,
     defaultOutboundBandwidth: 300,
     maxInboundBandwidth: 1000,
@@ -564,6 +568,9 @@ export function useProviderForm(props, emit) {
           agentRemoteIP: res.data.agentRemoteIP || '',
           agentControlLastSeen: res.data.agentControlLastSeen || null,
           networkType: res.data.networkType || formData.value.networkType,
+          ipv6AddressFilePath: res.data.ipv6AddressFilePath || '',
+          ipv6AddressFileSyncedAt: res.data.ipv6AddressFileSyncedAt || null,
+          ipv6AddressFileSyncError: res.data.ipv6AddressFileSyncError || '',
           enableTrafficControl: res.data.enableTrafficControl ?? formData.value.enableTrafficControl,
           enableResourceMonitoring: res.data.enableResourceMonitoring ?? formData.value.enableResourceMonitoring
         })
@@ -702,6 +709,12 @@ export function useProviderForm(props, emit) {
     emit('cancel')
   }
 
+  const acknowledgePersistedFields = (updates = {}) => {
+    const snapshot = formSnapshot.value ? JSON.parse(formSnapshot.value) : {}
+    Object.assign(snapshot, updates)
+    formSnapshot.value = JSON.stringify(snapshot)
+  }
+
   return {
     dialogVisible,
     activeTab,
@@ -728,6 +741,7 @@ export function useProviderForm(props, emit) {
     handleGenerateAgentSecret,
     handleExecCommand,
     handleCheckAgentStatus,
+    acknowledgePersistedFields,
     handleResetLevelLimits,
     handleSubmit,
     handleBeforeClose,

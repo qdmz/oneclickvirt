@@ -76,5 +76,21 @@ export default {
   loginAs: "代登录",
   loginAsConfirm: "确定要以用户 {username} 的身份登录吗？将在新标签页中打开。",
   loginAsSuccess: "代登录成功，请在新标签页中操作",
-  manualExpiry: "手动设置"
+  manualExpiry: "手动设置",
+  balance: "余额",
+  adjustBalance: "调整余额",
+  currentBalance: "当前余额",
+  adjustMode: "调整方式",
+  modeAdd: "增减金额",
+  modeSet: "设为指定值",
+  modeAddTip: "在当前余额基础上增加（正数）或扣减（负数）",
+  modeSetTip: "直接把用户余额设置为下面填写的数值",
+  adjustAmount: "调整金额",
+  afterBalance: "调整后余额",
+  yuan: "元",
+  adjustRemarkPlaceholder: "选填，会记录到用户的余额变动明细中",
+  adjustAmountRequired: "请输入调整金额",
+  adjustAmountInvalid: "设定余额不能为负数",
+  adjustBalanceSuccess: "余额调整成功，当前余额 ¥{balance}",
+  adjustBalanceFailed: "余额调整失败"
 }
