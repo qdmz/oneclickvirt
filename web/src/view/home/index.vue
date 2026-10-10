@@ -239,6 +239,7 @@
             <p>{{ t('home.platforms.description') }}</p>
           </div>
         </div>
+        <div class="container">
         <LogoCarousel
           class="carousel"
           :items="platformList"
@@ -268,6 +269,7 @@
             </a>
           </template>
         </LogoCarousel>
+        </div>
       </section>
 
       <!-- 赞助方 -->
@@ -308,7 +310,7 @@
         v-if="announcements.length > 0"
         class="section section-alt"
       >
-        <div class="container narrow">
+        <div class="container">
           <div class="section-head">
             <h2>{{ t('home.announcements.title') }}</h2>
           </div>
