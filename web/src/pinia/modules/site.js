@@ -19,7 +19,7 @@ export const useSiteStore = defineStore('site', () => {
   // Favicon URL
   const faviconURL = ref('')
   // 主题色
-  const primaryColor = ref('#2563eb')
+  const primaryColor = ref('')
   // 自定义 CSS
   const customCSS = ref('')
   // 自定义页眉 HTML
@@ -129,7 +129,7 @@ export const useSiteStore = defineStore('site', () => {
         icp.value = data.icp_number || ''
         faviconURL.value = data.favicon_url || ''
         darkLogoURL.value = data.dark_logo_url || ''
-        primaryColor.value = data.primary_color || '#2563eb'
+        primaryColor.value = data.primary_color || ''
         customCSS.value = data.custom_css || ''
         customHeader.value = data.custom_header || ''
         customFooter.value = data.custom_footer || ''
@@ -187,49 +187,100 @@ export const useSiteStore = defineStore('site', () => {
     }
   }
 
-  // 应用主题色
+  // 设计系统默认品牌色；旧版本后台表单默认写入的绿色（#16a34a）视为“未自定义”，
+  // 以便升级后直接使用新的设计系统配色。管理员选择其它颜色时仍然生效。
+  const LEGACY_DEFAULT_COLORS = ['#16a34a']
+
+  function normalizeHex(color) {
+    if (!color || typeof color !== 'string') return ''
+    let c = color.trim().toLowerCase()
+    if (/^#[0-9a-f]{3}$/.test(c)) c = '#' + c.slice(1).split('').map(x => x + x).join('')
+    return /^#[0-9a-f]{6}$/.test(c) ? c : ''
+  }
+
+  function mixHex(a, b, weight) {
+    const pa = [1, 3, 5].map(i => parseInt(a.slice(i, i + 2), 16))
+    const pb = [1, 3, 5].map(i => parseInt(b.slice(i, i + 2), 16))
+    return '#' + pa.map((x, i) => Math.round(x * (1 - weight) + pb[i] * weight).toString(16).padStart(2, '0')).join('')
+  }
+
+  function hexToRgb(hex) {
+    return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(', ')
+  }
+
+  // 应用主题色：为亮/暗两套主题分别生成完整的 Element Plus 色阶
   function applyPrimaryColor(color) {
-    if (!color || typeof document === 'undefined') return
-    const root = document.documentElement
-    root.style.setProperty('--primary-color', color)
-    // 同时更新 Element Plus 的主题色
-    const style = document.getElementById('site-custom-theme-style')
-    if (style) {
-      style.innerHTML = generateThemeCSS(color)
+    if (typeof document === 'undefined') return
+    const existing = document.getElementById('site-custom-theme-style')
+    const hex = normalizeHex(color)
+    if (!hex || LEGACY_DEFAULT_COLORS.includes(hex)) {
+      if (existing) existing.remove()
+      document.documentElement.style.removeProperty('--primary-color')
+      return
+    }
+    const css = generateThemeCSS(hex)
+    if (existing) {
+      existing.innerHTML = css
     } else {
       const newStyle = document.createElement('style')
       newStyle.id = 'site-custom-theme-style'
-      newStyle.innerHTML = generateThemeCSS(color)
+      newStyle.innerHTML = css
       document.head.appendChild(newStyle)
     }
   }
 
-  // 生成主题色 CSS
+  // 生成主题色 CSS（不使用 !important，暗色通过 html.dark 提升优先级）
   function generateThemeCSS(color) {
+    const rgb = hexToRgb(color)
+    const darkBase = '#141824'
+    const light = (n) => mixHex(color, '#ffffff', n / 10)
+    const dark = (n) => mixHex(color, darkBase, n / 10)
     return `
       :root {
-        --el-color-primary: ${color} !important;
+        --primary-color: ${color};
+        --primary-color-dark: ${mixHex(color, '#000000', 0.15)};
+        --primary-color-darker: ${mixHex(color, '#000000', 0.3)};
+        --primary-color-light: ${light(1.5)};
+        --primary-color-lighter: ${light(3)};
+        --primary-color-bg: rgba(${rgb}, 0.06);
+        --primary-color-bg-hover: rgba(${rgb}, 0.10);
+        --primary-color-shadow: rgba(${rgb}, 0.22);
+        --primary-color-shadow-hover: rgba(${rgb}, 0.32);
+        --primary-color-focus: rgba(${rgb}, 0.24);
+        --accent-text-color: ${mixHex(color, '#000000', 0.12)};
+        --accent-text-color-hover: ${mixHex(color, '#000000', 0.25)};
+        --bg-color-hover: rgba(${rgb}, 0.05);
+        --bg-color-active: rgba(${rgb}, 0.09);
+        --border-color-hover: ${light(6)};
+        --el-color-primary: ${color};
+        --el-color-primary-dark-2: ${mixHex(color, '#000000', 0.2)};
+        --el-color-primary-light-3: ${light(3)};
+        --el-color-primary-light-5: ${light(5)};
+        --el-color-primary-light-7: ${light(7)};
+        --el-color-primary-light-8: ${light(8)};
+        --el-color-primary-light-9: ${light(9)};
+        --brand-gradient: linear-gradient(135deg, ${light(2)} 0%, ${color} 55%, ${mixHex(color, '#0ea5e9', 0.45)} 100%);
+        --brand-gradient-text: linear-gradient(120deg, ${color} 0%, ${mixHex(color, '#0ea5e9', 0.5)} 100%);
       }
-      .el-button--primary {
-        --el-button-bg-color: ${color} !important;
-        --el-button-border-color: ${color} !important;
-      }
-      .el-switch.is-checked .el-switch__core {
-        --el-switch-on-color: ${color} !important;
-      }
-      .el-radio__input.is-checked .el-radio__inner {
-        --el-radio-checked-bg-color: ${color} !important;
-        --el-radio-checked-input-border-color: ${color} !important;
-      }
-      .el-checkbox__input.is-checked .el-checkbox__inner {
-        --el-checkbox-checked-bg-color: ${color} !important;
-        --el-checkbox-checked-input-border-color: ${color} !important;
-      }
-      .el-tabs__item.is-active {
-        color: ${color} !important;
-      }
-      .el-tabs__active-bar {
-        background-color: ${color} !important;
+      html.dark {
+        --primary-color: ${color};
+        --primary-color-dark: ${light(2)};
+        --primary-color-light: ${light(2)};
+        --primary-color-bg: rgba(${rgb}, 0.10);
+        --primary-color-bg-hover: rgba(${rgb}, 0.16);
+        --accent-text-color: ${light(4)};
+        --accent-text-color-hover: ${light(6)};
+        --bg-color-hover: rgba(${rgb}, 0.08);
+        --bg-color-active: rgba(${rgb}, 0.14);
+        --border-color-hover: rgba(${rgb}, 0.45);
+        --el-color-primary: ${color};
+        --el-color-primary-dark-2: ${light(2)};
+        --el-color-primary-light-3: ${dark(3)};
+        --el-color-primary-light-5: ${dark(5)};
+        --el-color-primary-light-7: ${dark(7)};
+        --el-color-primary-light-8: ${dark(8)};
+        --el-color-primary-light-9: ${dark(9)};
+        --brand-gradient-text: linear-gradient(120deg, ${light(4)} 0%, ${mixHex(light(4), '#7dd3fc', 0.5)} 100%);
       }
     `
   }

@@ -1,4 +1,8 @@
 export default {
+  groupCloud: '云资源',
+  groupBilling: '商城与账单',
+  groupService: '服务与支持',
+  groupAccount: '账户与安全',
   groupOverview: '概览',
   groupUsers: '用户',
   groupResources: '资源',

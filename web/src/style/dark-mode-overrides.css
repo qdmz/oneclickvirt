@@ -1,25 +1,24 @@
 /*
- * 全局暗黑模式补丁
- * 处理无法通过 CSS 变量覆盖的 Element Plus 内置样式和硬绑定方式
+ * 全局暗黑模式补丁（OneHost Design System）
+ * 大部分暗色效果已由 theme.scss 中 html.dark 的 CSS 变量完成；
+ * 这里只处理：动态 header-cell-style 等内联绑定、Element Plus 未变量化的细节、历史页面中的硬编码颜色。
  * 通过 html.dark 类激活
  */
 
-/* =============================================
-   Element Plus 表格 - 覆盖动态 header-cell-style 绑定
-   ============================================= */
+/* ---------- 表格：覆盖页面里通过 :header-cell-style 写死的浅色表头 ---------- */
 html.dark .el-table thead th.el-table__cell,
 html.dark .el-table th.el-table__cell {
-  background: var(--neutral-bg) !important;
-  color: var(--text-color-primary) !important;
+  background: var(--surface-muted) !important;
+  color: var(--text-color-secondary) !important;
   border-bottom-color: var(--border-color) !important;
 }
 
 html.dark .el-table,
 html.dark .el-table tr,
 html.dark .el-table td.el-table__cell {
-  background-color: var(--bg-color-secondary) !important;
+  background-color: var(--card-bg-solid) !important;
   color: var(--text-color-primary) !important;
-  border-bottom-color: var(--border-color) !important;
+  border-bottom-color: var(--border-color-light) !important;
 }
 
 html.dark .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
@@ -32,88 +31,75 @@ html.dark .el-table .el-table__row:hover > td.el-table__cell {
 
 html.dark .el-table::before,
 html.dark .el-table__inner-wrapper::before {
-  background-color: var(--border-color) !important;
+  background-color: var(--border-color-light) !important;
 }
 
-/* =============================================
-   Element Plus 卡片
-   ============================================= */
+/* ---------- 卡片 / 描述 / 折叠 ---------- */
 html.dark .el-card {
-  background: var(--bg-color-secondary) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-color-primary) !important;
+  background: var(--card-bg-solid);
+  border-color: var(--border-color);
+  color: var(--text-color-primary);
 }
 
 html.dark .el-card__header {
-  border-bottom-color: var(--border-color) !important;
-  color: var(--text-color-primary) !important;
+  border-bottom-color: var(--border-color-light);
+  color: var(--text-color-primary);
 }
 
-/* =============================================
-   Element Plus 分页
-   ============================================= */
-html.dark .el-pagination .el-pagination__total,
-html.dark .el-pagination .el-pagination__sizes,
-html.dark .el-pagination .el-pagination__jump,
-html.dark .el-pager li,
-html.dark .el-pagination button {
-  color: var(--text-color-secondary) !important;
-  background: transparent !important;
-}
-
-html.dark .el-pager li.is-active {
-  color: var(--primary-color) !important;
-}
-
-/* =============================================
-   Element Plus 描述列表 (Descriptions)
-   ============================================= */
 html.dark .el-descriptions__header,
-html.dark .el-descriptions__label,
 html.dark .el-descriptions__content,
 html.dark .el-descriptions__body {
-  background-color: var(--bg-color-secondary) !important;
+  background-color: transparent !important;
   color: var(--text-color-primary) !important;
+}
+
+html.dark .el-descriptions__label {
+  color: var(--text-color-secondary) !important;
 }
 
 html.dark .el-descriptions__cell {
   border-color: var(--border-color) !important;
 }
 
-/* =============================================
-   Element Plus 折叠面板
-   ============================================= */
 html.dark .el-collapse,
 html.dark .el-collapse-item__header,
 html.dark .el-collapse-item__wrap,
 html.dark .el-collapse-item__content {
-  background-color: var(--bg-color-secondary) !important;
-  border-color: var(--border-color) !important;
+  background-color: transparent !important;
+  border-color: var(--border-color-light) !important;
   color: var(--text-color-primary) !important;
 }
 
-/* =============================================
-   Element Plus 标签（Tabs）
-   ============================================= */
-html.dark .el-tabs__nav-wrap::after {
-  background-color: var(--border-color) !important;
-}
-
-html.dark .el-tabs__item {
+/* ---------- 分页 ---------- */
+html.dark .el-pagination .el-pagination__total,
+html.dark .el-pagination .el-pagination__jump {
   color: var(--text-color-secondary) !important;
 }
 
-html.dark .el-tabs__item.is-active {
-  color: var(--primary-color) !important;
+html.dark .el-pagination:not(.is-background) .el-pager li,
+html.dark .el-pagination:not(.is-background) button {
+  background: transparent !important;
+  color: var(--text-color-secondary);
+}
+
+html.dark .el-pagination:not(.is-background) .el-pager li.is-active {
+  color: var(--accent-text-color) !important;
+}
+
+/* ---------- 标签页 / 时间线 / 步骤 ---------- */
+html.dark .el-tabs__item {
+  color: var(--text-color-secondary);
+}
+
+html.dark .el-tabs__item.is-active,
+html.dark .el-tabs__item:hover {
+  color: var(--accent-text-color);
 }
 
 html.dark .el-tab-pane {
-  color: var(--text-color-primary) !important;
+  color: var(--text-color-primary);
 }
 
-/* =============================================
-   Element Plus 时间线
-   ============================================= */
 html.dark .el-timeline-item__tail {
   border-color: var(--border-color) !important;
 }
@@ -122,147 +108,121 @@ html.dark .el-timeline-item__content {
   color: var(--text-color-primary) !important;
 }
 
-/* =============================================
-   Element Plus 步骤条
-   ============================================= */
 html.dark .el-step__title,
 html.dark .el-step__description {
   color: var(--text-color-secondary) !important;
 }
 
-html.dark .el-step__title.is-finish,
-html.dark .el-step__title.is-process {
+html.dark .el-step__title.is-finish {
   color: var(--text-color-primary) !important;
 }
 
-/* =============================================
-   Element Plus 对话框
-   ============================================= */
-html.dark .el-dialog {
-  background: var(--bg-color-secondary) !important;
-  border: 1px solid var(--border-color) !important;
+html.dark .el-step__title.is-process {
+  color: var(--accent-text-color) !important;
+}
+
+/* ---------- 弹层 ---------- */
+html.dark .el-dialog,
+html.dark .el-drawer,
+html.dark .el-message-box {
+  background: var(--surface-elevated) !important;
+  border-color: var(--border-color) !important;
 }
 
 html.dark .el-dialog__title,
-html.dark .el-dialog__header {
-  color: var(--text-color-primary) !important;
-}
-
-html.dark .el-dialog__body {
-  color: var(--text-color-primary) !important;
-}
-
-html.dark .el-dialog__footer {
-  border-top-color: var(--border-color) !important;
-}
-
-/* =============================================
-   Element Plus 抽屉
-   ============================================= */
-html.dark .el-drawer {
-  background: var(--bg-color-secondary) !important;
-}
-
+html.dark .el-dialog__header,
+html.dark .el-dialog__body,
 html.dark .el-drawer__header {
   color: var(--text-color-primary) !important;
-  border-bottom-color: var(--border-color) !important;
 }
 
-/* =============================================
-   Element Plus 下拉框
-   ============================================= */
-html.dark .el-dropdown-menu {
-  background: var(--bg-color-secondary) !important;
-  border-color: var(--border-color) !important;
+html.dark .el-dialog__footer,
+html.dark .el-dialog__header,
+html.dark .el-drawer__header {
+  border-color: var(--border-color-light) !important;
 }
 
-html.dark .el-dropdown-menu__item {
-  color: var(--text-color-primary) !important;
-}
-
-html.dark .el-dropdown-menu__item:hover,
-html.dark .el-dropdown-menu__item:focus {
-  background: var(--bg-color-hover) !important;
-  color: var(--primary-color) !important;
-}
-
-/* =============================================
-   Element Plus 弹出框
-   ============================================= */
+html.dark .el-dropdown-menu,
+html.dark .el-select-dropdown,
 html.dark .el-popover.el-popper,
-html.dark .el-tooltip__trigger + .el-popper {
-  background: var(--bg-color-secondary) !important;
+html.dark .el-picker-panel {
+  background: var(--surface-elevated) !important;
   border-color: var(--border-color) !important;
   color: var(--text-color-primary) !important;
 }
 
-/* =============================================
-   Element Plus Select 下拉
-   ============================================= */
-html.dark .el-select-dropdown {
-  background: var(--bg-color-secondary) !important;
-  border-color: var(--border-color) !important;
-}
-
+html.dark .el-dropdown-menu__item,
 html.dark .el-select-dropdown__item {
-  color: var(--text-color-primary) !important;
+  color: var(--text-color-primary);
 }
 
+html.dark .el-select-dropdown__item.is-hovering,
 html.dark .el-select-dropdown__item:hover,
 html.dark .el-select-dropdown__item.hover {
   background: var(--bg-color-hover) !important;
 }
 
 html.dark .el-select-dropdown__item.is-selected {
-  color: var(--primary-color) !important;
+  color: var(--accent-text-color) !important;
 }
 
-/* =============================================
-   Element Plus 表单 / 输入框
-   ============================================= */
+html.dark .el-popper.is-light .el-popper__arrow::before {
+  background: var(--surface-elevated) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ---------- 表单 ---------- */
 html.dark .el-input__wrapper,
-html.dark .el-textarea__inner {
-  background: var(--neutral-bg) !important;
-  box-shadow: 0 0 0 1px var(--border-color) inset !important;
+html.dark .el-textarea__inner,
+html.dark .el-select__wrapper {
+  background-color: var(--surface-input) !important;
 }
 
-html.dark .el-input__inner,
-html.dark .el-textarea__inner {
+html.dark .el-input__wrapper:not(.is-focus),
+html.dark .el-select__wrapper:not(.is-focused),
+html.dark .el-textarea__inner:not(:focus) {
+  box-shadow: 0 0 0 1px var(--el-border-color) inset;
+}
+
+html.dark .el-input__inner {
   color: var(--text-color-primary) !important;
   background: transparent !important;
 }
 
-html.dark .el-form-item__label {
+html.dark .el-textarea__inner {
   color: var(--text-color-primary) !important;
+}
+
+html.dark .el-form-item__label {
+  color: var(--text-color-secondary) !important;
 }
 
 html.dark .el-form-item__error {
   color: var(--error-color) !important;
 }
 
-/* =============================================
-   Element Plus 标签 Tag
-   ============================================= */
-html.dark .el-tag {
-  border-color: var(--border-color) !important;
+/* ---------- 标签 / 菜单 ---------- */
+html.dark .el-tag--plain,
+html.dark .el-tag--light {
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
 }
 
-/* =============================================
-   Element Plus 菜单
-   ============================================= */
 html.dark .el-menu {
-  background-color: var(--bg-color-sidebar) !important;
+  background-color: transparent;
   border-right-color: var(--border-color) !important;
 }
 
-html.dark .el-menu-item,
-html.dark .el-sub-menu__title {
-  color: var(--text-color-primary) !important;
+html.dark .el-menu--popup {
+  background-color: var(--surface-elevated) !important;
 }
 
-html.dark .el-menu-item:hover,
-html.dark .el-sub-menu__title:hover {
-  background-color: var(--bg-color-hover) !important;
+html.dark .el-menu--popup .el-menu-item {
+  color: var(--text-color-primary);
+  background-color: transparent;
+}
+
+html.dark .el-menu--popup .el-menu-item:hover {
+  background-color: var(--bg-color-hover);
 }
 
 /* =============================================

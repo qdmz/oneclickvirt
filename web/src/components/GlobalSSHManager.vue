@@ -256,9 +256,9 @@ const openSSHInNewWindow = (conn) => {
   const popupTerminalBg = '#000000'
   const popupHeaderBg = isDarkTheme ? '#162032' : '#ffffff'
   const popupHeaderText = isDarkTheme ? '#e2e8f0' : '#1f2937'
-  const popupHeaderBorder = isDarkTheme ? 'rgba(22, 163, 74, 0.2)' : '#e0e0e0'
-  const popupReconnectBg = '#16a34a'
-  const popupReconnectHover = '#15803d'
+  const popupHeaderBorder = isDarkTheme ? 'rgba(79, 70, 229, 0.2)' : '#e0e0e0'
+  const popupReconnectBg = '#4f46e5'
+  const popupReconnectHover = '#4338ca'
   const popupCloseBg = isDarkTheme ? '#334155' : '#f56c6c'
   const popupCloseHover = isDarkTheme ? '#475569' : '#f78989'
   

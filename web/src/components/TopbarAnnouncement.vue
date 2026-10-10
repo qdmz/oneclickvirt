@@ -230,13 +230,13 @@ onUnmounted(() => {
 
 <style scoped>
 .topbar-announcement {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light));
   color: white;
   padding: 6px 0;
   position: sticky;
   top: 0;
   z-index: calc(var(--z-navbar, 1002) + 2);
-  box-shadow: 0 2px 10px rgba(22, 163, 74, 0.2);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--primary-color) 20%, transparent);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 

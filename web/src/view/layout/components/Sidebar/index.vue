@@ -1,29 +1,32 @@
 <template>
   <div
-    class="sidebar-container"
+    class="sidebar-container oh-sidebar"
     :class="{ 
       'is-collapse': isCollapse && !isMobile,
       'mobile': isMobile
     }"
   >
     <div class="sidebar-logo">
-      <img
-        v-show="!isCollapse || isMobile"
-        :src="siteStore.logoSrc"
-        alt="Logo"
-        class="sidebar-logo-img"
+      <router-link
+        :to="homePath"
+        class="sidebar-brand"
+        :title="siteStore.displaySiteName"
       >
-      <h1 v-show="!isCollapse || isMobile">
-        {{ siteStore.displaySiteName }}
-      </h1>
-      <el-button 
-        v-if="!isMobile"
-        class="collapse-btn" 
-        :icon="isCollapse ? Expand : Fold" 
-        size="small" 
-        circle 
-        @click="toggleCollapse" 
-      />
+        <span class="sidebar-logo-mark">
+          <img
+            :src="siteStore.logoSrc"
+            alt="Logo"
+            class="sidebar-logo-img"
+          >
+        </span>
+        <span
+          v-show="!isCollapse || isMobile"
+          class="sidebar-brand-text"
+        >
+          <h1>{{ siteStore.displaySiteName }}</h1>
+          <small>{{ isAdminView ? t('ui.layout.adminConsole') : t('ui.layout.console') }}</small>
+        </span>
+      </router-link>
     </div>
     <el-scrollbar wrap-class="scrollbar-wrapper">
       <el-menu
@@ -34,7 +37,6 @@
         :default-openeds="defaultOpeneds"
         :collapse-transition="false"
         mode="vertical"
-        active-text-color="#16a34a"
         @select="handleMenuSelect"
       >
         <!-- 首页链接 - 仅在未登录时显示 -->
@@ -58,6 +60,21 @@
         />
       </el-menu>
     </el-scrollbar>
+    <div
+      v-if="!isMobile"
+      class="sidebar-footer"
+    >
+      <button
+        type="button"
+        class="collapse-btn"
+        :title="isCollapse ? t('ui.layout.expand') : t('ui.layout.collapse')"
+        :aria-label="isCollapse ? t('ui.layout.expand') : t('ui.layout.collapse')"
+        @click="toggleCollapse"
+      >
+        <el-icon><component :is="isCollapse ? Expand : Fold" /></el-icon>
+        <span v-show="!isCollapse">{{ t('ui.layout.collapse') }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -98,8 +115,16 @@ const handleMenuSelect = () => {
 }
 
 // 获取当前活动菜单
+// 详情页（如 /user/instances/123）也高亮其所属菜单
 const activeMenu = computed(() => {
-  return route.path
+  const flat = []
+  const walk = (items) => items.forEach(i => { if (i.children?.length) walk(i.children); else flat.push(i.path) })
+  walk(userRoutes.value || [])
+  if (flat.includes(route.path)) return route.path
+  const parent = flat
+    .filter(p => route.path.startsWith(p + '/'))
+    .sort((a, b) => b.length - a.length)[0]
+  return parent || route.path
 })
 
 // 根据用户类型获取对应的路由
@@ -126,100 +151,48 @@ const userRoutes = computed(() => {
         }
       },
       {
-        path: '/user/instances',
-        name: 'UserInstances',
-        meta: {
-          title: 'sidebar.myInstances',
-          icon: 'Box'
-        }
+        path: '/user/_cloud',
+        name: 'UserMenuCloud',
+        alwaysShow: true,
+        meta: { title: 'sidebar.groupCloud', icon: 'Cloudy' },
+        children: [
+          { path: '/user/instances', name: 'UserInstances', meta: { title: 'sidebar.myInstances', icon: 'Box' } },
+          { path: '/user/apply', name: 'UserApply', meta: { title: 'sidebar.apply', icon: 'Plus' } },
+          { path: '/user/tasks', name: 'UserTasks', meta: { title: 'sidebar.taskList', icon: 'List' } }
+        ]
       },
       {
-        path: '/user/apply',
-        name: 'UserApply',
-        meta: {
-          title: 'sidebar.apply',
-          icon: 'Plus'
-        }
+        path: '/user/_billing',
+        name: 'UserMenuBilling',
+        alwaysShow: true,
+        meta: { title: 'sidebar.groupBilling', icon: 'ShoppingBag' },
+        children: [
+          { path: '/user/store', name: 'UserStore', meta: { title: 'sidebar.store', icon: 'Shop' } },
+          { path: '/user/orders', name: 'UserOrders', meta: { title: 'sidebar.orders', icon: 'Document' } },
+          { path: '/user/wallet', name: 'UserWallet', meta: { title: 'sidebar.wallet', icon: 'Wallet' } }
+        ]
       },
       {
-        path: '/user/tasks',
-        name: 'UserTasks',
-        meta: {
-          title: 'sidebar.taskList',
-          icon: 'List'
-        }
+        path: '/user/_service',
+        name: 'UserMenuService',
+        alwaysShow: true,
+        meta: { title: 'sidebar.groupService', icon: 'Service' },
+        children: [
+          { path: '/user/tickets', name: 'UserTickets', meta: { title: 'sidebar.tickets', icon: 'ChatDotSquare' } },
+          { path: '/user/checkin', name: 'UserCheckin', meta: { title: 'sidebar.checkinRenewal', icon: 'Calendar' } },
+          { path: '/user/domain', name: 'UserDomain', meta: { title: 'sidebar.domainBinding', icon: 'Link' } }
+        ]
       },
       {
-        path: '/user/profile',
-        name: 'UserProfile',
-        meta: {
-          title: 'sidebar.personalCenter',
-          icon: 'User'
-        }
-      },
-      {
-        path: '/user/domain',
-        name: 'UserDomain',
-        meta: {
-          title: 'sidebar.domainBinding',
-          icon: 'Link'
-        }
-      },
-      {
-        path: '/user/kyc',
-        name: 'UserKYC',
-        meta: {
-          title: 'sidebar.kycVerification',
-          icon: 'Postcard'
-        }
-      },
-      {
-        path: '/user/checkin',
-        name: 'UserCheckin',
-        meta: {
-          title: 'sidebar.checkinRenewal',
-          icon: 'Calendar'
-        }
-      },
-      {
-        path: '/user/api-tokens',
-        name: 'UserApiTokens',
-        meta: {
-          title: 'sidebar.apiTokenManagement',
-          icon: 'Key'
-        }
-      },
-      {
-        path: '/user/store',
-        name: 'UserStore',
-        meta: {
-          title: 'sidebar.store',
-          icon: 'Shop'
-        }
-      },
-      {
-        path: '/user/orders',
-        name: 'UserOrders',
-        meta: {
-          title: 'sidebar.orders',
-          icon: 'Document'
-        }
-      },
-      {
-        path: '/user/tickets',
-        name: 'UserTickets',
-        meta: {
-          title: 'sidebar.tickets',
-          icon: 'Service'
-        }
-      },
-      {
-        path: '/user/wallet',
-        name: 'UserWallet',
-        meta: {
-          title: 'sidebar.wallet',
-          icon: 'Wallet'
-        }
+        path: '/user/_account',
+        name: 'UserMenuAccount',
+        alwaysShow: true,
+        meta: { title: 'sidebar.groupAccount', icon: 'User' },
+        children: [
+          { path: '/user/profile', name: 'UserProfile', meta: { title: 'sidebar.personalCenter', icon: 'User' } },
+          { path: '/user/kyc', name: 'UserKYC', meta: { title: 'sidebar.kycVerification', icon: 'Postcard' } },
+          { path: '/user/api-tokens', name: 'UserApiTokens', meta: { title: 'sidebar.apiTokenManagement', icon: 'Key' } }
+        ]
       }
     ],
     // 管理员路由
@@ -573,8 +546,22 @@ const userRoutes = computed(() => {
   return filteredRoutes
 })
 
+const isAdminView = computed(() => {
+  const viewMode = userStore.currentViewMode || userStore.userType
+  return viewMode === 'admin' || viewMode === 'normal_admin'
+})
+
+const homePath = computed(() => {
+  if (!userStore.isLoggedIn) return '/home'
+  return isAdminView.value ? '/admin/dashboard' : '/user/dashboard'
+})
+
+// 默认展开：用户视图展开全部分组（菜单项少，一屏可见）；管理员视图仅展开当前页面所在分组
 const defaultOpeneds = computed(() => {
-  return []
+  const groups = userRoutes.value.filter(r => r.children?.length)
+  if (!isAdminView.value) return groups.map(g => g.path)
+  const current = groups.find(g => g.children.some(c => route.path === c.path || route.path.startsWith(c.path + '/')))
+  return current ? [current.path] : []
 })
 
 const menuRenderKey = computed(() => {
@@ -606,165 +593,254 @@ watch([
 </script>
 
 <style lang="scss" scoped>
-.sidebar-container {
-  transition: width 0.28s;
+.oh-sidebar {
+  display: flex;
+  flex-direction: column;
   width: var(--sidebar-width);
-  background-color: var(--bg-color-sidebar-light);
+  background-color: var(--bg-color-sidebar);
+  border-right: 1px solid var(--border-color);
+  box-shadow: none;
+  transition: width 0.26s var(--ease-in-out), transform 0.26s var(--ease-in-out);
 
   .sidebar-logo {
     height: var(--navbar-height);
-    line-height: var(--navbar-height);
-    background: #16a34a; /* 绿色背景 */
-    text-align: center;
-    overflow: hidden;
+    flex-shrink: 0;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
-    padding: 0 var(--spacing-md);
-    position: relative;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--border-color-light);
+    background: transparent;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .sidebar-logo-mark {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-gradient-soft);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  .sidebar-logo-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+
+  .sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
 
     h1 {
-      color: #ffffff; /* 白色文字 */
-      font-weight: var(--font-weight-semibold);
-      font-size: var(--font-size-md);
-      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
       margin: 0;
-      transition: opacity 0.28s;
-    }
-    
-    .sidebar-logo-img {
-      height: 28px;
-      width: 28px;
-      border-radius: 4px;
-      object-fit: contain;
-      flex-shrink: 0;
-      margin-right: 8px;
-    }
-    
-    span {
-      font-size: var(--font-size-xs);
-      color: #dcfce7; /* 浅绿色文字 */
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-color-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .collapse-btn {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-      color: #dcfce7; /* 浅绿色 */
-      background: transparent;
-      border: none;
-      transition: all 0.28s;
-      
-      &:hover {
-        color: #ffffff; /* 悬停时白色 */
-      }
+    small {
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-color-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-  }
-
-  .scrollbar-wrapper {
-    overflow-x: hidden !important;
-  }
-
-  .el-scrollbar__bar.is-vertical {
-    right: 0px;
   }
 
   .el-scrollbar {
-    height: calc(100% - var(--navbar-height));
+    flex: 1;
+    height: auto;
+    min-height: 0;
   }
 
-  .is-horizontal {
-    display: none;
+  :deep(.scrollbar-wrapper) {
+    overflow-x: hidden !important;
   }
 
-  a {
-    display: inline-block;
-    width: 100%;
-    overflow: hidden;
-  }
-
-  .svg-icon {
-    margin-right: 16px;
-  }
-
-  .sub-el-icon {
-    margin-right: 12px;
-    margin-left: -2px;
-  }
-
-  .el-menu {
+  :deep(.el-menu) {
     border: none;
-    height: 100%;
-    background-color: var(--bg-color-sidebar-light) !important;
-  }
-
-  /* 菜单项悬停效果 */
-  :deep(.el-menu-item) {
-    height: 48px;
-    line-height: 48px;
     background-color: transparent !important;
-    
-    &:hover {
-      background-color: var(--bg-color-hover) !important;
-      color: #16a34a !important;
-    }
-    
-    &.is-active {
-      background-color: var(--bg-color-active) !important;
-      color: #16a34a !important;
-      border-right: 3px solid #16a34a;
-    }
+    padding: 10px 10px 16px;
+    --el-menu-item-height: 40px;
+    --el-menu-sub-item-height: 38px;
   }
 
+  :deep(.el-menu .el-menu) {
+    padding: 2px 0 4px;
+  }
+
+  :deep(a) {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+  }
+
+  /* 一级与二级菜单项 */
+  :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
-    height: 48px;
-    line-height: 48px;
+    height: 40px;
+    line-height: 40px;
+    margin: 2px 0;
+    padding: 0 12px !important;
+    border-radius: 8px;
+    color: var(--text-color-sidebar-inactive) !important;
     background-color: transparent !important;
-    color: var(--text-color-sidebar-primary) !important;
-    font-weight: var(--font-weight-semibold);
-    
-    &:hover {
-      background-color: var(--bg-color-hover) !important;
-      color: #16a34a !important;
-    }
-  }
-
-  :deep(.el-sub-menu.is-opened > .el-sub-menu__title),
-  :deep(.el-sub-menu.is-active > .el-sub-menu__title) {
-    color: #16a34a !important;
-  }
-
-  :deep(.el-sub-menu .el-menu) {
-    background-color: var(--bg-color-sidebar-light) !important;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   :deep(.el-sub-menu .el-menu-item) {
-    height: 42px;
-    line-height: 42px;
-    padding-left: 44px !important;
+    height: 38px;
+    line-height: 38px;
+    padding-left: 38px !important;
     font-size: 13px;
+    position: relative;
   }
 
-  // 收缩状态样式
+  :deep(.el-sub-menu .el-menu-item)::before {
+    content: '';
+    position: absolute;
+    left: 21px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border-color);
+  }
+
+  :deep(.el-menu-item:hover),
+  :deep(.el-sub-menu__title:hover) {
+    background-color: var(--bg-color-hover) !important;
+    color: var(--text-color-primary) !important;
+  }
+
+  :deep(.el-menu-item.is-active) {
+    background-color: var(--bg-color-active) !important;
+    color: var(--accent-text-color) !important;
+    font-weight: 600;
+  }
+
+  :deep(.el-sub-menu .el-menu-item.is-active)::before {
+    width: 2px;
+    left: 20.5px;
+    top: 9px;
+    bottom: 9px;
+    border-radius: 2px;
+    background: var(--brand-gradient);
+  }
+
+  :deep(> .el-scrollbar .el-menu > div > a > .el-menu-item.is-active),
+  :deep(.el-menu > div > a > .el-menu-item.is-active) {
+    box-shadow: inset 3px 0 0 var(--primary-color);
+  }
+
+  :deep(.el-sub-menu.is-active > .el-sub-menu__title) {
+    color: var(--text-color-primary) !important;
+    font-weight: 600;
+  }
+
+  :deep(.el-sub-menu.is-active > .el-sub-menu__title .menu-icon) {
+    color: var(--primary-color);
+  }
+
+  :deep(.el-sub-menu__icon-arrow) {
+    right: 10px;
+    font-size: 12px;
+    color: var(--text-color-tertiary);
+  }
+
+  :deep(.menu-icon) {
+    font-size: 17px;
+    margin-right: 10px;
+  }
+
+  :deep(.el-sub-menu .el-menu-item .menu-icon) {
+    font-size: 15px;
+    opacity: 0.9;
+  }
+
+  .sidebar-footer {
+    flex-shrink: 0;
+    padding: 10px;
+    border-top: 1px solid var(--border-color-light);
+  }
+
+  .collapse-btn {
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color-tertiary);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    .el-icon {
+      font-size: 16px;
+    }
+
+    &:hover {
+      background: var(--bg-color-hover);
+      color: var(--text-color-primary);
+    }
+  }
+
+  /* 收缩状态 */
   &.is-collapse {
     width: var(--sidebar-width-collapsed);
 
+    .sidebar-logo {
+      padding: 0;
+      justify-content: center;
+    }
+
+    .sidebar-brand {
+      justify-content: center;
+    }
+
     :deep(.el-menu) {
       width: var(--sidebar-width-collapsed) !important;
+      padding: 10px 8px;
     }
 
     :deep(.el-menu-item),
     :deep(.el-sub-menu__title) {
       justify-content: center;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
+      padding: 0 !important;
     }
 
     :deep(.el-menu-item .el-menu-tooltip__trigger),
     :deep(.el-sub-menu__title .el-menu-tooltip__trigger) {
       justify-content: center;
+      padding: 0 !important;
     }
 
     :deep(.menu-title),
@@ -772,14 +848,10 @@ watch([
     :deep(.el-menu-item > span:not(.el-icon)),
     :deep(.el-sub-menu__title > span:not(.el-icon)) {
       display: none !important;
-      width: 0 !important;
-      min-width: 0 !important;
-      overflow: hidden !important;
     }
 
     :deep(.menu-item) {
       justify-content: center;
-      width: var(--sidebar-width-collapsed);
     }
 
     :deep(.menu-icon),
@@ -787,351 +859,15 @@ watch([
       margin-right: 0 !important;
     }
 
-    .sidebar-logo {
-      .collapse-btn {
-        right: 50%;
-        transform: translate(50%, -50%);
-      }
+    .collapse-btn {
+      justify-content: center;
+      padding: 0;
     }
   }
-  
-  // 移动端样式
+
   &.mobile {
     width: var(--sidebar-width);
-    
-    .sidebar-logo {
-      .collapse-btn {
-        display: none;
-      }
-    }
-  }
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .sidebar-container {
-    .sidebar-logo {
-      h1 {
-        font-size: var(--font-size-base);
-      }
-    }
-    
-    :deep(.el-menu-item),
-    :deep(.el-sub-menu__title) {
-      height: 48px;
-      line-height: 48px;
-    }
-  }
-}
-
-
-/* ── 现代 UI 增强 ── */
-
-/* 卡片 */
-:deep(.el-card),
-:deep(.el-card.is-always-shadow),
-:deep(.el-card.is-hover-shadow) {
-  border-radius: 16px !important;
-  border: 1px solid var(--border-color) !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-:deep(.el-card:hover) {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.09) !important;
-}
-
-/* 统计卡片 */
-.stat-card :deep(.el-card__body) {
-  padding: 20px !important;
-}
-
-.stat-content {
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
-}
-
-.stat-icon {
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 22px !important;
-  flex-shrink: 0 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
-}
-
-.stat-icon.user-icon { background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; }
-.stat-icon.server-icon { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; }
-.stat-icon.vm-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; }
-.stat-icon.container-icon { background: linear-gradient(135deg, #ec4899, #f472b6); color: #fff; }
-.stat-icon.cpu-icon { background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; }
-.stat-icon.memory-icon { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; }
-.stat-icon.disk-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; }
-
-.stat-number {
-  font-size: 28px !important;
-  font-weight: 800 !important;
-  color: var(--text-color-primary) !important;
-  line-height: 1.1 !important;
-  font-variant-numeric: tabular-nums !important;
-}
-
-.stat-label {
-  font-size: 13px !important;
-  color: var(--text-color-secondary) !important;
-  font-weight: 600 !important;
-  margin-top: 2px !important;
-}
-
-/* 资源卡片 */
-.resource-card :deep(.el-card__body) {
-  padding: 16px 20px !important;
-}
-
-.resource-header {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-bottom: 12px !important;
-}
-
-.resource-icon {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 10px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 16px !important;
-  flex-shrink: 0 !important;
-}
-
-.resource-title {
-  font-weight: 700 !important;
-  font-size: 14px !important;
-  color: var(--text-color-primary) !important;
-}
-
-.resource-number-value {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  color: var(--primary-color) !important;
-  font-variant-numeric: tabular-nums !important;
-}
-
-.resource-number-label {
-  font-size: 11px !important;
-  color: var(--text-color-secondary) !important;
-  font-weight: 600 !important;
-}
-
-.resource-number-separator {
-  color: var(--text-color-tertiary) !important;
-  font-weight: 700 !important;
-  font-size: 16px !important;
-  margin: 0 8px !important;
-}
-
-/* 按钮 */
-:deep(.el-button--primary) {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light)) !important;
-  border: none !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2) !important;
-}
-
-:deep(.el-button--primary:hover) {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
-}
-
-:deep(.el-button--success) {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-}
-
-:deep(.el-button--warning) {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-}
-
-:deep(.el-button--danger) {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-}
-
-:deep(.el-button--default) {
-  border-radius: 12px !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-:deep(.el-button--default:hover) {
-  transform: translateY(-1px) !important;
-}
-
-/* 表格 */
-:deep(.el-table) {
-  --el-table-border-color: var(--border-color) !important;
-}
-
-:deep(.el-table th) {
-  background: rgba(99, 102, 241, 0.04) !important;
-  color: var(--text-color-primary) !important;
-  font-weight: 700 !important;
-  font-size: 13px !important;
-  letter-spacing: 0.3px !important;
-}
-
-:deep(.el-table td) {
-  font-size: 13px !important;
-  color: var(--text-color-primary) !important;
-}
-
-:deep(.el-table__row) {
-  transition: all 0.2s ease !important;
-}
-
-:deep(.el-table__row:hover) {
-  background: rgba(99, 102, 241, 0.04) !important;
-  transform: scale(1.005) !important;
-}
-
-/* 徽章 */
-:deep(.el-tag) {
-  border-radius: 999px !important;
-  font-weight: 600 !important;
-  font-size: 12px !important;
-  padding: 2px 12px !important;
-  border: none !important;
-}
-
-:deep(.el-tag--success) {
-  background: rgba(16, 185, 129, 0.12) !important;
-  color: #10b981 !important;
-}
-
-:deep(.el-tag--warning) {
-  background: rgba(245, 158, 11, 0.12) !important;
-  color: #f59e0b !important;
-}
-
-:deep(.el-tag--danger) {
-  background: rgba(239, 68, 68, 0.12) !important;
-  color: #ef4444 !important;
-}
-
-:deep(.el-tag--info) {
-  background: rgba(107, 114, 128, 0.1) !important;
-  color: #6b7280 !important;
-}
-
-/* 输入框 */
-:deep(.el-input__wrapper) {
-  border-radius: 12px !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-:deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
-}
-
-:deep(.el-select .el-input__wrapper),
-:deep(.el-cascader .el-input__wrapper) {
-  border-radius: 12px !important;
-}
-
-/* 分页 */
-:deep(.el-pagination) {
-  margin-top: 24px !important;
-}
-
-:deep(.el-pager li),
-:deep(.el-pager li.btn-quicknext),
-:deep(.el-pager li.btn-quickprev),
-:deep(.el-pagination .btn-prev),
-:deep(.el-pagination .btn-next) {
-  border-radius: 10px !important;
-  font-weight: 600 !important;
-  transition: all 0.2s ease !important;
-}
-
-:deep(.el-pager li.is-active) {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light)) !important;
-  border-color: transparent !important;
-}
-
-/* 加载态 */
-.el-loading-mask {
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-  background: rgba(255, 255, 255, 0.7) !important;
-}
-
-.el-dark .el-loading-mask {
-  background: rgba(15, 23, 42, 0.7) !important;
-}
-
-/* 标题 */
-h1, h2, h3, h4 {
-  color: var(--text-color-primary) !important;
-}
-
-/* 进场动画 */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* 响应式断点 */
-@media (max-width: 768px) {
-  .stat-content {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-
-  .stat-number {
-    font-size: 22px !important;
-  }
-
-  .stat-icon {
-    width: 40px !important;
-    height: 40px !important;
-    font-size: 18px !important;
-  }
-
-  .resource-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-
-  .resource-numbers {
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    flex-wrap: wrap !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .stat-number {
-    font-size: 20px !important;
-  }
-
-  .stat-label {
-    font-size: 12px !important;
-  }
-
-  .resource-number-value {
-    font-size: 18px !important;
+    box-shadow: var(--shadow-xl);
   }
 }
 </style>

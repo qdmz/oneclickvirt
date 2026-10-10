@@ -19,6 +19,7 @@ import init from './en-US/auth/init.js'
 import home from './en-US/public/home.js'
 import sidebar from './en-US/public/sidebar.js'
 import notFound from './en-US/public/notFound.js'
+import ui from './en-US/ui.js'
 
 // 用户模块
 import userDashboard from './en-US/user/dashboard.js'
@@ -133,5 +134,6 @@ export default {
   validation,
   message,
   errors,
-  notFound
+  notFound,
+  ui
 }

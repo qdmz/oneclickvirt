@@ -35,7 +35,7 @@ export default {
   faviconRemoved: 'Favicon removed',
   themeConfig: 'Theme Settings',
   primaryColor: 'Primary Color',
-  colorFormatError: 'Please enter a valid color, e.g. #16a34a',
+  colorFormatError: 'Please enter a valid color, e.g. #4f46e5',
   customCss: 'Custom CSS',
   customCssPlaceholder: 'Enter custom CSS rules',
   customCssHint: 'This CSS is injected directly into the page and can override default styles',

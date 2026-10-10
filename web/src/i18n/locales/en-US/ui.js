@@ -1,0 +1,87 @@
+// OneHost design system strings (layout, auth brand panel, home, dashboards, 404 ...)
+export default {
+  brand: {
+    tagline: 'Next-generation cloud server & virtualization platform',
+    headline: 'Manage all your cloud compute in one place',
+    description: 'Unify LXD / Incus / Docker / Proxmox VE nodes and automate provisioning, billing, monitoring and operations end to end.',
+    point1: 'Unified multi-hypervisor management',
+    point2: 'Instant provisioning & automation',
+    point3: 'Real-time traffic & resource monitoring',
+    point4: 'Built-in store, tickets and wallet',
+    secure: 'End-to-end encrypted connection'
+  },
+  layout: {
+    console: 'Console',
+    adminConsole: 'Admin Console',
+    collapse: 'Collapse sidebar',
+    expand: 'Expand sidebar',
+    fullscreen: 'Fullscreen',
+    exitFullscreen: 'Exit fullscreen',
+    backToSite: 'Visit homepage',
+    profile: 'Profile',
+    signedInAs: 'Signed in as',
+    adminBadge: 'Admin',
+    userBadge: 'User'
+  },
+  home: {
+    badge: 'Enterprise cloud server platform',
+    ctaConsole: 'Open Console',
+    ctaStore: 'Browse Products',
+    featuresTitle: 'Built for operating at scale',
+    featuresSubtitle: 'From node onboarding to customer delivery, every step of a cloud hosting business is covered',
+    feature1Title: 'Unified multi-platform',
+    feature1Desc: 'One panel for LXD, Incus, Docker, Proxmox VE, Podman and more — no more per-platform tooling.',
+    feature2Title: 'Automated provisioning',
+    feature2Desc: 'Instances are delivered on payment with images, port mappings, IPv6 and snapshots handled automatically.',
+    feature3Title: 'Fine-grained quotas',
+    feature3Desc: 'Per-level limits for CPU, memory, disk and traffic with automatic enforcement.',
+    feature4Title: 'Monitoring & insight',
+    feature4Desc: 'Traffic and resource trends for every node and instance at a glance.',
+    feature5Title: 'Commerce built in',
+    feature5Desc: 'Store, orders, wallet, vouchers and online payment — ready to operate out of the box.',
+    feature6Title: 'Security & compliance',
+    feature6Desc: 'KYC, block rules, API tokens and OAuth2 sign-in with clear permission tiers.',
+    ctaTitle: 'Ready to get started?',
+    ctaSubtitle: 'Create an account and launch your first cloud server in minutes.',
+    from: 'from',
+    viewDetail: 'View details',
+    viewAll: 'View all products'
+  },
+  dashboard: {
+    goodMorning: 'Good morning',
+    goodAfternoon: 'Good afternoon',
+    goodEvening: 'Good evening',
+    adminSubtitle: "Here's how the platform is doing right now",
+    instanceDistribution: 'Instance distribution',
+    resourceAllocation: 'Resource allocation',
+    serverStatus: 'Panel server status',
+    uptime: 'Uptime',
+    running: 'Running',
+    activeUsers: 'Active users',
+    activeProviders: 'Online nodes',
+    totalInstances: 'Total instances',
+    quickEntry: 'Quick links',
+    allocated: 'Allocated',
+    available: 'Available',
+    noData: 'No data',
+    quotaOverview: 'Quota usage',
+    recentAnnouncements: 'Latest announcements',
+    noAnnouncements: 'No announcements yet'
+  },
+  notFound: {
+    hint: 'The page may have been moved or deleted, or the address is incorrect.'
+  },
+  resetPassword: {
+    verifying: 'Verifying your reset link…',
+    successTitle: 'Password reset',
+    successDesc: 'A new password has been generated and sent to your email / linked notification channel. Please sign in and change it as soon as possible.',
+    invalidTitle: 'Link invalid or expired',
+    invalidDesc: 'Please request a new reset link. Links are valid for 24 hours.',
+    missingToken: 'Reset token missing. Please open this page from the link in your email.',
+    requestAgain: 'Request again'
+  },
+  common: {
+    viewAll: 'View all',
+    retry: 'Retry'
+  }
+}

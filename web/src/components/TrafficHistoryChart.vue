@@ -419,13 +419,13 @@ const renderChart = (data) => {
         smooth: true,
         data: totalUsed,
         itemStyle: {
-          color: '#16a34a'
+          color: '#4f46e5'
         },
         areaStyle: {
           opacity: 0.3,
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#16a34a' },
-            { offset: 1, color: 'rgba(22, 163, 74, 0.05)' }
+            { offset: 0, color: '#4f46e5' },
+            { offset: 1, color: 'rgba(79, 70, 229, 0.05)' }
           ])
         }
       }

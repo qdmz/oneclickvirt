@@ -35,7 +35,7 @@ export default {
   faviconRemoved: '图标已移除',
   themeConfig: '主题配置',
   primaryColor: '主题色',
-  colorFormatError: '请输入正确的颜色格式，如 #16a34a',
+  colorFormatError: '请输入正确的颜色格式，如 #4f46e5',
   customCss: '自定义CSS',
   customCssPlaceholder: '请输入自定义 CSS 样式代码',
   customCssHint: '此处输入的 CSS 将直接注入到页面中，可用于覆盖默认样式',

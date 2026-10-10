@@ -1,4 +1,8 @@
 export default {
+  groupCloud: 'Cloud',
+  groupBilling: 'Store & Billing',
+  groupService: 'Services',
+  groupAccount: 'Account & Security',
   groupOverview: 'Overview',
   groupUsers: 'Users',
   groupResources: 'Resources',
