@@ -1,7 +1,7 @@
 package constant
 
 // ServerVersion is the current version of the oneclickvirt server.
-const ServerVersion = "0.3.0"
+const ServerVersion = "0.25"
 
 // AgentReleaseVersion is the release tag used when downloading the Agent.
 // Official builds rewrite ServerVersion to the release tag, so this value

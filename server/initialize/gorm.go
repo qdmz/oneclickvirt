@@ -11,8 +11,8 @@ import (
 	monitoringModel "oneclickvirt/model/monitoring"
 	oauth2Model "oneclickvirt/model/oauth2"
 	permissionModel "oneclickvirt/model/permission"
-	providerModel "oneclickvirt/model/provider"
 	productModel "oneclickvirt/model/product"
+	providerModel "oneclickvirt/model/provider"
 	resourceModel "oneclickvirt/model/resource"
 	systemModel "oneclickvirt/model/system"
 	userModel "oneclickvirt/model/user"
@@ -67,12 +67,14 @@ func Gorm() *gorm.DB {
 	}
 
 	// 检查系统是否已初始化（表已存在）
-	// 如果已初始化则跳过自动迁移，避免MariaDB上AutoMigrate挂起的问题
+	// 已初始化系统不再执行完整的 AutoMigrate（避免 MariaDB 上 AutoMigrate 挂起，
+	// 也避免其对已有列做 ALTER），但升级时仍必须补齐新版本新增的表、列和索引，
+	// 否则新代码会因缺列报错（Unknown column）。这里执行只增不改的结构同步。
 	if isSystemInitialized(db) {
-		global.APP_LOG.Info("系统已初始化，跳过数据库表结构自动迁移")
+		global.APP_LOG.Info("系统已初始化，执行增量（只增不改）表结构同步")
+		ensureAdditiveSchema(db, registeredModels())
 
-		// 即使系统已初始化（跳过 AutoMigrate），也需要执行列结构修复迁移，
-		// 确保旧数据库的表结构与新版本代码期望的一致
+		// 执行列结构修复迁移，确保旧数据库的表结构与新版本代码期望的一致
 		dbService := database.GetDatabaseService()
 		if err := dbService.FixSchemaColumns(); err != nil {
 			global.APP_LOG.Warn("执行数据库列结构修复迁移失败", zap.Error(err))
@@ -121,105 +123,7 @@ func validateDatabaseConnection(db *gorm.DB) error {
 func RegisterTables(db *gorm.DB) {
 	dbService := database.GetDatabaseService()
 
-	err := db.AutoMigrate(
-		// 用户相关表
-		&userModel.User{},     // 用户基础信息表
-		&authModel.Role{},     // 角色管理表
-		&userModel.UserRole{}, // 用户角色关联表
-
-		// OAuth2相关表
-		&oauth2Model.OAuth2Provider{}, // OAuth2提供商配置表
-
-		// 实例相关表
-		&providerModel.Instance{},           // 虚拟机/容器实例表
-		&providerModel.Provider{},           // 服务提供商配置表
-		&providerModel.AdminGroupSetting{},  // 管理员分组设置表
-		&providerModel.Port{},               // 端口映射表
-		&providerModel.ProviderIPv4Pool{},   // IPv4地址池表（dedicated_ipv4类型服务商）
-		&providerModel.ProviderIPv6Pool{},   // IPv6地址池表（支持离散地址和CIDR范围）
-		&providerModel.ProviderIPv6Tunnel{}, // Provider宿主机IPv6隧道配置
-		&providerModel.InstanceShareLink{},  // 临时实例授权分享表
-		&providerModel.InstanceSnapshot{},   // 实例快照表
-		&providerModel.SnapshotSchedule{},   // 实例计划快照表
-		&providerModel.SnapshotTask{},       // 实例快照后台任务表
-		&adminModel.Task{},                  // 用户任务表
-
-		// 资源管理表
-		&resourceModel.ResourceReservation{}, // 资源预留表
-
-		// 认证相关表
-		&userModel.VerifyCode{},          // 验证码表（邮笱/短信）
-		&userModel.PasswordReset{},       // 密码重置令牌表
-		&userModel.JWTBlacklistedToken{}, // JWT黑名单持久化表
-
-		// 系统配置表
-		&adminModel.SystemConfig{},  // 系统配置表
-		&systemModel.Announcement{}, // 系统公告表
-		&systemModel.SystemImage{},  // 系统镜像模板表
-		&systemModel.Captcha{},      // 图形验证码表
-		&systemModel.JWTSecret{},    // JWT密钥表
-
-		// 邀请码相关表
-		&systemModel.InviteCode{},      // 邀请码表
-		&systemModel.InviteCodeUsage{}, // 邀请码使用记录表
-		&systemModel.RedemptionCode{},  // 兑换码表
-
-		// 权限管理表
-		&permissionModel.UserPermission{}, // 用户权限组合表
-
-		// 审计日志表
-		&adminModel.AuditLog{},              // 操作审计日志表
-		&providerModel.PendingDeletion{},    // 待删除资源表
-		&providerModel.HardwareTestReport{}, // 硬件测试报告表
-
-		// 管理员配置任务表
-		&adminModel.ConfigurationTask{},  // 管理员配置任务表
-		&adminModel.TrafficMonitorTask{}, // 流量监控操作任务表
-
-		// 监控数据表
-		&monitoringModel.PmacctTrafficRecord{},    // pmacct流量记录表（原始数据，5分钟粒度）
-		&monitoringModel.PmacctMonitor{},          // pmacct监控配置表
-		&monitoringModel.InstanceTrafficHistory{}, // 实例流量历史表
-		&monitoringModel.ProviderTrafficHistory{}, // Provider流量历史表
-		&monitoringModel.UserTrafficHistory{},     // 用户流量历史表
-		&monitoringModel.PerformanceMetric{},      // 性能指标历史表
-		// Agent监控表
-		&monitoringModel.AgentMonitor{},         // Agent监控映射表
-		&monitoringModel.ResourceMetric{},       // 资源监控数据表（24小时保留）
-		&monitoringModel.MonitoringConfig{},     // Provider监控配置表
-		&monitoringModel.MonitorSyncTask{},      // Provider监控同步后台任务表
-		&monitoringModel.EgressDesiredProfile{}, // 独立出口控制端期望配置
-		&monitoringModel.EgressDesiredBinding{}, // 独立出口控制端实例绑定
-		// 防火墙/滥用屏蔽表
-		&firewallModel.BlockRule{},            // 屏蔽规则表
-		&firewallModel.BlockRuleApplication{}, // 屏蔽规则应用记录表
-
-		// 域名绑定表
-		&domainModel.Domain{},       // 域名绑定记录表
-		&domainModel.DomainConfig{}, // 域名绑定配置表
-
-		// 实名认证表
-		&kycModel.KYCRecord{}, // KYC认证记录表
-
-		// 签到续期表
-		&checkinModel.CheckinConfig{},       // 签到配置表
-		&checkinModel.CheckinRecord{},       // 签到记录表
-		&checkinModel.CheckinVerification{}, // 签到验证码表
-
-		// API Token表
-		&authModel.ApiToken{}, // API访问令牌表
-
-		// 产品商城表
-		&productModel.Product{},         // 产品定义表
-		&productModel.ProductOrder{},    // 产品订单表
-		&productModel.Ticket{},          // 用户工单表
-		&productModel.TicketReply{},     // 工单回复表
-		&productModel.SiteConfig{},      // 站点前端配置表
-		&productModel.UserBalanceLog{},  // 用户余额变动记录表
-		&productModel.RechargeOrder{},   // 易支付充值订单表（下单创建，成功后写流水）
-		&productModel.YiPayConfig{},     // 易支付配置表
-		&productModel.Voucher{},         // 代金券表
-	)
+	err := db.AutoMigrate(registeredModels()...)
 	if err != nil {
 		global.APP_LOG.Error("register table failed", zap.Error(err))
 		return
@@ -318,4 +222,108 @@ func isSystemInitialized(db *gorm.DB) bool {
 	}
 
 	return userCount > 0
+}
+
+// registeredModels 返回所有需要建表/迁移的模型。
+// 新增模型时只需在这里登记，首次安装（AutoMigrate）和升级（增量同步）都会覆盖到。
+func registeredModels() []interface{} {
+	return []interface{}{
+		// 用户相关表
+		&userModel.User{},     // 用户基础信息表
+		&authModel.Role{},     // 角色管理表
+		&userModel.UserRole{}, // 用户角色关联表
+
+		// OAuth2相关表
+		&oauth2Model.OAuth2Provider{}, // OAuth2提供商配置表
+
+		// 实例相关表
+		&providerModel.Instance{},           // 虚拟机/容器实例表
+		&providerModel.Provider{},           // 服务提供商配置表
+		&providerModel.AdminGroupSetting{},  // 管理员分组设置表
+		&providerModel.Port{},               // 端口映射表
+		&providerModel.ProviderIPv4Pool{},   // IPv4地址池表（dedicated_ipv4类型服务商）
+		&providerModel.ProviderIPv6Pool{},   // IPv6地址池表（支持离散地址和CIDR范围）
+		&providerModel.ProviderIPv6Tunnel{}, // Provider宿主机IPv6隧道配置
+		&providerModel.InstanceShareLink{},  // 临时实例授权分享表
+		&providerModel.InstanceSnapshot{},   // 实例快照表
+		&providerModel.SnapshotSchedule{},   // 实例计划快照表
+		&providerModel.SnapshotTask{},       // 实例快照后台任务表
+		&adminModel.Task{},                  // 用户任务表
+
+		// 资源管理表
+		&resourceModel.ResourceReservation{}, // 资源预留表
+
+		// 认证相关表
+		&userModel.VerifyCode{},          // 验证码表（邮笱/短信）
+		&userModel.PasswordReset{},       // 密码重置令牌表
+		&userModel.JWTBlacklistedToken{}, // JWT黑名单持久化表
+
+		// 系统配置表
+		&adminModel.SystemConfig{},  // 系统配置表
+		&systemModel.Announcement{}, // 系统公告表
+		&systemModel.SystemImage{},  // 系统镜像模板表
+		&systemModel.Captcha{},      // 图形验证码表
+		&systemModel.JWTSecret{},    // JWT密钥表
+
+		// 邀请码相关表
+		&systemModel.InviteCode{},      // 邀请码表
+		&systemModel.InviteCodeUsage{}, // 邀请码使用记录表
+		&systemModel.RedemptionCode{},  // 兑换码表
+
+		// 权限管理表
+		&permissionModel.UserPermission{}, // 用户权限组合表
+
+		// 审计日志表
+		&adminModel.AuditLog{},              // 操作审计日志表
+		&providerModel.PendingDeletion{},    // 待删除资源表
+		&providerModel.HardwareTestReport{}, // 硬件测试报告表
+
+		// 管理员配置任务表
+		&adminModel.ConfigurationTask{},  // 管理员配置任务表
+		&adminModel.TrafficMonitorTask{}, // 流量监控操作任务表
+
+		// 监控数据表
+		&monitoringModel.PmacctTrafficRecord{},    // pmacct流量记录表（原始数据，5分钟粒度）
+		&monitoringModel.PmacctMonitor{},          // pmacct监控配置表
+		&monitoringModel.InstanceTrafficHistory{}, // 实例流量历史表
+		&monitoringModel.ProviderTrafficHistory{}, // Provider流量历史表
+		&monitoringModel.UserTrafficHistory{},     // 用户流量历史表
+		&monitoringModel.PerformanceMetric{},      // 性能指标历史表
+		// Agent监控表
+		&monitoringModel.AgentMonitor{},         // Agent监控映射表
+		&monitoringModel.ResourceMetric{},       // 资源监控数据表（24小时保留）
+		&monitoringModel.MonitoringConfig{},     // Provider监控配置表
+		&monitoringModel.MonitorSyncTask{},      // Provider监控同步后台任务表
+		&monitoringModel.EgressDesiredProfile{}, // 独立出口控制端期望配置
+		&monitoringModel.EgressDesiredBinding{}, // 独立出口控制端实例绑定
+		// 防火墙/滥用屏蔽表
+		&firewallModel.BlockRule{},            // 屏蔽规则表
+		&firewallModel.BlockRuleApplication{}, // 屏蔽规则应用记录表
+
+		// 域名绑定表
+		&domainModel.Domain{},       // 域名绑定记录表
+		&domainModel.DomainConfig{}, // 域名绑定配置表
+
+		// 实名认证表
+		&kycModel.KYCRecord{}, // KYC认证记录表
+
+		// 签到续期表
+		&checkinModel.CheckinConfig{},       // 签到配置表
+		&checkinModel.CheckinRecord{},       // 签到记录表
+		&checkinModel.CheckinVerification{}, // 签到验证码表
+
+		// API Token表
+		&authModel.ApiToken{}, // API访问令牌表
+
+		// 产品商城表
+		&productModel.Product{},        // 产品定义表
+		&productModel.ProductOrder{},   // 产品订单表
+		&productModel.Ticket{},         // 用户工单表
+		&productModel.TicketReply{},    // 工单回复表
+		&productModel.SiteConfig{},     // 站点前端配置表
+		&productModel.UserBalanceLog{}, // 用户余额变动记录表
+		&productModel.RechargeOrder{},  // 易支付充值订单表（下单创建，成功后写流水）
+		&productModel.YiPayConfig{},    // 易支付配置表
+		&productModel.Voucher{},        // 代金券表
+	}
 }
