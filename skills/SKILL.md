@@ -1,7 +1,7 @@
 ---
 name: oneclickvirt
 description: OneClickVirt operations skill for managing containers, virtual machines, provider nodes, health checks, and metrics through MCP.
-version: 0.3.0
+version: 0.25
 author: oneclickvirt
 homepage: https://github.com/oneclickvirt/oneclickvirt
 tags:
@@ -73,7 +73,7 @@ Manual install from a release archive:
 
 ```bash
 mkdir -p ~/.claude/skills/oneclickvirt
-tar -xzf oneclickvirt-skill-v0.3.0.tar.gz -C ~/.claude/skills/oneclickvirt
+tar -xzf oneclickvirt-skill-v0.25.tar.gz -C ~/.claude/skills/oneclickvirt
 ```
 
 Development install from a clone:

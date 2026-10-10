@@ -1,7 +1,7 @@
 ---
 name: oneclickvirt
 description: OneClickVirt 操作 Skill，通过 MCP 管理容器、虚拟机、节点、健康检查和监控指标。
-version: 0.3.0
+version: 0.25
 author: oneclickvirt
 homepage: https://github.com/oneclickvirt/oneclickvirt
 tags:
@@ -73,7 +73,7 @@ mcpServers:
 
 ```bash
 mkdir -p ~/.claude/skills/oneclickvirt
-tar -xzf oneclickvirt-skill-v0.3.0.tar.gz -C ~/.claude/skills/oneclickvirt
+tar -xzf oneclickvirt-skill-v0.25.tar.gz -C ~/.claude/skills/oneclickvirt
 ```
 
 从本地仓库开发安装：
