@@ -256,12 +256,19 @@
               :title="item.name"
             >
               <img
+                v-if="item.icon"
                 :src="item.icon"
                 :alt="item.name"
                 width="36"
                 height="36"
-                loading="lazy"
+                loading="eager"
+                decoding="async"
+                @error="e => (e.target.style.visibility = 'hidden')"
               >
+              <i
+                v-else
+                class="fas fa-server platform-fallback-icon"
+              />
               <span class="platform-text">
                 <b>{{ item.name }}</b>
                 <small v-if="item.repo"><i class="fab fa-github" /> {{ item.repo }}</small>
@@ -575,10 +582,30 @@ const fetchSiteLinks = async () => {
   }
 }
 
+const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+const hostOf = (u) => { try { return new URL(u).host.replace(/^www\./, '') } catch { return '' } }
+const repoFromUrl = (u) => {
+  const m = String(u || '').match(/github\.com\/([^/]+\/[^/?#]+)/i)
+  return m ? m[1] : ''
+}
+const findBuiltinPlatform = (l) => {
+  const n = norm(l.name)
+  return platforms.find(p => norm(p.name) === n || (n && norm(p.name).startsWith(n)) || (l.url && p.href === l.url.replace(/\/$/, '')))
+}
+
 // 平台轮播：优先使用后台配置的 site_links，无数据时回退到内置默认值
 const platformList = computed(() => {
   if (siteLinksPlatform.value.length > 0) {
-    return siteLinksPlatform.value.map(l => ({ name: l.name, href: l.url, icon: l.iconUrl, repo: l.description || '' }))
+    return siteLinksPlatform.value.map(l => {
+      // 后台未配置图标时，按名称或链接回退到内置图标，避免显示破图
+      const builtin = findBuiltinPlatform(l)
+      return {
+        name: l.name,
+        href: l.url || builtin?.href || '#',
+        icon: l.iconUrl || builtin?.icon || '',
+        repo: l.description || builtin?.repo || repoFromUrl(l.url)
+      }
+    })
   }
   return platforms
 })
@@ -586,7 +613,16 @@ const platformList = computed(() => {
 // 赞助方：优先后台配置，无数据回退内置默认值
 const sponsorList = computed(() => {
   if (siteLinksSponsor.value.length > 0) {
-    return siteLinksSponsor.value.map(l => ({ name: l.name, href: l.url, logo: l.iconUrl }))
+    return siteLinksSponsor.value.map(l => {
+      const builtin = footerSponsors.find(b => norm(b.name) === norm(l.name) || (l.url && b.href && hostOf(b.href) === hostOf(l.url)))
+      return {
+        name: l.name,
+        href: l.url || builtin?.href || '#',
+        logo: l.iconUrl || builtin?.logo || '',
+        cardClass: builtin?.cardClass,
+        logoClass: builtin?.logoClass
+      }
+    })
   }
   return footerSponsors
 })
