@@ -19,9 +19,13 @@
 
       <div
         v-show="loading"
-        v-loading="true"
-        style="height: 300px;"
-      />
+        class="chart-skeleton"
+      >
+        <el-skeleton
+          :rows="6"
+          animated
+        />
+      </div>
 
       <div
         v-show="!loading"
@@ -67,6 +71,7 @@ import { useI18n } from 'vue-i18n'
 import { Refresh } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { getInstanceResourceMonitoring, getSharedInstanceResourceMonitoring } from '@/api/user'
+import { withChartTheme, useChartTheme, areaGradient, getChartTokens } from '@/utils/chartTheme'
 
 const { t } = useI18n()
 
@@ -87,6 +92,7 @@ let cpuChart = null
 let memChart = null
 let diskChart = null
 let refreshTimer = null
+let lastData = null
 
 const formatTime = (ts) => {
   const d = new Date(ts)
@@ -102,7 +108,8 @@ const formatBytes = (bytes) => {
 }
 
 const buildLineOption = (times, series, yFormatter, yMax) => {
-  return {
+  const tk = getChartTokens()
+  return withChartTheme({
     tooltip: {
       trigger: 'axis',
       formatter: (params) => {
@@ -114,9 +121,10 @@ const buildLineOption = (times, series, yFormatter, yMax) => {
       }
     },
     legend: { data: series.map(s => s.name), bottom: 0 },
-    grid: { top: 10, right: 20, bottom: 50, left: 60 },
+    grid: { top: 12, right: 16, bottom: 36, left: 8, containLabel: true },
     xAxis: {
       type: 'category',
+      boundaryGap: false,
       data: times,
       axisLabel: { fontSize: 10 }
     },
@@ -125,19 +133,26 @@ const buildLineOption = (times, series, yFormatter, yMax) => {
       max: yMax || undefined,
       axisLabel: { formatter: (v) => yFormatter(v) }
     },
-    series: series.map(s => ({
-      name: s.name,
-      type: 'line',
-      smooth: true,
-      symbol: 'none',
-      data: s.data,
-      areaStyle: { opacity: 0.15 },
-      lineStyle: { width: 2 }
-    }))
-  }
+    series: series.map((s, i) => {
+      const color = s.color || tk.palette[i % tk.palette.length]
+      return {
+        name: s.name,
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        data: s.data,
+        itemStyle: { color },
+        areaStyle: { color: areaGradient(color, 0.26, 0.02) },
+        lineStyle: { width: 2, color }
+      }
+    })
+  })
 }
 
 const renderCharts = (data) => {
+  if (!data) return
+  lastData = data
+  const tk = getChartTokens()
   const times = data.map(d => formatTime(d.timestamp))
   const cpuData = data.map(d => d.cpu_percent || 0)
   const memUsed = data.map(d => d.memory_used || 0)
@@ -149,7 +164,7 @@ const renderCharts = (data) => {
   if (cpuChartRef.value) {
     if (!cpuChart || cpuChart.isDisposed()) cpuChart = echarts.init(cpuChartRef.value)
     cpuChart.setOption(buildLineOption(times,
-      [{ name: 'CPU %', data: cpuData }],
+      [{ name: 'CPU %', data: cpuData, color: tk.primary }],
       (v) => v.toFixed(1) + '%',
       100
     ))
@@ -160,8 +175,8 @@ const renderCharts = (data) => {
     if (!memChart || memChart.isDisposed()) memChart = echarts.init(memChartRef.value)
     memChart.setOption(buildLineOption(times,
       [
-        { name: t('user.instanceDetail.memUsed'), data: memUsed },
-        { name: t('user.instanceDetail.memPercent'), data: memPercent }
+        { name: t('user.instanceDetail.memUsed'), data: memUsed, color: tk.violet },
+        { name: t('user.instanceDetail.memPercent'), data: memPercent, color: tk.accent }
       ],
       (v) => {
         if (v > 1000) return formatBytes(v)
@@ -175,8 +190,8 @@ const renderCharts = (data) => {
     if (!diskChart || diskChart.isDisposed()) diskChart = echarts.init(diskChartRef.value)
     diskChart.setOption(buildLineOption(times,
       [
-        { name: t('user.instanceDetail.diskUsed'), data: diskUsed },
-        { name: t('user.instanceDetail.diskPercent'), data: diskPercent }
+        { name: t('user.instanceDetail.diskUsed'), data: diskUsed, color: tk.warning },
+        { name: t('user.instanceDetail.diskPercent'), data: diskPercent, color: tk.success }
       ],
       (v) => {
         if (v > 1000) return formatBytes(v)
@@ -247,6 +262,11 @@ const handleResize = () => {
 
 let resizeObserver = null
 
+// 主题（亮/暗）切换时用最近一次数据重绘
+useChartTheme(() => {
+  if (lastData && !loading.value) renderCharts(lastData)
+})
+
 onMounted(() => {
   loadData()
   window.addEventListener('resize', handleResize)
@@ -311,7 +331,19 @@ defineExpose({ refresh: loadData })
 .charts-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
+}
+
+.chart-skeleton {
+  min-height: 300px;
+  padding: 8px 4px;
+}
+
+.chart-item {
+  padding: 14px 14px 6px;
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-muted, transparent);
 }
 
 .chart-item h4 {
@@ -319,11 +351,22 @@ defineExpose({ refresh: loadData })
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-item h4::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--brand-gradient, var(--primary-color));
 }
 
 .chart-canvas {
   width: 100%;
-  height: 240px;
+  height: 220px;
 }
 
 .no-data {

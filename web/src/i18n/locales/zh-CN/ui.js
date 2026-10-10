@@ -66,7 +66,24 @@ export default {
     noData: '暂无数据',
     quotaOverview: '配额使用概览',
     recentAnnouncements: '最新公告',
-    noAnnouncements: '暂无公告'
+    noAnnouncements: '暂无公告',
+    lastUpdated: '更新于 {time}',
+    refreshed: '仪表盘已刷新',
+    notRunning: '未运行',
+    runningOfTotal: '运行中 {running} / 共 {total}',
+    cpuUsage: 'CPU',
+    memoryUsage: '内存',
+    diskUsage: '磁盘',
+    healthOk: '运行良好',
+    healthWarn: '负载较高',
+    healthBad: '负载告急',
+    uptimeDHM: '{d}天 {h}小时 {m}分',
+    uptimeHM: '{h}小时 {m}分',
+    uptimeM: '{m}分钟',
+    quickApplyDesc: '创建一台新的云实例',
+    quickInstancesDesc: '管理并连接你的服务器',
+    quickOrdersDesc: '查看购买与续费记录',
+    quickTicketsDesc: '向客服提交问题'
   },
   notFound: {
     hint: '页面可能已被移动、删除，或您输入的地址有误。'

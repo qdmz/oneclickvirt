@@ -1,6 +1,5 @@
 <template>
   <AuthShell>
-
     <div class="forgot-password-form">
       <div v-if="!emailSent">
         <h2>{{ t('forgotPassword.title') }}</h2>
@@ -100,17 +99,10 @@ import { ElMessage } from 'element-plus'
 import { forgotPassword } from '@/api/auth'
 import { getCaptcha } from '@/api/auth'
 import { getPublicConfig } from '@/api/public'
-import { Operation, HomeFilled, Sunny, Moon } from '@element-plus/icons-vue'
-import { useLanguageStore } from '@/pinia/modules/language'
-import { useThemeStore } from '@/pinia/modules/theme'
-import { useSiteStore } from '@/pinia/modules/site'
 import AuthShell from '@/components/AuthShell.vue'
 
 const router = useRouter()
-const { t, locale } = useI18n()
-const languageStore = useLanguageStore()
-const themeStore = useThemeStore()
-const siteStore = useSiteStore()
+const { t } = useI18n()
 const forgotFormRef = ref()
 const loading = ref(false)
 const emailSent = ref(false)
@@ -204,17 +196,6 @@ const loadCaptchaConfig = async () => {
 
 const goToLogin = () => {
   router.push('/login')
-}
-
-// 切换语言
-const switchLanguage = () => {
-  const newLang = languageStore.toggleLanguage()
-  locale.value = newLang
-  ElMessage.success(t('navbar.languageSwitched'))
-}
-
-const toggleTheme = () => {
-  themeStore.toggleTheme()
 }
 
 onMounted(async () => {

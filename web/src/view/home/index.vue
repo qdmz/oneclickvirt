@@ -1,166 +1,229 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-  <div class="home-container">
-    <!-- 导航栏 -->
-    <header class="home-header">
-      <div class="header-content">
-        <div class="logo">
+  <div class="home">
+    <!-- 顶部导航（玻璃态，吸顶） -->
+    <header class="nav">
+      <div class="nav-inner">
+        <router-link
+          to="/"
+          class="brand"
+        >
           <img
             :src="siteStore.logoSrc"
             :alt="siteStore.displaySiteName"
-            class="logo-image"
+            class="brand-logo"
           >
-          <h1>{{ siteStore.displaySiteName }}</h1>
-        </div>
-        <nav class="nav-menu">
-          <!-- 主题切换按钮 -->
+          <span class="brand-name">{{ siteStore.displaySiteName }}</span>
+        </router-link>
+        <nav class="nav-actions">
           <button
-            class="nav-link theme-btn"
+            class="icon-btn"
             :title="themeStore.isDark ? t('navbar.lightMode') : t('navbar.darkMode')"
+            :aria-label="themeStore.isDark ? t('navbar.lightMode') : t('navbar.darkMode')"
             @click="toggleTheme"
           >
             <el-icon><component :is="themeStore.isDark ? Sunny : Moon" /></el-icon>
           </button>
-          <!-- 语言切换按钮 -->
           <button
-            class="nav-link language-btn"
+            class="icon-btn lang-btn"
             @click="switchLanguage"
           >
             <el-icon><Operation /></el-icon>
-            {{ languageStore.currentLanguage === 'zh-CN' ? 'English' : '中文' }}
+            <span>{{ languageStore.currentLanguage === 'zh-CN' ? 'EN' : '中文' }}</span>
           </button>
-          <router-link
-            to="/login"
-            class="nav-link"
-          >
-            {{ t('home.nav.login') }}
-          </router-link>
-          <router-link
-            to="/register"
-            class="nav-link primary"
-          >
-            {{ t('home.nav.register') }}
-          </router-link>
+          <template v-if="userStore.isLoggedIn">
+            <router-link
+              :to="consolePath"
+              class="btn btn-primary btn-sm"
+            >
+              {{ t('ui.home.ctaConsole') }}
+            </router-link>
+          </template>
+          <template v-else>
+            <router-link
+              to="/login"
+              class="btn btn-ghost btn-sm hide-xs"
+            >
+              {{ t('home.nav.login') }}
+            </router-link>
+            <router-link
+              to="/register"
+              class="btn btn-primary btn-sm"
+            >
+              {{ t('home.nav.register') }}
+            </router-link>
+          </template>
         </nav>
       </div>
     </header>
 
-    <!-- 主要内容 -->
-    <main class="home-main">
-      <!-- 英雄区域 -->
+    <main>
+      <!-- Hero -->
       <section
-        class="hero-section"
+        class="hero"
+        :class="{ 'has-bg': !!siteStore.homeBackground }"
         :style="heroStyle"
       >
-        <div class="hero-content">
+        <div
+          class="hero-glow"
+          aria-hidden="true"
+        />
+        <div
+          class="hero-grid"
+          aria-hidden="true"
+        />
+        <div class="container hero-inner">
+          <span class="badge"><span class="badge-dot" />{{ t('ui.home.badge') }}</span>
           <h1 class="hero-title">
-            {{ siteStore.homeTitle || t('home.hero.title') }}
+            <span class="oh-gradient-text">{{ siteStore.homeTitle || t('home.hero.title') }}</span>
           </h1>
-          <p class="hero-description">
+          <p class="hero-sub">
             {{ siteStore.homeSubtitle || t('home.hero.description') }}
           </p>
-          <div class="hero-actions">
+          <div class="hero-cta">
             <router-link
-              to="/login"
-              class="btn btn-primary"
+              :to="userStore.isLoggedIn ? consolePath : '/register'"
+              class="btn btn-primary btn-lg"
             >
-              {{ t('home.hero.loginButton') }}
+              {{ userStore.isLoggedIn ? t('ui.home.ctaConsole') : t('home.hero.registerButton') }}
+              <el-icon class="btn-arrow">
+                <Right />
+              </el-icon>
             </router-link>
             <router-link
-              to="/register"
-              class="btn btn-secondary"
+              to="/user/store"
+              class="btn btn-ghost btn-lg"
             >
-              {{ t('home.hero.registerButton') }}
+              {{ t('ui.home.ctaStore') }}
             </router-link>
           </div>
-        </div>
-        <div class="hero-image">
-          <div class="feature-preview">
-            <div class="preview-card">
-              <div class="card-icon">
-                <i class="fas fa-server" />
+
+          <div
+            class="stats"
+            aria-label="platform-stats"
+          >
+            <div
+              v-for="s in statItems"
+              :key="s.key"
+              class="stat"
+            >
+              <i
+                :class="['fas', s.icon, 'stat-icon']"
+                aria-hidden="true"
+              />
+              <div class="stat-value">
+                {{ s.value }}
               </div>
-              <h3>{{ t('home.features.vm.title') }}</h3>
-              <p>{{ t('home.features.vm.description') }}</p>
-            </div>
-            <div class="preview-card">
-              <div class="card-icon">
-                <i class="fas fa-box" />
+              <div class="stat-label">
+                {{ s.label }}
               </div>
-              <h3>{{ t('home.features.container.title') }}</h3>
-              <p>{{ t('home.features.container.description') }}</p>
-            </div>
-            <div class="preview-card">
-              <div class="card-icon">
-                <i class="fas fa-chart-bar" />
-              </div>
-              <h3>{{ t('home.features.monitoring.title') }}</h3>
-              <p>{{ t('home.features.monitoring.description') }}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 平台概览 -->
-      <section class="overview-section">
-        <div class="section-header">
-          <h2>{{ t('home.platformOverview.title') }}</h2>
-          <p>{{ t('home.platformOverview.description') }}</p>
+      <!-- 六大特性 -->
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <h2>{{ t('ui.home.featuresTitle') }}</h2>
+            <p>{{ t('ui.home.featuresSubtitle') }}</p>
+          </div>
+          <div class="features">
+            <div
+              v-for="f in featureItems"
+              :key="f.n"
+              :class="['feature', f.tone]"
+            >
+              <div class="feature-icon">
+                <i
+                  :class="['fas', f.icon]"
+                  aria-hidden="true"
+                />
+              </div>
+              <h3>{{ t(`ui.home.feature${f.n}Title`) }}</h3>
+              <p>{{ t(`ui.home.feature${f.n}Desc`) }}</p>
+            </div>
+          </div>
         </div>
-        <div
-          class="stats-grid"
-          aria-label="platform-stats"
-        >
-          <div class="platform-item stats-item">
-            <div class="platform-icon">
-              <i
-                class="fas fa-users fa-2x"
-                aria-hidden="true"
-              />
-            </div>
-            <h3>{{ t('home.stats.users') }}</h3>
-            <p class="stats-value">
-              {{ usersCountDisplay }}
-            </p>
-          </div>
+      </section>
 
-          <div class="platform-item stats-item">
-            <div class="platform-icon">
-              <i
-                class="fas fa-network-wired fa-2x"
-                aria-hidden="true"
-              />
-            </div>
-            <h3>{{ t('home.stats.nodes') }}</h3>
-            <p class="stats-value">
-              {{ nodesCountDisplay }}
-            </p>
+      <!-- 推荐产品（价格卡） -->
+      <section
+        v-if="siteStore.showRecommended && recommendedProducts.length > 0"
+        class="section section-alt"
+      >
+        <div class="container">
+          <div class="section-head">
+            <h2>{{ siteStore.recommendedTitle || t('home.recommendedProducts.title') }}</h2>
+            <p>{{ siteStore.recommendedSubtitle || t('home.recommendedProducts.subtitle') }}</p>
           </div>
-
-          <div class="platform-item stats-item">
-            <div class="platform-icon">
-              <i
-                class="fas fa-box fa-2x"
-                aria-hidden="true"
-              />
-            </div>
-            <h3>{{ t('home.stats.containers') }}</h3>
-            <p class="stats-value">
-              {{ containersCountDisplay }}
-            </p>
+          <div
+            class="pricing"
+            :style="{ '--cols': effectiveCols }"
+          >
+            <article
+              v-for="(p, i) in recommendedProducts"
+              :key="p.id"
+              :class="['plan', { featured: i === featuredIndex }]"
+              @click="goToProduct(p.id)"
+            >
+              <header class="plan-head">
+                <div class="plan-icon">
+                  <img
+                    v-if="p.icon"
+                    :src="p.icon"
+                    :alt="p.name"
+                  >
+                  <el-icon
+                    v-else
+                    :size="22"
+                  >
+                    <Box />
+                  </el-icon>
+                </div>
+                <div class="plan-title">
+                  <h3>{{ p.name }}</h3>
+                  <span class="chip">{{ categoryLabel(p) }}</span>
+                </div>
+              </header>
+              <div
+                v-if="siteStore.recommendedShowPrice"
+                class="plan-price"
+              >
+                <span class="cur">¥</span><span class="num">{{ p.price }}</span><span class="per">/{{ periodLabel(p) }}</span>
+              </div>
+              <p
+                v-if="p.description"
+                class="plan-desc"
+              >
+                {{ p.description }}
+              </p>
+              <ul
+                v-if="siteStore.recommendedShowSpecs"
+                class="plan-specs"
+              >
+                <li><span>{{ t('user.store.cpu') }}</span><b>{{ p.cpu }} {{ t('user.store.cores') }}</b></li>
+                <li><span>{{ t('user.store.memory') }}</span><b>{{ formatMB(p.memory) }}</b></li>
+                <li><span>{{ t('user.store.disk') }}</span><b>{{ formatMB(p.disk) }}</b></li>
+                <li><span>{{ t('user.store.bandwidth') }}</span><b>{{ p.bandwidth }} Mbps</b></li>
+                <li><span>{{ t('user.store.traffic') }}</span><b>{{ formatMB(p.traffic) }}</b></li>
+              </ul>
+              <footer class="plan-foot">
+                <span class="plan-stock">{{ p.stock < 0 ? t('user.store.stockUnlimited') : (p.stock + ' ' + t('user.store.stock')) }}</span>
+                <span :class="['btn', 'btn-sm', i === featuredIndex ? 'btn-primary' : 'btn-ghost']">{{ t('ui.home.viewDetail') }}</span>
+              </footer>
+            </article>
           </div>
-
-          <div class="platform-item stats-item">
-            <div class="platform-icon">
-              <i
-                class="fas fa-server fa-2x"
-                aria-hidden="true"
-              />
-            </div>
-            <h3>{{ t('home.stats.vms') }}</h3>
-            <p class="stats-value">
-              {{ vmsCountDisplay }}
-            </p>
+          <div class="center-row">
+            <router-link
+              to="/user/store"
+              class="btn btn-ghost"
+            >
+              {{ t('ui.home.viewAll') }} <el-icon class="btn-arrow">
+                <Right />
+              </el-icon>
+            </router-link>
           </div>
         </div>
       </section>
@@ -168,44 +231,39 @@
       <!-- 支持的虚拟化平台 -->
       <section
         v-if="siteStore.showPlatforms"
-        class="platforms-section"
+        class="section"
       >
-        <div class="section-header">
-          <h2>{{ t('home.platforms.title') }}</h2>
-          <p>{{ t('home.platforms.description') }}</p>
+        <div class="container">
+          <div class="section-head">
+            <h2>{{ t('home.platforms.title') }}</h2>
+            <p>{{ t('home.platforms.description') }}</p>
+          </div>
         </div>
         <LogoCarousel
+          class="carousel"
           :items="platformList"
           :speed="35"
           direction="left"
-          :gap="24"
+          :gap="16"
         >
           <template #default="{ item }">
             <a
               :href="item.href"
               target="_blank"
               rel="noopener noreferrer"
-              class="carousel-platform-card"
+              class="platform"
               :title="item.name"
             >
-              <div class="platform-card-icon">
-                <img
-                  :src="item.icon"
-                  :alt="item.name"
-                  width="48"
-                  height="48"
-                  loading="lazy"
-                >
-              </div>
-              <span class="platform-card-name">{{ item.name }}</span>
-              <span class="platform-card-repo">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                ><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
-                {{ item.repo }}
+              <img
+                :src="item.icon"
+                :alt="item.name"
+                width="36"
+                height="36"
+                loading="lazy"
+              >
+              <span class="platform-text">
+                <b>{{ item.name }}</b>
+                <small v-if="item.repo"><i class="fab fa-github" /> {{ item.repo }}</small>
               </span>
             </a>
           </template>
@@ -215,259 +273,166 @@
       <!-- 赞助方 -->
       <section
         v-if="siteStore.showSponsors"
-        class="supporters-section"
+        class="section section-tight"
       >
-        <div class="section-header">
-          <h2>{{ t('home.supporters.title') }}</h2>
-          <p>{{ t('home.supporters.description') }}</p>
-        </div>
-        <div class="supporters-grid">
-          <a
-            v-for="item in sponsorList"
-            :key="item.name"
-            :href="item.href"
-            target="_blank"
-            rel="noopener noreferrer"
-            :class="['supporter-card', item.cardClass]"
-            :title="item.name"
-            :aria-label="item.name"
-          >
-            <img
-              :src="item.logo"
-              :alt="item.name"
-              loading="eager"
-              decoding="async"
-              :class="item.logoClass"
+        <div class="container">
+          <div class="section-head">
+            <h2>{{ t('home.supporters.title') }}</h2>
+            <p>{{ t('home.supporters.description') }}</p>
+          </div>
+          <div class="sponsors">
+            <a
+              v-for="item in sponsorList"
+              :key="item.name"
+              :href="item.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              :class="['sponsor', item.cardClass]"
+              :title="item.name"
+              :aria-label="item.name"
             >
-          </a>
+              <img
+                :src="item.logo"
+                :alt="item.name"
+                loading="eager"
+                decoding="async"
+                :class="item.logoClass"
+              >
+            </a>
+          </div>
         </div>
       </section>
 
       <!-- 系统公告 -->
       <section
         v-if="announcements.length > 0"
-        class="announcements-section"
+        class="section section-alt"
       >
-        <div class="section-header">
-          <h2>{{ t('home.announcements.title') }}</h2>
-        </div>
-        <div class="announcements-list">
-          <div
-            v-for="announcement in announcements"
-            :key="announcement.id"
-            class="announcement-item"
-          >
-            <div class="announcement-header">
-              <h3>{{ announcement.title }}</h3>
-              <div class="announcement-meta">
-                <el-tag
-                  :type="announcement.type === 'homepage' ? 'success' : 'warning'"
-                  size="small"
-                >
-                  {{ announcement.type === 'homepage' ? t('home.announcements.typeHomepage') : t('home.announcements.typeTopbar') }}
-                </el-tag>
-                <span class="announcement-date">{{ formatDate(announcement.createdAt) }}</span>
+        <div class="container narrow">
+          <div class="section-head">
+            <h2>{{ t('home.announcements.title') }}</h2>
+          </div>
+          <div class="news">
+            <article
+              v-for="announcement in announcements"
+              :key="announcement.id"
+              class="news-item"
+            >
+              <div class="news-head">
+                <h3>{{ announcement.title }}</h3>
+                <div class="news-meta">
+                  <el-tag
+                    :type="announcement.type === 'homepage' ? 'success' : 'warning'"
+                    size="small"
+                    effect="light"
+                    round
+                  >
+                    {{ announcement.type === 'homepage' ? t('home.announcements.typeHomepage') : t('home.announcements.typeTopbar') }}
+                  </el-tag>
+                  <time>{{ formatDate(announcement.createdAt) }}</time>
+                </div>
               </div>
-            </div>
-            <div
-              class="announcement-content"
-              v-html="announcement.contentHtml || announcement.content"
-            />
+              <div
+                class="news-body"
+                v-html="announcement.contentHtml || announcement.content"
+              />
+            </article>
           </div>
         </div>
       </section>
 
-      <!-- 推荐产品 -->
-      <section
-        v-if="siteStore.showRecommended && recommendedProducts.length > 0"
-        class="recommended-section"
-      >
-        <div class="section-header">
-          <h2>{{ siteStore.recommendedTitle || t('home.recommendedProducts.title') }}</h2>
-          <p>{{ siteStore.recommendedSubtitle || t('home.recommendedProducts.subtitle') }}</p>
-        </div>
-        <div
-          class="recommended-grid"
-          :style="{ gridTemplateColumns: 'repeat(' + effectiveCols + ', minmax(0, 1fr))' }"
-        >
-          <el-card
-            v-for="p in recommendedProducts"
-            :key="p.id"
-            shadow="hover"
-            class="recommended-card"
-            @click="goToProduct(p.id)"
-          >
-            <div class="rec-card-head">
-              <div class="rec-card-icon">
-                <img
-                  v-if="p.icon"
-                  :src="p.icon"
-                  :alt="p.name"
-                  class="rec-icon-img"
-                >
-                <el-icon v-else :size="30" color="#4f46e5"><Box /></el-icon>
-              </div>
-              <div class="rec-card-title">
-                <h3 class="rec-name">{{ p.name }}</h3>
-                <span class="rec-type-tag">{{ categoryLabel(p) }}</span>
-              </div>
-            </div>
-            <p class="rec-desc">{{ p.description }}</p>
-
+      <!-- CTA -->
+      <section class="section">
+        <div class="container">
+          <div class="cta">
             <div
-              v-if="siteStore.recommendedShowSpecs"
-              class="rec-specs"
-            >
-              <div class="rec-spec">
-                <span class="rec-spec-label">{{ t('user.store.cpu') }}</span>
-                <span class="rec-spec-val">{{ p.cpu }} {{ t('user.store.cores') }}</span>
-              </div>
-              <div class="rec-spec">
-                <span class="rec-spec-label">{{ t('user.store.memory') }}</span>
-                <span class="rec-spec-val">{{ formatMB(p.memory) }}</span>
-              </div>
-              <div class="rec-spec">
-                <span class="rec-spec-label">{{ t('user.store.disk') }}</span>
-                <span class="rec-spec-val">{{ formatMB(p.disk) }}</span>
-              </div>
-              <div class="rec-spec">
-                <span class="rec-spec-label">{{ t('user.store.bandwidth') }}</span>
-                <span class="rec-spec-val">{{ p.bandwidth }} Mbps</span>
-              </div>
-              <div class="rec-spec">
-                <span class="rec-spec-label">{{ t('user.store.traffic') }}</span>
-                <span class="rec-spec-val">{{ formatMB(p.traffic) }}</span>
-              </div>
+              class="cta-glow"
+              aria-hidden="true"
+            />
+            <div class="cta-text">
+              <h2>{{ t('ui.home.ctaTitle') }}</h2>
+              <p>{{ t('ui.home.ctaSubtitle') }}</p>
             </div>
-
-            <div class="rec-footer">
-              <div
-                v-if="siteStore.recommendedShowPrice"
-                class="rec-price"
+            <div class="cta-actions">
+              <router-link
+                :to="userStore.isLoggedIn ? consolePath : '/register'"
+                class="btn btn-light btn-lg"
               >
-                <span class="rec-price-symbol">¥</span>
-                <span class="rec-price-num">{{ p.price }}</span>
-                <span class="rec-price-unit">/{{ periodLabel(p) }}</span>
-              </div>
-              <div class="rec-stock">
-                {{ p.stock < 0 ? t('user.store.stockUnlimited') : (p.stock + ' ' + t('user.store.stock')) }}
-              </div>
+                {{ userStore.isLoggedIn ? t('ui.home.ctaConsole') : t('home.hero.registerButton') }}
+              </router-link>
+              <router-link
+                v-if="!userStore.isLoggedIn"
+                to="/login"
+                class="btn btn-outline-light btn-lg"
+              >
+                {{ t('home.hero.loginButton') }}
+              </router-link>
             </div>
-          </el-card>
-        </div>
-        <div class="rec-viewall">
-          <router-link
-            to="/user/store"
-            class="btn btn-secondary"
-          >{{ t('home.recommendedProducts.viewAll') }}</router-link>
+          </div>
         </div>
       </section>
     </main>
 
     <!-- 页脚 -->
-    <footer class="home-footer">
-      <div class="footer-glow-top" />
-      <div class="footer-inner">
+    <footer class="footer">
+      <div class="container footer-top">
         <div class="footer-brand">
-          <div class="footer-logo">
+          <div class="brand">
             <img
               :src="siteStore.logoSrc"
-              alt="OneClickVirt Logo"
-              class="footer-logo-img"
+              alt="logo"
+              class="brand-logo"
             >
-            <span class="footer-logo-text">{{ siteStore.displaySiteName }}</span>
+            <span class="brand-name">{{ siteStore.displaySiteName }}</span>
           </div>
-          <p class="footer-tagline">
-            {{ t('home.hero.description') }}
-          </p>
+          <p>{{ t('home.hero.description') }}</p>
           <a
             href="https://github.com/oneclickvirt/oneclickvirt"
             target="_blank"
             rel="noopener noreferrer"
-            class="footer-github-btn"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            GitHub
-          </a>
+            class="btn btn-ghost btn-sm"
+          ><i class="fab fa-github" /> GitHub</a>
         </div>
-
         <div
           v-if="footerLinkList.length > 0"
-          class="footer-links-grid"
+          class="footer-links"
         >
-          <div class="footer-col">
-            <h4 class="footer-col-title">
-              <span class="footer-col-dot" />
-              {{ t('home.footer.friendLinks') }}
-            </h4>
-            <ul class="footer-link-list">
-              <li
-                v-for="l in footerLinkList"
-                :key="l.id"
-              >
-                <a
-                  :href="l.href"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="link-arrow">›</span>{{ l.name }}
-                </a>
-              </li>
-            </ul>
-          </div>
+          <h4>{{ t('home.footer.friendLinks') }}</h4>
+          <ul>
+            <li
+              v-for="l in footerLinkList"
+              :key="l.id"
+            >
+              <a
+                :href="l.href"
+                target="_blank"
+                rel="noopener noreferrer"
+              >{{ l.name }}</a>
+            </li>
+          </ul>
         </div>
       </div>
-
-      <div class="footer-bottom">
-        <div class="footer-bottom-inner">
-          <span class="footer-copyright">&copy; 2026 {{ siteStore.copyrightText || (siteStore.displaySiteName + '. ' + t('home.footer.allRightsReserved')) }}</span>
-          <span class="footer-divider" />
+      <div class="container footer-bottom">
+        <span>&copy; 2026 {{ siteStore.copyrightText || (siteStore.displaySiteName + '. ' + t('home.footer.allRightsReserved')) }}</span>
+        <a
+          href="https://github.com/oneclickvirt"
+          target="_blank"
+          rel="noopener noreferrer"
+        ><i class="fab fa-github" /> {{ t('home.footer.openSourceProject') }}</a>
+        <template v-if="serverVersion">
+          <span
+            class="ver"
+            :title="`${t('home.footer.serverVersion')} ${serverVersion}`"
+          >{{ t('home.footer.serverVersion') }} <b>{{ serverVersion }}</b></span>
           <a
-            href="https://github.com/oneclickvirt"
+            v-if="updateAvailable && latestVersion"
+            :href="releaseUrl || 'https://github.com/oneclickvirt/oneclickvirt/releases'"
             target="_blank"
             rel="noopener noreferrer"
-            class="footer-bottom-link"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              style="margin-right:4px;vertical-align:middle"
-            >
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            {{ t('home.footer.openSourceProject') }}
-          </a>
-          <template v-if="serverVersion">
-            <span class="footer-divider" />
-            <span
-              class="footer-version-tag"
-              :title="`${t('home.footer.serverVersion')} ${serverVersion}`"
-            >
-              <span>{{ t('home.footer.serverVersion') }}</span>
-              <span class="footer-version-value">{{ serverVersion }}</span>
-            </span>
-            <a
-              v-if="updateAvailable && latestVersion"
-              :href="releaseUrl || 'https://github.com/oneclickvirt/oneclickvirt/releases'"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="footer-bottom-link footer-version-update"
-              :title="`${t('home.footer.latestVersion')} ${latestVersion}`"
-            >
-              <span>{{ t('home.footer.latestVersion') }}</span>
-              <span class="footer-version-value">{{ latestVersion }}</span>
-            </a>
-          </template>
-        </div>
+            class="ver ver-update"
+            :title="`${t('home.footer.latestVersion')} ${latestVersion}`"
+          >{{ t('home.footer.latestVersion') }} <b>{{ latestVersion }}</b></a>
+        </template>
       </div>
     </footer>
   </div>
@@ -480,7 +445,7 @@ import { useI18n } from 'vue-i18n'
 import { getPublicAnnouncements, getPublicStats, getServerVersion, getRecommendedProducts, getSiteLinks } from '@/api/public'
 import { checkSystemInit } from '@/api/init'
 import { ElTag, ElMessage } from 'element-plus'
-import { Operation, Sunny, Moon, Box } from '@element-plus/icons-vue'
+import { Operation, Sunny, Moon, Box, Right } from '@element-plus/icons-vue'
 import { useLanguageStore } from '@/pinia/modules/language'
 import LogoCarousel from '@/components/LogoCarousel.vue'
 import proxmoxPng from '@/assets/images/proxmox.png'
@@ -495,12 +460,16 @@ import ibmLinuxonePng from '@/assets/images/ibm-linuxone.png'
 import dartnodePng from '@/assets/images/dartnode.png'
 import { useThemeStore } from '@/pinia/modules/theme'
 import { useSiteStore } from '@/pinia/modules/site'
+import { useUserStore } from '@/pinia/modules/user'
 
 const router = useRouter()
 const { t, locale } = useI18n()
 const languageStore = useLanguageStore()
 const themeStore = useThemeStore()
 const siteStore = useSiteStore()
+const userStore = useUserStore()
+// 已登录用户的控制台入口
+const consolePath = computed(() => (userStore.isAnyAdmin ? '/admin/dashboard' : '/user/dashboard'))
 const announcements = ref([])
 // 首页推荐产品
 const recommendedProducts = ref([])
@@ -563,6 +532,27 @@ const nodesCountDisplay = computed(() => (nodesCount.value === null ? '-' : node
 const containersCountDisplay = computed(() => (containersCount.value === null ? '-' : containersCount.value))
 const vmsCountDisplay = computed(() => (vmsCount.value === null ? '-' : vmsCount.value))
 
+// Hero 实时统计
+const statItems = computed(() => [
+  { key: 'users', icon: 'fa-users', label: t('home.stats.users'), value: usersCountDisplay.value },
+  { key: 'nodes', icon: 'fa-network-wired', label: t('home.stats.nodes'), value: nodesCountDisplay.value },
+  { key: 'containers', icon: 'fa-box', label: t('home.stats.containers'), value: containersCountDisplay.value },
+  { key: 'vms', icon: 'fa-server', label: t('home.stats.vms'), value: vmsCountDisplay.value }
+])
+
+// 六大特性（文案见 ui.home.featureN*）
+const featureItems = [
+  { n: 1, icon: 'fa-layer-group', tone: 'oh-tone-indigo' },
+  { n: 2, icon: 'fa-bolt', tone: 'oh-tone-sky' },
+  { n: 3, icon: 'fa-sliders-h', tone: 'oh-tone-violet' },
+  { n: 4, icon: 'fa-chart-line', tone: 'oh-tone-emerald' },
+  { n: 5, icon: 'fa-store', tone: 'oh-tone-amber' },
+  { n: 6, icon: 'fa-shield-alt', tone: 'oh-tone-rose' }
+]
+
+// 价格卡高亮：产品数 ≥3 时高亮第二个
+const featuredIndex = computed(() => (recommendedProducts.value.length >= 3 ? 1 : -1))
+
 // 站点链接（来自 site_links 表，后台「站点链接」可配置）——首页平台/赞助方/页脚均从此读取
 const siteLinksPlatform = ref([])
 const siteLinksSponsor = ref([])
@@ -605,7 +595,7 @@ const footerLinkList = computed(() => footerLinks.value.map(l => ({ id: l.id, na
 // 英雄区背景（站点配置可设置首页背景图）
 const heroStyle = computed(() => {
   return siteStore.homeBackground
-    ? { backgroundImage: `url(${siteStore.homeBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    ? { '--hero-bg': `url(${siteStore.homeBackground})` }
     : {}
 })
 
@@ -674,10 +664,6 @@ const fetchRecommendedProducts = async () => {
 
 const goToProduct = (id) => {
   router.push(`/user/store/${id}`)
-}
-
-const goToStore = () => {
-  router.push('/user/store')
 }
 
 // 推荐产品每行列数（来自站点配置，限制在 2~6 之间）

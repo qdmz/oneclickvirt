@@ -1,6 +1,5 @@
 <template>
   <AuthShell>
-
     <!-- 注册被禁用的提示 -->
     <div
       v-if="!registrationEnabled"
@@ -156,20 +155,13 @@ import { useI18n } from 'vue-i18n'
 import { getCaptcha, register } from '@/api/auth'
 import { getRegisterConfig } from '@/api/config'
 import { useErrorHandler } from '@/composables/useErrorHandler'
-import { Warning, Operation, HomeFilled, Sunny, Moon } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import { useLanguageStore } from '@/pinia/modules/language'
-import { useThemeStore } from '@/pinia/modules/theme'
-import { useSiteStore } from '@/pinia/modules/site'
+import { Warning } from '@element-plus/icons-vue'
 import { containsUnsafeUsernameContent } from '@/utils/validate'
 import AuthShell from '@/components/AuthShell.vue'
 
 const router = useRouter()
 const { t, locale } = useI18n()
 const { executeAsync, handleSubmit } = useErrorHandler()
-const languageStore = useLanguageStore()
-const themeStore = useThemeStore()
-const siteStore = useSiteStore()
 const registerFormRef = ref()
 const loading = ref(false)
 const showInviteCode = ref(false)
@@ -377,17 +369,6 @@ const checkRegistrationEnabled = async () => {
   
   // 如果成功获取配置，使用返回的值；否则默认允许注册
   registrationEnabled.value = result.success ? result.data : true
-}
-
-// 切换语言
-const switchLanguage = () => {
-  const newLang = languageStore.toggleLanguage()
-  locale.value = newLang
-  ElMessage.success(t('navbar.languageSwitched'))
-}
-
-const toggleTheme = () => {
-  themeStore.toggleTheme()
 }
 
 onMounted(async () => {

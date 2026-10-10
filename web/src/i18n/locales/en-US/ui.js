@@ -66,7 +66,24 @@ export default {
     noData: 'No data',
     quotaOverview: 'Quota usage',
     recentAnnouncements: 'Latest announcements',
-    noAnnouncements: 'No announcements yet'
+    noAnnouncements: 'No announcements yet',
+    lastUpdated: 'Updated {time}',
+    refreshed: 'Dashboard refreshed',
+    notRunning: 'Not running',
+    runningOfTotal: '{running} running / {total} total',
+    cpuUsage: 'CPU',
+    memoryUsage: 'Memory',
+    diskUsage: 'Disk',
+    healthOk: 'Healthy',
+    healthWarn: 'High load',
+    healthBad: 'Critical',
+    uptimeDHM: '{d}d {h}h {m}m',
+    uptimeHM: '{h}h {m}m',
+    uptimeM: '{m}m',
+    quickApplyDesc: 'Create a new cloud instance',
+    quickInstancesDesc: 'Manage and connect to your servers',
+    quickOrdersDesc: 'View purchases and renewals',
+    quickTicketsDesc: 'Get help from support'
   },
   notFound: {
     hint: 'The page may have been moved or deleted, or the address is incorrect.'

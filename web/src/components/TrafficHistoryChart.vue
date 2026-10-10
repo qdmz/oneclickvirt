@@ -68,10 +68,13 @@
 
       <div
         v-show="loading"
-        v-loading="loading"
         class="chart-loading"
-        style="height: 400px;"
-      />
+      >
+        <el-skeleton
+          :rows="8"
+          animated
+        />
+      </div>
       
       <div
         v-show="!loading"
@@ -85,13 +88,12 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { Refresh } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import request from '@/utils/request'
 import { getUserTrafficHistory, getInstanceTrafficHistory } from '@/api/user'
-import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/pinia/modules/user'
+import { withChartTheme, useChartTheme, areaGradient, getChartTokens } from '@/utils/chartTheme'
 
 const { t, locale } = useI18n()
 const userStore = useUserStore()
@@ -326,37 +328,36 @@ const renderChart = (data) => {
     if (item.total_bytes !== undefined) return ((item.total_bytes || 0) / 1024 / 1024).toFixed(2)
     return '0.00'
   })
-  // 配置图表选项
-  const option = {
+  // 配置图表选项（颜色 / 坐标轴 / 提示框样式来自 chartTheme，随亮暗主题切换）
+  const tk = getChartTokens()
+  const seriesDefs = [
+    { name: t('user.traffic.historyChart.inbound'), data: trafficIn, color: tk.accent },
+    { name: t('user.traffic.historyChart.outbound'), data: trafficOut, color: tk.violet },
+    { name: t('user.traffic.historyChart.total'), data: totalUsed, color: tk.primary }
+  ]
+  const option = withChartTheme({
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-        label: {
-          backgroundColor: '#6a7985'
-        }
-      },
+      axisPointer: { type: 'line' },
       formatter: (params) => {
-        let result = `${params[0].axisValue}<br/>`
+        let result = `<div style="margin-bottom:4px;opacity:.75">${params[0].axisValue}</div>`
         params.forEach(item => {
           const value = parseFloat(item.value)
-          result += `${item.marker} ${item.seriesName}: ${formatTraffic(value * 1024 * 1024)}<br/>`
+          result += `${item.marker} ${item.seriesName}: <b>${formatTraffic(value * 1024 * 1024)}</b><br/>`
         })
         return result
       }
     },
     legend: {
-      data: [
-        t('user.traffic.historyChart.inbound'),
-        t('user.traffic.historyChart.outbound'),
-        t('user.traffic.historyChart.total')
-      ],
-      top: 10
+      data: seriesDefs.map(s => s.name),
+      top: 4,
+      left: 'center'
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
+      top: 44,
+      left: 8,
+      right: 16,
+      bottom: 8,
       containLabel: true
     },
     xAxis: {
@@ -364,8 +365,9 @@ const renderChart = (data) => {
       boundaryGap: false,
       data: timeLabels,
       axisLabel: {
-        rotate: 45,
-        interval: 'auto'
+        rotate: timeLabels.length > 12 ? 30 : 0,
+        interval: 'auto',
+        hideOverlap: true
       }
     },
     yAxis: {
@@ -380,59 +382,26 @@ const renderChart = (data) => {
         }
       }
     },
-    series: [
-      {
-        name: t('user.traffic.historyChart.inbound'),
-        type: 'line',
-        smooth: true,
-        data: trafficIn,
-        itemStyle: {
-          color: '#67C23A'
-        },
-        areaStyle: {
-          opacity: 0.3,
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#67C23A' },
-            { offset: 1, color: 'rgba(103, 194, 58, 0.1)' }
-          ])
-        }
-      },
-      {
-        name: t('user.traffic.historyChart.outbound'),
-        type: 'line',
-        smooth: true,
-        data: trafficOut,
-        itemStyle: {
-          color: '#E6A23C'
-        },
-        areaStyle: {
-          opacity: 0.3,
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#E6A23C' },
-            { offset: 1, color: 'rgba(230, 162, 60, 0.1)' }
-          ])
-        }
-      },
-      {
-        name: t('user.traffic.historyChart.total'),
-        type: 'line',
-        smooth: true,
-        data: totalUsed,
-        itemStyle: {
-          color: '#4f46e5'
-        },
-        areaStyle: {
-          opacity: 0.3,
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#4f46e5' },
-            { offset: 1, color: 'rgba(79, 70, 229, 0.05)' }
-          ])
-        }
-      }
-    ]
-  }
-  chartInstance.value.setOption(option)
+    series: seriesDefs.map((def, idx) => ({
+      name: def.name,
+      type: 'line',
+      smooth: true,
+      showSymbol: false,
+      symbolSize: 6,
+      data: def.data,
+      emphasis: { focus: 'series' },
+      itemStyle: { color: def.color },
+      lineStyle: { width: idx === 2 ? 2.5 : 2, color: def.color },
+      areaStyle: { color: areaGradient(def.color, idx === 2 ? 0.3 : 0.18, 0.01) }
+    }))
+  })
+  chartInstance.value.setOption(option, true)
 }
+
+// 亮/暗主题切换时重新渲染（chartData 为空时 renderChart 会生成零填充数据）
+useChartTheme(() => {
+  if (!loading.value && chartInstance.value) renderChart(chartData.value)
+})
 
 // 窗口大小改变时重新渲染
 const handleResize = () => {
@@ -537,15 +506,18 @@ defineExpose({
     }
   }
 
-  .chart-loading,
-  .chart-error {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .chart-loading {
+    height: 400px;
+    padding: 12px 4px;
   }
 
   .chart-container {
     min-height: 400px;
+  }
+
+  .control-label {
+    color: var(--text-color-tertiary);
+    font-size: 12.5px !important;
   }
 
   @media (max-width: 768px) {

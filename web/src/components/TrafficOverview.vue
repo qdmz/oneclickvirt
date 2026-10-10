@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>{{ t('user.trafficOverview.title') }}</span>
+          <span class="card-title"><i class="fas fa-chart-pie" /> {{ t('user.trafficOverview.title') }}</span>
           <el-button
             size="small"
             :loading="loading"
@@ -29,81 +29,94 @@
         v-else-if="trafficData"
         class="traffic-content"
       >
-        <!-- 数据源指示 -->
-        <div class="data-source-indicator">
-          <el-tag 
-            :type="dataSourceTagType(trafficData.data_source)"
-            size="small"
-          >
-            {{ dataSourceLabel(trafficData.data_source) }}
-          </el-tag>
-        </div>
-
-        <!-- 流量使用进度 -->
-        <div class="traffic-usage">
-          <div class="usage-header">
-            <span class="usage-title">{{ t('user.trafficOverview.monthlyUsage') }}</span>
-            <span class="usage-values">
-              {{ trafficData.formatted?.current_usage || formatTraffic(trafficData.current_month_usage_mb ?? trafficData.current_month_usage) }} /
-              {{ trafficData.formatted?.total_limit || formatTraffic(trafficData.total_limit_mb ?? trafficData.total_limit) }}
-            </span>
-          </div>
-          <el-progress 
-            :percentage="Math.min(trafficData.usage_percent || 0, 100)"
-            :color="getProgressColor(trafficData.usage_percent || 0)"
-            :stroke-width="12"
-            :status="trafficData.is_limited ? 'exception' : undefined"
-            :format="(percentage) => `${percentage.toFixed(2)}%`"
-          />
-          <div class="usage-info">
-            <span class="usage-percent">{{ (trafficData.usage_percent || 0).toFixed(2) }}%</span>
-            <span 
-              v-if="trafficData.is_limited" 
-              class="limit-warning"
+        <div class="traffic-main">
+          <!-- 用量环 -->
+          <div class="usage-ring">
+            <el-progress
+              type="dashboard"
+              :percentage="Math.min(trafficData.usage_percent || 0, 100)"
+              :color="getProgressColor(trafficData.usage_percent || 0)"
+              :stroke-width="10"
+              :width="132"
+              :status="trafficData.is_limited ? 'exception' : undefined"
             >
-              <el-icon><Warning /></el-icon>
-              {{ t('user.trafficOverview.limitExceeded') }}
-            </span>
+              <template #default>
+                <div class="ring-inner">
+                  <span class="ring-value">{{ (trafficData.usage_percent || 0).toFixed(1) }}<small>%</small></span>
+                  <span class="ring-label">{{ t('user.trafficOverview.usagePercent') }}</span>
+                </div>
+              </template>
+            </el-progress>
           </div>
-        </div>
 
-        <!-- 重置时间 -->
-        <div
-          v-if="trafficData.reset_time"
-          class="reset-info"
-        >
-          <el-text
-            type="info"
-            size="small"
-          >
-            <el-icon><Clock /></el-icon>
-            {{ t('user.trafficOverview.resetTime') }}: {{ formatDate(trafficData.reset_time) }}
-          </el-text>
+          <!-- 流量使用进度 -->
+          <div class="traffic-usage">
+            <div class="data-source-indicator">
+              <el-tag
+                :type="dataSourceTagType(trafficData.data_source)"
+                size="small"
+                effect="light"
+                round
+              >
+                {{ dataSourceLabel(trafficData.data_source) }}
+              </el-tag>
+            </div>
+            <div class="usage-title">
+              {{ t('user.trafficOverview.monthlyUsage') }}
+            </div>
+            <div class="usage-values">
+              <span class="usage-current">{{ trafficData.formatted?.current_usage || formatTraffic(trafficData.current_month_usage_mb ?? trafficData.current_month_usage) }}</span>
+              <span class="usage-sep">/</span>
+              <span class="usage-total">{{ trafficData.formatted?.total_limit || formatTraffic(trafficData.total_limit_mb ?? trafficData.total_limit) }}</span>
+            </div>
+            <el-progress
+              :percentage="Math.min(trafficData.usage_percent || 0, 100)"
+              :color="getProgressColor(trafficData.usage_percent || 0)"
+              :stroke-width="8"
+              :show-text="false"
+              :status="trafficData.is_limited ? 'exception' : undefined"
+            />
+            <div class="usage-info">
+              <span
+                v-if="trafficData.reset_time"
+                class="reset-info"
+              >
+                <el-icon><Clock /></el-icon>
+                {{ t('user.trafficOverview.resetTime') }}: {{ formatDate(trafficData.reset_time) }}
+              </span>
+              <span
+                v-if="trafficData.is_limited"
+                class="limit-warning"
+              >
+                <el-icon><Warning /></el-icon>
+                {{ t('user.trafficOverview.limitExceeded') }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- PMAcct详细数据 -->
-        <div
-          v-if="trafficData.traffic_control_enabled && showDetails"
-          class="pmacct-details"
-        >
-          <el-divider content-position="left">
-            {{ t('user.trafficOverview.detailedStats') }}
-          </el-divider>
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="detail-label">{{ t('user.trafficOverview.rxTraffic') }}</span>
-              <span class="detail-value">{{ trafficData.formatted?.rx || formatBytes(trafficData.rx_bytes) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">{{ t('user.trafficOverview.txTraffic') }}</span>
-              <span class="detail-value">{{ trafficData.formatted?.tx || formatBytes(trafficData.tx_bytes) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">{{ t('user.trafficOverview.totalTraffic') }}</span>
-              <span class="detail-value">{{ trafficData.formatted?.total || formatBytes(trafficData.total_bytes) }}</span>
+        <el-collapse-transition>
+          <div
+            v-if="trafficData.traffic_control_enabled && showDetails"
+            class="pmacct-details"
+          >
+            <div class="details-grid">
+              <div class="detail-item tone-sky">
+                <span class="detail-label"><i class="fas fa-arrow-down" /> {{ t('user.trafficOverview.rxTraffic') }}</span>
+                <span class="detail-value">{{ trafficData.formatted?.rx || formatBytes(trafficData.rx_bytes) }}</span>
+              </div>
+              <div class="detail-item tone-violet">
+                <span class="detail-label"><i class="fas fa-arrow-up" /> {{ t('user.trafficOverview.txTraffic') }}</span>
+                <span class="detail-value">{{ trafficData.formatted?.tx || formatBytes(trafficData.tx_bytes) }}</span>
+              </div>
+              <div class="detail-item tone-indigo">
+                <span class="detail-label"><i class="fas fa-exchange-alt" /> {{ t('user.trafficOverview.totalTraffic') }}</span>
+                <span class="detail-value">{{ trafficData.formatted?.total || formatBytes(trafficData.total_bytes) }}</span>
+              </div>
             </div>
           </div>
-        </div>
+        </el-collapse-transition>
 
         <!-- 展开/收起按钮 -->
         <div
@@ -113,6 +126,7 @@
           <el-button
             text
             size="small"
+            type="primary"
             @click="showDetails = !showDetails"
           >
             {{ showDetails ? t('user.trafficOverview.hideDetails') : t('user.trafficOverview.viewDetails') }}
@@ -193,10 +207,11 @@ const formatBytes = (bytes) => {
   return `${size.toFixed(2)} ${units[unitIndex]}`
 }
 
+// 进度颜色取自设计令牌（CSS 变量），亮/暗主题自动适配
 const getProgressColor = (percentage) => {
-  if (percentage < 60) return '#67c23a'
-  if (percentage < 80) return '#e6a23c'
-  return '#f56c6c'
+  if (percentage < 60) return 'var(--primary-color)'
+  if (percentage < 80) return 'var(--warning-color)'
+  return 'var(--error-color)'
 }
 
 const dataSourceLabel = (source) => {
@@ -236,118 +251,197 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+}
+
+.card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.card-title i {
+  color: var(--primary-color);
 }
 
 .loading-container {
-  padding: 20px;
+  padding: 12px 4px;
 }
 
 .traffic-content {
-  padding: 10px 0;
+  padding: 4px 0;
 }
 
-.data-source-indicator {
-  margin-bottom: 15px;
+.traffic-main {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.usage-ring {
+  flex-shrink: 0;
+}
+
+.ring-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ring-value {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ring-value small {
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 1px;
+  color: var(--text-color-secondary);
+}
+
+.ring-label {
+  font-size: 12px;
+  color: var(--text-color-tertiary);
 }
 
 .traffic-usage {
-  margin-bottom: 15px;
+  flex: 1;
+  min-width: 0;
 }
 
-.usage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.data-source-indicator {
   margin-bottom: 10px;
 }
 
 .usage-title {
+  font-size: 13px;
   font-weight: 500;
-  color: var(--el-text-color-primary);
+  color: var(--text-color-secondary);
 }
 
 .usage-values {
-  font-family: monospace;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-current {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-color-primary);
+}
+
+.usage-sep,
+.usage-total {
   font-size: 14px;
-  color: var(--el-text-color-regular);
+  color: var(--text-color-tertiary);
 }
 
 .usage-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
-}
-
-.usage-percent {
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.limit-warning {
-  color: var(--el-color-danger);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 12.5px;
 }
 
 .reset-info {
-  margin-bottom: 15px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-color-tertiary);
+}
+
+.limit-warning {
+  color: var(--error-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
 }
 
 .pmacct-details {
-  margin-top: 15px;
+  margin-top: 18px;
 }
 
 .details-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-top: 10px;
-}
-
-@media (max-width: 768px) {
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: 12px;
 }
 
 .detail-item {
-  text-align: center;
-  padding: 15px;
-  background: var(--el-fill-color-lighter);
-  border-radius: 6px;
-  min-height: 80px;
+  --tone: var(--primary-color);
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--tone) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 18%, transparent);
+  border-radius: var(--radius-md, 10px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  gap: 6px;
 }
 
+.tone-sky { --tone: var(--brand-accent, #0ea5e9); }
+.tone-violet { --tone: var(--brand-accent-2, #8b5cf6); }
+.tone-indigo { --tone: var(--primary-color); }
+
 .detail-label {
-  display: block;
   font-size: 12px;
-  color: var(--el-text-color-secondary);
-  margin-bottom: 5px;
+  color: var(--text-color-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-label i {
+  color: var(--tone);
+  font-size: 11px;
 }
 
 .detail-value {
-  display: block;
-  font-weight: 600;
-  font-size: 16px;
-  font-family: monospace;
-  color: var(--el-text-color-primary);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-color-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .toggle-details {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 12px;
 }
 
 .error-state {
-  padding: 20px;
+  padding: 12px;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .traffic-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .usage-ring {
+    display: flex;
+    justify-content: center;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
