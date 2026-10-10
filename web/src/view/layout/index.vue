@@ -170,7 +170,10 @@ onBeforeUnmount(() => {
 }
 
 .drawer-bg {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-color-overlay, rgba(15, 23, 42, 0.45));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: oh-fade-in 0.2s ease;
   width: 100%;
   top: 0;
   height: 100%;
@@ -185,9 +188,7 @@ onBeforeUnmount(() => {
   z-index: var(--z-navbar);
   width: calc(100% - var(--sidebar-width));
   transition: width 0.28s;
-  background-color: var(--bg-color-secondary);
-  box-shadow: var(--box-shadow-light);
-  border-bottom: 1px solid var(--border-color);
+  background-color: transparent;
   
   &.fixed-header-collapsed {
     width: calc(100% - var(--sidebar-width-collapsed));
@@ -210,7 +211,7 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: var(--z-sidebar);
   overflow: hidden;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid var(--border-color-light);
   
   &.is-collapse {
     width: var(--sidebar-width-collapsed);
@@ -220,8 +221,11 @@ onBeforeUnmount(() => {
     width: var(--sidebar-width);
     transform: translateX(0);
     
+    box-shadow: var(--shadow-xl);
+
     &.hidden {
       transform: translateX(-100%);
+      box-shadow: none;
     }
   }
 }
@@ -264,5 +268,10 @@ onBeforeUnmount(() => {
   .fixed-header {
     width: 100%;
   }
+}
+
+@keyframes oh-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

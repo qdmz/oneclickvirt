@@ -1,41 +1,5 @@
 <template>
-  <div class="admin-login-container">
-    <!-- 顶部栏 -->
-    <header class="auth-header">
-      <div class="header-content">
-        <div class="logo">
-          <img
-            :src="siteStore.logoSrc"
-            alt="OneClickVirt Logo"
-            class="logo-image"
-          >
-          <h1>{{ siteStore.displaySiteName }}</h1>
-        </div>
-        <nav class="nav-actions">
-          <button
-            class="nav-link theme-btn"
-            :title="themeStore.isDark ? t('navbar.lightMode') : t('navbar.darkMode')"
-            @click="toggleTheme"
-          >
-            <el-icon><component :is="themeStore.isDark ? Sunny : Moon" /></el-icon>
-          </button>
-          <button
-            class="nav-link language-btn"
-            @click="switchLanguage"
-          >
-            <el-icon><Operation /></el-icon>
-            {{ languageStore.currentLanguage === 'zh-CN' ? 'English' : '中文' }}
-          </button>
-          <router-link
-            to="/"
-            class="nav-link home-btn"
-          >
-            <el-icon><HomeFilled /></el-icon>
-            {{ t('common.backToHome') }}
-          </router-link>
-        </nav>
-      </div>
-    </header>
+  <AuthShell>
 
     <div class="login-form">
       <div class="login-header">
@@ -120,8 +84,7 @@
         </div>
       </el-form>
     </div>
-    <AppFooter />
-  </div>
+  </AuthShell>
 </template>
 
 <script setup>
@@ -138,7 +101,7 @@ import { Operation, HomeFilled, Sunny, Moon } from '@element-plus/icons-vue'
 import { useLanguageStore } from '@/pinia/modules/language'
 import { useThemeStore } from '@/pinia/modules/theme'
 import { useSiteStore } from '@/pinia/modules/site'
-import AppFooter from '@/view/layout/components/AppFooter.vue'
+import AuthShell from '@/components/AuthShell.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -550,5 +513,18 @@ onMounted(async () => {
   .login-form {
     padding: 22px 18px;
   }
+}
+
+/* ---- 认证外壳内的扁平表单（覆盖旧卡片样式） ---- */
+.login-form {
+  margin: 0;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 </style>

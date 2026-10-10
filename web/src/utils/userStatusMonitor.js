@@ -74,7 +74,7 @@ class UserStatusMonitor {
         
         // 只有当前不在首页或登录页时才重定向
         const currentPath = router.currentRoute.value.path
-        if (!['/home', '/login', '/register', '/forgot-password'].includes(currentPath)) {
+        if (!['/home', '/login', '/register', '/forgot-password', '/reset-password'].includes(currentPath)) {
           ElMessage.warning(t('common.loginInvalid'))
           router.push('/home')
         }
@@ -89,7 +89,7 @@ class UserStatusMonitor {
         userStore.clearUserData()
         
         const currentPath = router.currentRoute.value.path
-        if (!['/home', '/login', '/register', '/forgot-password'].includes(currentPath)) {
+        if (!['/home', '/login', '/register', '/forgot-password', '/reset-password'].includes(currentPath)) {
           ElMessage.warning(t('common.loginInvalid'))
           router.push('/home')
         }

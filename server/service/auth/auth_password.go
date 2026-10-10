@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"oneclickvirt/service/database"
 	"oneclickvirt/utils/messaging"
+	"strings"
 	"time"
 
 	"oneclickvirt/global"
@@ -74,7 +75,8 @@ func (s *AuthService) ForgotPassword(req auth.ForgotPasswordRequest) error {
 	if frontendURL == "" {
 		frontendURL = "http://localhost:3000"
 	}
-	resetURL := fmt.Sprintf("%s/reset-password?token=%s", frontendURL, resetToken)
+	// 前端使用 hash 路由（createWebHashHistory），链接需带 /#/ 前缀
+	resetURL := fmt.Sprintf("%s/#/reset-password?token=%s", strings.TrimRight(frontendURL, "/"), resetToken)
 	emailBody := fmt.Sprintf("请点击以下链接重置密码：<br><a href='%s'>重置密码</a><br>链接有效期为24小时。", resetURL)
 	return s.sendEmail(req.Email, "密码重置", emailBody)
 }

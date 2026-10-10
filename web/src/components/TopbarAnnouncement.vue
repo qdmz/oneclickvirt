@@ -230,14 +230,18 @@ onUnmounted(() => {
 
 <style scoped>
 .topbar-announcement {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light));
-  color: white;
+  /* 深色底 + 品牌渐变光晕，亮/暗主题下都保持高对比 */
+  background:
+    radial-gradient(60% 140% at 0% 50%, rgba(99, 102, 241, 0.45), transparent 70%),
+    radial-gradient(50% 140% at 100% 50%, rgba(14, 165, 233, 0.35), transparent 70%),
+    #0f172a;
+  color: #e2e8f0;
   padding: 6px 0;
   position: sticky;
   top: 0;
   z-index: calc(var(--z-navbar, 1002) + 2);
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--primary-color) 20%, transparent);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  font-size: 13px;
 }
 
 .announcement-container {
@@ -283,9 +287,12 @@ onUnmounted(() => {
 }
 
 .announcement-badge {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 8px;
-  border-radius: 12px;
+  background: var(--brand-gradient);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
   font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
@@ -336,12 +343,12 @@ onUnmounted(() => {
 
 .control-btn,
 .close-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
