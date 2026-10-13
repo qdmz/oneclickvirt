@@ -656,7 +656,8 @@ certbot renew --dry-run
 
 | 版本 | 主要变更 |
 |------|---------|
-| **v0.25.2** | 文档：README 按线上站点 webhost.ypvps.com 重写演示截图（首页亮/暗/移动端、登录、管理后台、用户控制台），新增在线演示与版本历史 |
+| **v0.25.3** | 文档：README 截图改为 jsDelivr CDN 加载，修复国内无法显示 |
+| v0.25.2 | 文档：README 按线上站点 webhost.ypvps.com 重写演示截图（首页亮/暗/移动端、登录、管理后台、用户控制台），新增在线演示与版本历史 |
 | v0.25.1 | 首页平台轮播 / 赞助方未配置图标时回退内置图标 |
 | v0.25 | 已初始化数据库启动时执行"只增不改"的增量结构同步，修复升级缺列；版本号与发布号一致 |
 | v0.24 | 首页落地页重做、ECharts 亮/暗主题、管理员与用户仪表盘重做、404 页面 |
@@ -718,7 +719,7 @@ docker compose restart api
 
 <p>
   <a href="https://dartnode.com?aff=bonus">
-    <img src="./web/src/assets/images/dartnode.png" alt="DartNode" height="44">
+    <img src="https://cdn.jsdelivr.net/gh/qdmz/onehost@main/web/src/assets/images/dartnode.png" alt="DartNode" height="44">
   </a>
   &nbsp;&nbsp;
   <a href="https://console.zmto.com/?affid=1524">
@@ -726,7 +727,7 @@ docker compose restart api
   </a>
   &nbsp;&nbsp;
   <a href="https://community.ibm.com/zsystems/form/l1cc-oss-vm-request/">
-    <img src="./web/src/assets/images/ibm-linuxone.png" alt="IBM LinuxONE OSS Community Cloud" height="44">
+    <img src="https://cdn.jsdelivr.net/gh/qdmz/onehost@main/web/src/assets/images/ibm-linuxone.png" alt="IBM LinuxONE OSS Community Cloud" height="44">
   </a>
   &nbsp;&nbsp;
   <a href="https://fossvps.org/">
@@ -744,54 +745,54 @@ docker compose restart api
 
 ## 演示截图
 
-以下截图于 2026-10-13 从线上站点 [webhost.ypvps.com](https://webhost.ypvps.com)（v0.25.1）实时截取，覆盖首页（亮色 / 暗色 / 移动端）、登录页、管理后台和用户控制台。节点 API 地址已打码。
+以下截图于 2026-10-13 从线上站点 [webhost.ypvps.com](https://webhost.ypvps.com)（v0.25.1）实时截取，覆盖首页（亮色 / 暗色 / 移动端）、登录页、管理后台和用户控制台。节点 API 地址已打码。图片经 jsDelivr CDN 加载，国内网络也可正常显示。
 
 ### 首页
 
 | 亮色 | 暗色 |
 |------|------|
-| ![首页 亮色](./.back/home-light.jpg) | ![首页 暗色](./.back/home-dark.jpg) |
+| ![首页 亮色](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/home-light.jpg) | ![首页 暗色](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/home-dark.jpg) |
 
 **移动端首页**
 
-<img src="./.back/home-mobile.jpg" alt="移动端首页" width="320">
+<img src="https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/home-mobile.jpg" alt="移动端首页" width="320">
 
 **登录页**
 
-![登录页](./.back/login.jpg)
+![登录页](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/login.jpg)
 
 ### 管理后台
 
 **管理员仪表盘**（CPU / 内存 / 磁盘进度环、实例分布、资源分配）
 
-![管理员仪表盘](./.back/admin-dashboard.jpg)
+![管理员仪表盘](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/admin-dashboard.jpg)
 
 **管理员仪表盘 · 暗色模式**
 
-![管理员仪表盘 暗色](./.back/admin-dashboard-dark.jpg)
+![管理员仪表盘 暗色](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/admin-dashboard-dark.jpg)
 
 **产品管理**
 
-![产品管理](./.back/admin-products.jpg)
+![产品管理](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/admin-products.jpg)
 
 **节点管理**
 
-![节点管理](./.back/admin-providers.jpg)
+![节点管理](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/admin-providers.jpg)
 
 **站点配置**
 
-![站点配置](./.back/admin-site-config.jpg)
+![站点配置](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/admin-site-config.jpg)
 
 ### 用户控制台
 
 **用户仪表盘**（快捷入口与六项资源配额）
 
-![用户仪表盘](./.back/user-dashboard.jpg)
+![用户仪表盘](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/user-dashboard.jpg)
 
 **产品商城**
 
-![产品商城](./.back/user-store.jpg)
+![产品商城](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/user-store.jpg)
 
 **我的钱包**（余额、代金券兑换、余额流水）
 
-![我的钱包](./.back/user-wallet.jpg)
+![我的钱包](https://cdn.jsdelivr.net/gh/qdmz/onehost@main/.back/user-wallet.jpg)

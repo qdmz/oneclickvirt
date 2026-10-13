@@ -1,5 +1,10 @@
 # 更新日志
 
+## v0.25.3 (2026-10-13)
+
+### 文档
+- 修复国内网络打开 GitHub 时 README 截图不显示：截图与赞助方图片改为经 jsDelivr CDN（cdn.jsdelivr.net/gh/qdmz/onehost）加载，不再依赖被屏蔽的 raw.githubusercontent.com。
+
 ## v0.25.2 (2026-10-13)
 
 ### 文档
