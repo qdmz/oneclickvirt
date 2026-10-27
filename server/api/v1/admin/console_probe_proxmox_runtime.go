@@ -33,6 +33,22 @@ func probeProxmoxConsoleRuntime(inst providerModel.Instance, p providerModel.Pro
 	}
 	executor, cleanup, err := consoleProbeExecutor(p)
 	if err != nil {
+		// API-transport providers have no shell executor; their VNC
+		// capability can still be probed end-to-end through the PVE API
+		// (vncproxy ticket + RFB handshake). Serial/exec probing is not
+		// available on this transport and is simply skipped.
+		if runtime.Type == "qemu" {
+			if transport, reason := proxmoxConsoleVNCTransport(p); transport == "api" && reason == "" {
+				probe.proxmoxVNCChecked = true
+				target := consoleTarget{
+					protocol: consoleProtocolVNC, proxmoxVNC: true,
+					runtimeID: runtime.ID, runtimeNode: runtime.Node, runtimeType: runtime.Type,
+					transport: transport, provider: p,
+				}
+				probe.proxmoxVNC, probe.proxmoxVNCReason = probeProxmoxVNCConnection(target)
+				return probe
+			}
+		}
 		probe.reason = "无法读取 PVE 控制台配置: " + err.Error()
 		return probe
 	}
@@ -51,7 +67,7 @@ func probeProxmoxConsoleRuntime(inst providerModel.Instance, p providerModel.Pro
 		// parsers do not recognize, so always verify the live proxy/RFB exchange.
 		target := consoleTarget{
 			protocol: consoleProtocolVNC, proxmoxVNC: true,
-			runtimeID: runtime.ID, runtimeNode: runtime.Node, provider: p,
+			runtimeID: runtime.ID, runtimeNode: runtime.Node, runtimeType: runtime.Type, provider: p,
 		}
 		target.transport, probe.proxmoxVNCReason = proxmoxConsoleVNCTransport(p)
 		if probe.proxmoxVNCReason == "" {

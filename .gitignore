@@ -108,3 +108,11 @@ deploy/du_var.sh
 *.log
 data/
 deploy/ssl/
+# 审计脱敏（2026-10-27）：含真实凭据，禁止提交
+server/config.yaml.backup
+deploy/deploy_binary.py
+
+# 安全提示（P2-7）：server/config.yaml 在仓库中是“脱敏示例”，但 Dockerfile /
+# Dockerfile.no-db 的构建流程会 COPY 它（改名为 config.example.yaml 会断构建，
+# 故保留现名）。切勿把本地填入的真实密钥/口令直接提交——本地真值请改走
+# 环境变量或服务器本地保管；提交前务必 git diff 复查该文件。

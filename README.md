@@ -601,6 +601,10 @@ go run main.go
 > **注意**：该文件会被运行时写入数据库明文密码，**请勿提交到版本库**。
 > `.gitignore` 已忽略 `.env`、`*.log`、`data/`，提交前建议自检：`git diff --cached | grep -iE 'password|secret|"'`
 
+> 仓库内的 `server/config.yaml` 只是**脱敏示例**（密码/密钥字段均为空）。它没有改名为
+> `config.example.yaml`，是因为 `Dockerfile` / `Dockerfile.no-db` 的构建流程会直接
+> COPY 该文件作为默认配置，改名会断构建；本地填入真实值后切勿顺手提交（P2-7）。
+
 ## 低配 VPS 部署优化
 
 在 **1 核 1G / 2 核 2G** 级别的入门级服务器上，默认的 MariaDB 配置会直接触发 OOM

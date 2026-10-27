@@ -50,6 +50,7 @@ type consoleTarget struct {
 	kubeVirtVNC  bool
 	runtimeID    string
 	runtimeNode  string
+	runtimeType  string
 	instanceID   uint
 	provider     providerModel.Provider
 }
@@ -88,7 +89,7 @@ func loadConsoleRecords(instanceID, userID uint, admin bool) (providerModel.Inst
 	if err := global.APP_DB.Select(
 		"id", "type", "endpoint", "port_ip", "ssh_port", "username", "password", "ssh_key",
 		"connection_type", "agent_status", "enable_vnc", "vnc_base_port", "vnc_host",
-		"host_name", "storage_pool", "storage_pool_path",
+		"host_name", "storage_pool", "storage_pool_path", "token",
 	).First(&p, inst.ProviderID).Error; err != nil {
 		return inst, p, err
 	}
@@ -432,6 +433,7 @@ func resolveInstanceConsoleTargets(instanceID, userID uint, admin bool) ([]conso
 
 	if isProxmoxConsoleProviderType(p.Type) && probe.proxmoxVNCChecked {
 		vncTarget := buildProxmoxConsoleVNCTarget(inst, p, runtimeID, probe.node, nil)
+		vncTarget.runtimeType = probe.runtimeKind
 		if !probe.proxmoxVNC {
 			vncTarget.available = false
 			if probe.proxmoxVNCReason != "" {

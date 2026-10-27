@@ -157,7 +157,7 @@ func corsRequestOriginCandidates(c *gin.Context) ([]string, []string) {
 	return schemes, hosts
 }
 
-func corsOriginAllowed(c *gin.Context, origin string, frontendOrigin string, allowedOrigins map[string]struct{}) bool {
+func corsOriginAllowed(c *gin.Context, origin string, frontendOrigin string, allowedOrigins map[string]struct{}, allowLoopback bool) bool {
 	originNorm := utils.NormalizeOrigin(origin)
 	if originNorm == "" {
 		return false
@@ -168,8 +168,9 @@ func corsOriginAllowed(c *gin.Context, origin string, frontendOrigin string, all
 	if _, ok := allowedOrigins[originNorm]; ok {
 		return true
 	}
-	// 开发环境默认允许 localhost 和 127.0.0.1
-	if utils.IsLoopbackOrigin(origin) {
+	// 仅非 production 环境放行 loopback Origin（本地开发便利）；
+	// production 下放行会让本机恶意页面跨源读取已登录 API 响应（P2-4）。
+	if allowLoopback && utils.IsLoopbackOrigin(origin) {
 		return true
 	}
 	schemes, hosts := corsRequestOriginCandidates(c)
@@ -215,10 +216,19 @@ func SetupRouter() *gin.Engine {
 	// 禁用 gin.Default() 内置的 Logger 和 Recovery，改用自定义中间件
 	Router := gin.New()
 	Router.Use(buildMetadataHeaders())
+	Router.Use(middleware.SecurityHeaders())
 
-	// 信任所有上游代理（用于反向代理和 Cloudflare Tunnel）
-	// nil 表示信任所有代理，可正确解析 X-Forwarded-For、X-Real-IP 等头
-	Router.SetTrustedProxies(nil)
+	// 只信任本机与内网代理（部署拓扑为同机 docker nginx 反代 / 本地隧道）：
+	// loopback + RFC1918 + IPv6 ULA。原先 SetTrustedProxies(nil) 信任全部代理，
+	// 任何直连后端的请求都能伪造 X-Forwarded-For 污染审计 IP 并削弱 IP 限流（P1-3）。
+	// 若将来把后端直接暴露在 CDN/公网代理之后，需把对应代理网段补进此列表。
+	if err := Router.SetTrustedProxies([]string{
+		"127.0.0.0/8", "::1/128",
+		"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16",
+		"fc00::/7",
+	}); err != nil && global.APP_LOG != nil {
+		global.APP_LOG.Warn("设置可信代理失败", zap.Error(err))
+	}
 	Router.ForwardedByClientIP = true
 
 	// 全局中间件排序：CORS → RequestID → Logger → ErrorHandler → InputValidator
@@ -282,7 +292,7 @@ func SetupRouter() *gin.Engine {
 		}
 		frontendOrigin := utils.NormalizeOrigin(frontendURL)
 		isAllowed := func(c *gin.Context, origin string) bool {
-			return corsOriginAllowed(c, origin, frontendOrigin, allowedOrigins)
+			return corsOriginAllowed(c, origin, frontendOrigin, allowedOrigins, !strings.EqualFold(appConfig.System.Env, "production"))
 		}
 		preflightMiddleware = corsPreflightFallback(allowedMethods, allowedHeaders, isAllowed)
 		corsMiddleware = cors.New(cors.Config{

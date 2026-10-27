@@ -99,22 +99,25 @@ export function setupRouterGuards(router) {
     const userStore = useUserStore()
     const isPublicShareRoute = to.path.startsWith('/share/instances/')
     
-    // 检查URL参数中是否有OAuth2 token（避免跨域localStorage隔离问题）
+    // 检查URL fragment中是否有OAuth2 token（避免跨域localStorage隔离问题）。
+    // 后端改用 fragment（#oauth2_token=...）传递：fragment 不发送到服务器、
+    // 不进代理/服务日志（P2-6）；query 形式仅作旧链接兜底，读到后一并清理。
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     const urlParams = new URLSearchParams(window.location.search)
-    const oauth2Token = urlParams.get('oauth2_token')
-    const oauth2Username = urlParams.get('username')
-    
+    const oauth2Token = hashParams.get('oauth2_token') || urlParams.get('oauth2_token')
+    const oauth2Username = hashParams.get('username') || urlParams.get('username')
+
     if (oauth2Token) {
       // 保存token到sessionStorage（不使用localStorage避免XSS token泄露）
       sessionStorage.setItem('token', oauth2Token)
       userStore.setToken(oauth2Token)
-      
+
       if (oauth2Username) {
         localStorage.setItem('username', oauth2Username)
       }
-      
-      // 清理URL参数（避免token暴露在URL中）
-      const cleanURL = window.location.pathname + window.location.hash
+
+      // 清理URL中的 token（query 与 fragment 都去掉，避免残留在历史中）
+      const cleanURL = window.location.pathname
       window.history.replaceState({}, document.title, cleanURL)
       
       // 获取用户信息

@@ -43,7 +43,18 @@ export default defineConfig(({ mode }) => {
         output: {
           chunkFileNames: 'js/[name]-[hash].js',
           entryFileNames: 'js/[name]-[hash].js',
-          assetFileNames: 'assets/[name]-[hash].[ext]'
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+          // 重型依赖分包（P1-7）：把 vue 运行时、element-plus、echarts、
+          // xterm、novnc 从默认 vendor 里拆出，首屏只解析真正用到的部分，
+          // 且库升级时业务 chunk 哈希不被连带污染、利于长缓存。
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return
+            if (id.includes('@novnc')) return 'vendor-novnc'
+            if (id.includes('@xterm')) return 'vendor-xterm'
+            if (id.includes('echarts') || id.includes('zrender')) return 'vendor-echarts'
+            if (id.includes('element-plus') || id.includes('@element-plus')) return 'vendor-element'
+            if (id.includes('/vue/') || id.includes('vue-router') || id.includes('pinia') || id.includes('vue-i18n') || id.includes('@vue/')) return 'vendor-vue'
+          }
         }
       },
       esbuild: {

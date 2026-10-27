@@ -11,6 +11,7 @@ import (
 
 	"oneclickvirt/global"
 	"oneclickvirt/model/product"
+	"oneclickvirt/utils"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -214,6 +215,10 @@ func (s *SiteService) UpdateSiteConfigFields(m map[string]interface{}) error {
 				v = int(f)
 			}
 		}
+		// custom_header / custom_footer 会在公开页以 v-html 原样渲染，保存前
+		// 必须过服务端 HTML 净化（剥 script/iframe/on* 事件与危险 URL），
+		// 防止管理员录入的 HTML 变成面向全体访客的存储型 XSS。
+		v = sanitizeSiteConfigValue(k, v)
 		// JSON 字段名与数据库列名可能不一致（如 custom_footer -> footer_html），更新时需转换为真实列名
 		col := k
 		if c, ok := jsonKeyToColumn[k]; ok {
@@ -245,17 +250,30 @@ func (s *SiteService) UpdateSiteConfigFields(m map[string]interface{}) error {
 	return nil
 }
 
+// sanitizeSiteConfigValue 对会被公开页原样渲染的站点 HTML 字段做保存前净化；
+// 其他字段原样返回。
+func sanitizeSiteConfigValue(key string, v interface{}) interface{} {
+	if key != "custom_header" && key != "custom_footer" {
+		return v
+	}
+	if s, ok := v.(string); ok {
+		return utils.SanitizeHTML(s)
+	}
+	return v
+}
+
 // UploadSiteImage 上传站点图片并返回URL
 func (s *SiteService) UploadSiteImage(imageData []byte, filename string) (string, error) {
 	if len(imageData) == 0 {
 		return "", errors.New("图片数据不能为空")
 	}
 
-	// 验证文件类型
-	validExts := map[string]bool{".png": true, ".jpg": true, ".jpeg": true, ".gif": true, ".svg": true, ".webp": true}
+	// 验证文件类型。SVG 不在白名单内：SVG 可内嵌脚本，同源提供时有脚本
+	// 执行面（P2-5），如确需 SVG 应先做 XML 净化再放行，当前直接移除。
+	validExts := map[string]bool{".png": true, ".jpg": true, ".jpeg": true, ".gif": true, ".webp": true}
 	ext := strings.ToLower(filepath.Ext(filename))
 	if !validExts[ext] {
-		return "", errors.New("不支持的图片格式，仅支持 png, jpg, jpeg, gif, svg, webp")
+		return "", errors.New("不支持的图片格式，仅支持 png, jpg, jpeg, gif, webp")
 	}
 
 	// 限制文件大小（5MB）

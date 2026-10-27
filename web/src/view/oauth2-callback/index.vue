@@ -77,10 +77,15 @@ const errorMessage = ref('')
 
 onMounted(async () => {
   try {
-    // 从URL获取token和用户信息
+    // 从URL fragment获取token和用户信息（P2-6：fragment 不进服务器/代理日志）；
+    // query 形式仅作旧链接兜底
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     const urlParams = new URLSearchParams(window.location.search)
-    const token = urlParams.get('token')
-    const username = urlParams.get('user')
+    const token = hashParams.get('token') || urlParams.get('token')
+    const username = hashParams.get('user') || urlParams.get('user')
+    if (token) {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
     
     if (!token) {
       throw new Error(t('oauth2Callback.noTokenError'))

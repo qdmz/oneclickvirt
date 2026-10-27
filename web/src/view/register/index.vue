@@ -304,8 +304,7 @@ const handleRegister = async () => {
           userStore.setToken(token)
           userStore.setUser(responseData.user)
           
-          // 保存token到localStorage和sessionStorage
-          localStorage.setItem('token', token)
+          // 保存token到sessionStorage（与 user store 保持一致，不使用localStorage，避免XSS时token被长期窃取）
           sessionStorage.setItem('token', token)
           
           // 获取用户信息确保完整性

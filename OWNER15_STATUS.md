@@ -1,7 +1,7 @@
 # 平台 Owner 15 项需求/BUG 解决状态（`onec.ypvps.com`）
 
 > 对应 owner 提报的 15 条问题清单。截至本地版本 **v0.06**（`8830d38`），已部署到生产并验证。
-> 生产地址：https://onec.ypvps.com ｜ 后台登录：`admin` / `admin123456`
+> 生产地址：https://onec.ypvps.com ｜ 后台登录：`admin` / 密码由 owner 保管，不入库
 > 最后更新：2026-08-11（线下会话，v0.03~v0.06 暂未同步 GitHub，原因见文末）
 
 ---

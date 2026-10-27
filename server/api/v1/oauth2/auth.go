@@ -215,8 +215,9 @@ func OAuth2Callback(c *gin.Context) {
                     frontendURL += '/';
                 }
                 
-                // 将token作为URL参数传递（解决跨域localStorage隔离问题）
-                var redirectURL = frontendURL + '?oauth2_token=' + encodeURIComponent(token) + 
+                // 将token放在 URL fragment（#）中传递（解决跨域localStorage隔离问题）；
+                // fragment 不会发送到服务器、不进代理/服务日志（P2-6）
+                var redirectURL = frontendURL + '#oauth2_token=' + encodeURIComponent(token) +
                                   '&username=' + encodeURIComponent(username);
                 
                 // 延迟跳转，让用户看到成功提示

@@ -2,7 +2,6 @@ package admin
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -30,6 +29,8 @@ type vncSession struct {
 	Host      string
 	Port      int
 	Password  string
+	Ticket    string
+	User      string
 	ExpiresAt time.Time
 }
 
@@ -72,9 +73,6 @@ func resolveInstanceVNCProxyTarget(instanceID uint, userID uint, admin bool) (st
 	if inst.Status != constant.InstanceStatusRunning {
 		return "", 0, "", fmt.Errorf("实例未运行")
 	}
-	if inst.InstanceType != "vm" {
-		return "", 0, "", fmt.Errorf("当前实例类型不支持WebVNC")
-	}
 	var p providerModel.Provider
 	if err := global.APP_DB.Select("id", "type", "endpoint", "port_ip", "enable_vnc", "vnc_base_port", "vnc_host", "host_name", "token").
 		First(&p, inst.ProviderID).Error; err != nil {
@@ -84,12 +82,20 @@ func resolveInstanceVNCProxyTarget(instanceID uint, userID uint, admin bool) (st
 		return "", 0, "", fmt.Errorf("节点未启用WebVNC")
 	}
 
-	if strings.EqualFold(strings.TrimSpace(p.Type), "proxmox") {
+	// Proxmox 走 vncproxy API 会话：qemu 与 lxc 都支持（P1-5 补齐 lxc）。
+	if isProxmoxConsoleProviderType(p.Type) {
+		if _, resourceErr := proxmoxAPIResource(inst.InstanceType); resourceErr != nil {
+			return "", 0, "", fmt.Errorf("当前实例类型不支持WebVNC")
+		}
 		sess, err := getOrCreateProxmoxVNCSession(&inst, &p)
 		if err != nil {
 			return "", 0, "", err
 		}
 		return sess.Host, sess.Port, sess.Password, nil
+	}
+
+	if inst.InstanceType != "vm" {
+		return "", 0, "", fmt.Errorf("当前实例类型不支持WebVNC")
 	}
 
 	// 非 Proxmox 节点：保留原有 TCP 直连解析逻辑
@@ -173,42 +179,56 @@ func parseVNCDiscoveredPort(raw string) int {
 // getOrCreateProxmoxVNCSession 调用 Proxmox API 的 vncproxy 获取临时 VNC 端口与密码。
 // 结果按实例缓存 vncSessionTTL，确保“获取连接信息”与“建立 WebSocket 代理”两次
 // 请求使用同一会话（同一端口与密码）。
-func getOrCreateProxmoxVNCSession(inst *providerModel.Instance, p *providerModel.Provider) (*vncSession, error) {
+// cachedVNCSession returns the live cached session for an instance, if any.
+func cachedVNCSession(instanceID uint, now time.Time) (*vncSession, bool) {
 	vncSessionMu.Lock()
-	if s, ok := vncSessions[inst.ID]; ok && time.Now().Before(s.ExpiresAt) {
-		vncSessionMu.Unlock()
+	defer vncSessionMu.Unlock()
+	s, ok := vncSessions[instanceID]
+	if !ok || s == nil || !now.Before(s.ExpiresAt) {
+		return nil, false
+	}
+	return s, true
+}
+
+func getOrCreateProxmoxVNCSession(inst *providerModel.Instance, p *providerModel.Provider) (*vncSession, error) {
+	if s, ok := cachedVNCSession(inst.ID, time.Now()); ok {
 		return s, nil
 	}
-	vncSessionMu.Unlock()
 
 	node := strings.TrimSpace(p.HostName)
 	if node == "" {
 		node = "pve"
 	}
-	endpoint := strings.TrimSpace(p.Endpoint)
-	if endpoint == "" {
+	host := proxmoxAPIHost(*p)
+	if host == "" {
 		return nil, fmt.Errorf("节点缺少 API 地址")
 	}
 	vmid := strings.TrimSpace(inst.ProviderVMID)
 	if vmid == "" {
 		return nil, fmt.Errorf("实例缺少 VMID")
 	}
-	apiToken := strings.TrimSpace(p.Token)
-	// 清理持久化 Token 中可能混入的不可见字符（换行/回车），与 provider/proxmox 主客户端保持一致
-	apiToken = strings.ReplaceAll(strings.ReplaceAll(apiToken, "\n", ""), "\r", "")
-	if apiToken == "" {
+	if cleanProxmoxAPIToken(p.Token) == "" {
 		return nil, fmt.Errorf("节点未配置 Proxmox API Token")
 	}
+	resource, err := proxmoxAPIResource(inst.InstanceType)
+	if err != nil {
+		return nil, err
+	}
 
-	port, password, err := proxmoxVNCProxy(endpoint, node, apiToken, vmid)
+	result, err := requestProxmoxVNCProxy(context.Background(), nil, host, node, resource, p.Token, vmid, false)
 	if err != nil {
 		return nil, err
 	}
 
 	s := &vncSession{
-		Host:      "127.0.0.1",
-		Port:      port,
-		Password:  password,
+		// The vncproxy TCP port listens on the PVE node itself, so the dial
+		// target is the node's API host (the previous hardcoded 127.0.0.1
+		// only worked when the controller shared the node).
+		Host:      host,
+		Port:      result.Port,
+		Password:  result.PasswordOrTicket(),
+		Ticket:    result.Ticket,
+		User:      result.User,
 		ExpiresAt: time.Now().Add(vncSessionTTL),
 	}
 	vncSessionMu.Lock()
@@ -218,48 +238,13 @@ func getOrCreateProxmoxVNCSession(inst *providerModel.Instance, p *providerModel
 }
 
 // proxmoxVNCProxy 调用 Proxmox API 打开一个 VNC 代理会话，返回 TCP 端口与一次性 VNC 密码。
+// 保留此签名供既有调用方使用；实现已收敛到 requestProxmoxVNCProxy（qemu、非 websocket 模式）。
 func proxmoxVNCProxy(endpoint, node, apiToken, vmid string) (int, string, error) {
-	// 兜底清理：去除 Token 首尾空白及换行/回车符，否则 http.Header.Set 会报
-	// "invalid header field value"（数据库持久化时曾带入尾随 \r）。
-	apiToken = strings.ReplaceAll(strings.ReplaceAll(strings.TrimSpace(apiToken), "\n", ""), "\r", "")
-	apiURL := fmt.Sprintf("https://%s:8006/api2/json/nodes/%s/qemu/%s/vncproxy", endpoint, node, vmid)
-	req, err := http.NewRequest(http.MethodPost, apiURL, nil)
+	result, err := requestProxmoxVNCProxy(context.Background(), nil, utils.ExtractHost(endpoint), node, "qemu", apiToken, vmid, false)
 	if err != nil {
 		return 0, "", err
 	}
-	req.Header.Set("Authorization", "PVEAPIToken="+apiToken)
-
-	client := &http.Client{
-		Timeout: 15 * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // #nosec G402 -- 节点自签名证书
-		},
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return 0, "", fmt.Errorf("调用 Proxmox VNC 代理失败: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return 0, "", fmt.Errorf("Proxmox VNC 代理请求失败: HTTP %d", resp.StatusCode)
-	}
-	var out struct {
-		Data struct {
-			Port     string `json:"port"`
-			Password string `json:"password"`
-		} `json:"data"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return 0, "", fmt.Errorf("解析 Proxmox VNC 代理响应失败: %w", err)
-	}
-	port, err := strconv.Atoi(out.Data.Port)
-	if err != nil {
-		return 0, "", fmt.Errorf("无效的 VNC 端口: %q", out.Data.Port)
-	}
-	if out.Data.Password == "" {
-		return 0, "", fmt.Errorf("Proxmox 未返回 VNC 密码")
-	}
-	return port, out.Data.Password, nil
+	return result.Port, result.PasswordOrTicket(), nil
 }
 
 var vncUpgrader = websocket.Upgrader{

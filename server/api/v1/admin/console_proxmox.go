@@ -163,6 +163,20 @@ func resolveProxmoxConsoleRuntimeID(inst providerModel.Instance, p providerModel
 func lookupProxmoxConsoleRuntime(inst providerModel.Instance, p providerModel.Provider) (proxmoxConsoleRuntime, error) {
 	executor, cleanup, err := newConsoleExecutor(p)
 	if err != nil {
+		// API-transport providers have no shell executor by design; resolve
+		// the runtime through the PVE HTTP API instead (P1-5).
+		if transport, reason := proxmoxConsoleVNCTransport(p); transport == "api" && reason == "" {
+			runtime, apiErr := lookupProxmoxConsoleRuntimeViaAPI(inst, p)
+			if apiErr != nil {
+				return proxmoxConsoleRuntime{}, apiErr
+			}
+			if strings.TrimSpace(inst.ProviderVMID) != runtime.ID {
+				if persistErr := persistProxmoxConsoleRuntimeID(inst, runtime.ID); persistErr != nil {
+					return proxmoxConsoleRuntime{}, persistErr
+				}
+			}
+			return runtime, nil
+		}
 		return proxmoxConsoleRuntime{}, fmt.Errorf("无法连接 PVE 节点以恢复实例 ID: %w", err)
 	}
 	defer cleanup()
@@ -441,6 +455,11 @@ func persistProxmoxConsoleRuntimeID(inst providerModel.Instance, runtimeID strin
 
 func proxmoxConsoleVNCTransport(p providerModel.Provider) (string, string) {
 	transport := normalizeConsoleTransport(p, "")
+	// Providers that carry only an API token + API endpoint (no SSH user,
+	// no agent, no explicit connection type) default to the API transport.
+	if transport == "" && strings.TrimSpace(p.Token) != "" && proxmoxAPIHost(p) != "" {
+		transport = "api"
+	}
 	switch transport {
 	case "ssh":
 		endpoint := strings.TrimSpace(p.Endpoint)
@@ -458,6 +477,16 @@ func proxmoxConsoleVNCTransport(p providerModel.Provider) (string, string) {
 		return transport, ""
 	case "local":
 		return transport, ""
+	case "api":
+		// HTTP-API-only PVE providers: VNC goes through vncproxy +
+		// vncwebsocket with the provider's API token (console_proxmox_api.go).
+		if strings.TrimSpace(p.Token) == "" {
+			return transport, "PVE API 图形控制台需要先为节点配置 API Token"
+		}
+		if proxmoxAPIHost(p) == "" {
+			return transport, "PVE API 图形控制台需要可用的节点 API 地址"
+		}
+		return transport, ""
 	default:
 		if transport == "" {
 			return transport, "PVE 节点未配置 SSH、Agent 或本机连接方式"
@@ -474,6 +503,11 @@ func buildProxmoxConsoleVNCTarget(inst providerModel.Instance, p providerModel.P
 		runtimeNode: strings.TrimSpace(runtimeNode),
 		instanceID:  inst.ID,
 		provider:    p,
+	}
+	// Fallback runtime type from the panel record; callers that observed the
+	// live runtime (capability probe) overwrite this with the observed kind.
+	if resource, resourceErr := proxmoxAPIResource(inst.InstanceType); resourceErr == nil {
+		target.runtimeType = resource
 	}
 	// PVE's vncproxy is a native, short-lived console endpoint created only
 	// after the user selects VNC. It is unrelated to the generic raw-VNC port

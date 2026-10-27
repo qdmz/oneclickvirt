@@ -4,8 +4,10 @@ import (
 	"bytes"
 	stdhtml "html"
 	"net/url"
+	"regexp"
 	"strings"
 
+	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -47,7 +49,42 @@ func SanitizeHTML(raw string) string {
 	for _, node := range nodes {
 		renderSanitizedHTML(&buf, node)
 	}
-	return strings.TrimSpace(buf.String())
+	// Defense in depth: run the whitelist renderer's output through
+	// bluemonday as a second, independent pass. The policy below mirrors the
+	// whitelist above (same tags/attributes), so already-sanitized editor
+	// content passes unchanged, while anything the first pass ever missed
+	// (new tag shapes, exotic URL forms) is stripped here.
+	return strings.TrimSpace(sanitizePolicy.Sanitize(buf.String()))
+}
+
+// sanitizePolicy is the bluemonday second-pass policy for SanitizeHTML. It
+// intentionally mirrors allowedHTMLTags/sanitizeHTMLAttrs: ql-* classes are
+// matched as a whole class list because the first pass already reduced the
+// list to ql-* tokens only, and style values are restricted to the same four
+// presentation properties with a conservative value alphabet (the first pass
+// has already removed url()/expression/javascript: declarations).
+var sanitizePolicy = buildSanitizePolicy()
+
+func buildSanitizePolicy() *bluemonday.Policy {
+	tags := make([]string, 0, len(allowedHTMLTags))
+	for tag := range allowedHTMLTags {
+		tags = append(tags, tag)
+	}
+	p := bluemonday.NewPolicy()
+	p.AllowElements(tags...)
+	p.AllowURLSchemes("http", "https", "mailto")
+	p.AllowRelativeURLs(true)
+	p.AllowDataURIImages()
+	p.AllowAttrs("alt", "title", "aria-label").OnElements(tags...)
+	p.AllowAttrs("class").Matching(regexp.MustCompile(`^ql-[a-zA-Z0-9_-]+( ql-[a-zA-Z0-9_-]+)*$`)).OnElements(tags...)
+	p.AllowStyles("background-color", "color", "font-size", "text-align").
+		Matching(regexp.MustCompile(`^[#a-zA-Z0-9 (),.%_-]+$`)).Globally()
+	p.AllowAttrs("href").OnElements("a")
+	p.AllowAttrs("target").Matching(regexp.MustCompile(`^(_blank|_self)$`)).OnElements("a")
+	p.AllowAttrs("rel").OnElements("a")
+	p.AllowAttrs("src").OnElements("img")
+	p.AllowAttrs("width", "height").Matching(regexp.MustCompile(`^[0-9]+%?$`)).OnElements("img")
+	return p
 }
 
 func renderSanitizedHTML(buf *bytes.Buffer, node *html.Node) {

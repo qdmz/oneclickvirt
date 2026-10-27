@@ -87,6 +87,9 @@ func parseProxmoxVNCProxyPort(raw json.RawMessage) (int, error) {
 }
 
 func openProxmoxVNCConn(target consoleTarget) (net.Conn, func(), string, error) {
+	if target.transport == "api" {
+		return openProxmoxVNCConnViaAPI(target)
+	}
 	node := strings.TrimSpace(target.runtimeNode)
 	// An empty runtime node deliberately lets proxmoxVNCProxyCommand use the
 	// executing PVE node's hostname. Provider.HostName can be an IP/FQDN and is

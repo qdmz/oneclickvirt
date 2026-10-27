@@ -122,6 +122,28 @@
         </div>
       </section>
 
+      <!-- 栏目加载骨架屏：推荐/平台/赞助/公告数据返回前占位，避免空白等待（P2-8） -->
+      <section
+        v-if="homeLoading"
+        class="section"
+        aria-hidden="true"
+      >
+        <div class="container">
+          <el-skeleton
+            :rows="2"
+            animated
+          />
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
+            <el-skeleton-item
+              v-for="n in 3"
+              :key="n"
+              variant="rect"
+              style="height: 140px; border-radius: 12px;"
+            />
+          </div>
+        </div>
+      </section>
+
       <!-- 六大特性 -->
       <section class="section">
         <div class="container">
@@ -480,6 +502,8 @@ const userStore = useUserStore()
 // 已登录用户的控制台入口
 const consolePath = computed(() => (userStore.isAnyAdmin ? '/admin/dashboard' : '/user/dashboard'))
 const announcements = ref([])
+// 首页栏目（推荐/平台/赞助/公告）加载中标记，驱动栏目区骨架屏（P2-8）
+const homeLoading = ref(true)
 // 首页推荐产品
 const recommendedProducts = ref([])
 // 统计数据
@@ -756,19 +780,22 @@ const checkInitStatus = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   // 首先加载完整站点配置（首页各栏目/英雄区文本/显示开关均由站点配置驱动）
-  siteStore.fetchFullSiteConfig()
+  const configPromise = siteStore.fetchFullSiteConfig()
   // 获取后台可配置的站点链接（平台/赞助方/页脚）
-  fetchSiteLinks()
+  const linksPromise = fetchSiteLinks()
   // 首先检查初始化状态
   checkInitStatus()
   // 然后获取公告
-  fetchAnnouncements()
+  const announcementsPromise = fetchAnnouncements()
   // 获取公开统计数据（用于未登录首页展示）
-  fetchPublicStats()
+  const statsPromise = fetchPublicStats()
   // 获取首页推荐产品
-  fetchRecommendedProducts()
+  const recommendedPromise = fetchRecommendedProducts()
+  // 栏目数据全部落定（成功或失败）后撤掉骨架屏，避免空白等待（P2-8）
+  await Promise.allSettled([configPromise, linksPromise, announcementsPromise, statsPromise, recommendedPromise])
+  homeLoading.value = false
   // 获取服务器版本信息
   getServerVersion().then(res => {
     if (res && (res.code === 200) && res.data?.server_version) {
